@@ -730,7 +730,7 @@ class Z_RealSeeder extends Seeder
         GrupoPermissao::create(['grupo_id' => 6, 'permissao_id' => 124]);
         GrupoPermissao::create(['grupo_id' => 6, 'permissao_id' => 125]);
 
-        Grupo::create(['id' => 7, 'empresa_id' => 1, 'name' => 'ADMINISTRATIVO']);
+        Grupo::create(['id' => 7, 'empresa_id' => 2, 'name' => 'ADMINISTRATIVO']);
 
         GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 21]);
         GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 22]);
@@ -756,7 +756,10 @@ class Z_RealSeeder extends Seeder
         GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 61]);
         GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 63]);
         GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 66]);
+        GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 67]);
         GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 68]);
+        GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 69]);
+        GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 70]);
         GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 71]);
         GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 73]);
         GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 76]);
