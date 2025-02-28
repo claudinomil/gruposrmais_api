@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             SubmodulosSeeder::class,
             GenerosSeeder::class,
             ContratacaoTiposSeeder::class,
+            PixTiposSeeder::class,
             ServicoTiposSeeder::class,
             ServicosSeeder::class,
             EstadosCivisSeeder::class,

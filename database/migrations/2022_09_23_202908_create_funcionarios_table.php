@@ -54,6 +54,8 @@ class CreateFuncionariosTable extends Migration
             $table->date('data_demissao')->nullable();
             $table->date('data_cadastro')->nullable();
             $table->date('data_afastamento')->nullable();
+            $table->foreignId('pix_tipo_id')->nullable()->constrained('pix_tipos');
+            $table->string('pix_chave')->nullable();
             $table->text('foto')->nullable();
             $table->timestamps();
         });

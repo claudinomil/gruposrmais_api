@@ -11,10 +11,10 @@ class ContratacaoTiposSeeder extends Seeder
     public function run()
     {
         //criando
-        ContratacaoTipo::create(['name' => 'CLT']);
-        ContratacaoTipo::create(['name' => 'MEI']);
-        ContratacaoTipo::create(['name' => 'Obra Certa']);
-        ContratacaoTipo::create(['name' => 'Cadastro de Reserva']);
-        ContratacaoTipo::create(['name' => 'Não Informado']);
+        ContratacaoTipo::create(['id' => 1, 'name' => 'CLT']);
+        ContratacaoTipo::create(['id' => 2, 'name' => 'MEI']);
+        ContratacaoTipo::create(['id' => 3, 'name' => 'Obra Certa']);
+        ContratacaoTipo::create(['id' => 4, 'name' => 'Temporário']);
+        ContratacaoTipo::create(['id' => 5, 'name' => 'Não Informado']);
     }
 }
