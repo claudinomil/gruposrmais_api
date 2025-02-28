@@ -477,6 +477,7 @@ class FuncionarioController extends Controller
                 ->leftJoin('bancos', 'funcionarios.banco_id', '=', 'bancos.id')
                 ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName'])
                 ->where('funcionarios.empresa_id', $empresa_id)
+                ->orderBy('funcionarios.name')
                 ->get();
 
             return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
