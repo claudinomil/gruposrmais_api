@@ -3,33 +3,38 @@
 namespace App\Http\Controllers;
 
 use App\Facades\SuporteFacade;
-use App\Http\Requests\BancoStoreRequest;
-use App\Http\Requests\BancoUpdateRequest;
-use App\Models\Banco;
+use App\Http\Requests\ClienteExecutivoStoreRequest;
+use App\Http\Requests\ClienteExecutivoUpdateRequest;
+use App\Models\Cliente;
+use App\Models\ClienteExecutivo;
 
-class BancoController extends Controller
+class ClienteExecutivoController extends Controller
 {
-    private $banco;
+    private $cliente_executivo;
 
-    public function __construct(Banco $banco)
+    public function __construct(ClienteExecutivo $cliente_executivo)
     {
-        $this->banco = $banco;
+        $this->cliente_executivo = $cliente_executivo;
     }
 
     public function index($empresa_id)
     {
-        $registros = $this->banco->get();
+        $registros = $this->cliente_executivo
+            ->leftJoin('clientes', 'clientes_executivos.cliente_id', '=', 'clientes.id')
+            ->select(['clientes_executivos.*', 'clientes.name as clienteName'])
+            ->where('clientes.empresa_id', $empresa_id)
+            ->get();
 
-        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
+        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
 
     public function show($id)
     {
         try {
-            $registro = $this->banco->find($id);
+            $registro = $this->cliente_executivo->find($id);
 
             if (!$registro) {
-                return $this->sendResponse('Registro não encontrado.', 4040, null, []);
+                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
                 return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
             }
@@ -42,7 +47,25 @@ class BancoController extends Controller
         }
     }
 
-    public function store(BancoStoreRequest $request, $empresa_id)
+    public function auxiliary($empresa_id)
+    {
+        try {
+            $registros = array();
+
+            //Clientes
+            $registros['clientes'] = Cliente::where('empresa_id', '=', $empresa_id)->get();
+
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function store(ClienteExecutivoStoreRequest $request, $empresa_id)
     {
         try {
             //Atualisar objeto Auth::user()
@@ -52,8 +75,9 @@ class BancoController extends Controller
             $request['empresa_id'] = $empresa_id;
 
             //Incluindo registro
-            $this->banco->create($request->all());
+            $registro = $this->cliente_executivo->create($request->all());
 
+            //Return
             return $this->sendResponse('Registro criado com sucesso.', 2010, null, null);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -64,10 +88,10 @@ class BancoController extends Controller
         }
     }
 
-    public function update(BancoUpdateRequest $request, $id, $empresa_id)
+    public function update(ClienteExecutivoUpdateRequest $request, $id, $empresa_id)
     {
         try {
-            $registro = $this->banco->find($id);
+            $registro = $this->cliente_executivo->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
@@ -92,7 +116,7 @@ class BancoController extends Controller
     public function destroy($id, $empresa_id)
     {
         try {
-            $registro = $this->banco->find($id);
+            $registro = $this->cliente_executivo->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
@@ -101,19 +125,9 @@ class BancoController extends Controller
                 SuporteFacade::setUserLogged($empresa_id);
 
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                //Tabela funcionarios
-                if (SuporteFacade::verificarRelacionamento('funcionarios', 'banco_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Funcionários.', 2040, null, null);
-                }
-
-                //Tabela fornecedores
-                if (SuporteFacade::verificarRelacionamento('fornecedores', 'banco_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Fornecedores.', 2040, null, null);
-                }
-
-                //Tabela clientes
-                if (SuporteFacade::verificarRelacionamento('clientes', 'banco_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes.', 2040, null, null);
+                //Tabela ordens_servicos_executivos
+                if (SuporteFacade::verificarRelacionamento('ordens_servicos_executivos', 'cliente_executivo_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Ordens Serviços Executivos.', 2040, null, null);
                 }
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -142,8 +156,10 @@ class BancoController extends Controller
 
 
         //Registros
-        $registros = $this->banco
-            ->select(['bancos.*'])
+        $registros = $this->cliente_executivo
+            ->leftJoin('clientes', 'clientes_executivos.cliente_id', '=', 'clientes.id')
+            ->select(['clientes_executivos.*', 'clientes.name as clienteName'])
+            ->where('clientes.empresa_id', '=', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

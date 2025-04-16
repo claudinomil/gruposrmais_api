@@ -46,7 +46,11 @@ class DatabaseSeeder extends Seeder
             LayoutsStylesSeeder::class,
             FuncionariosSeeder::class,
 
-            Z_RealSeeder::class
+            Z_RealSeeder::class,
+
+            ZZZ_20250315_Seeder::class,
+
+            Z_FakerSeeder::class
         ]);
     }
 }

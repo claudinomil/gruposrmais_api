@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Banco;
+use App\Models\ClienteExecutivo;
 use App\Models\Departamento;
 use App\Models\AdminCliente;
 use App\Models\Empresa;
@@ -19,10 +20,14 @@ use App\Models\Notificacao;
 use App\Models\Operacao;
 use App\Models\Funcao;
 use App\Models\Escolaridade;
+use App\Models\OrdemServico;
+use App\Models\Proposta;
 use App\Models\Situacao;
 use App\Models\Ferramenta;
 use App\Models\User;
+use App\Models\Veiculo;
 use App\Observers\BancoObserver;
+use App\Observers\ClienteExecutivoObserver;
 use App\Observers\DepartamentoObserver;
 use App\Observers\EmpresaObserver;
 use App\Observers\FornecedorObserver;
@@ -38,10 +43,13 @@ use App\Observers\NotificacaoObserver;
 use App\Observers\OperacaoObserver;
 use App\Observers\FuncaoObserver;
 use App\Observers\EscolaridadeObserver;
+use App\Observers\OrdemServicoObserver;
+use App\Observers\PropostaObserver;
 use App\Observers\SituacaoObserver;
 use App\Observers\FerramentaObserver;
 use App\Observers\UserObserver;
 
+use App\Observers\VeiculoObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -56,10 +64,11 @@ class EventServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Empresa::observe(EmpresaObserver::class);
         Banco::observe(BancoObserver::class);
         Cliente::observe(ClienteObserver::class);
+        ClienteExecutivo::observe(ClienteExecutivoObserver::class);
         Departamento::observe(DepartamentoObserver::class);
+        Empresa::observe(EmpresaObserver::class);
         Escolaridade::observe(EscolaridadeObserver::class);
         EstadoCivil::observe(EstadoCivilObserver::class);
         Ferramenta::observe(FerramentaObserver::class);
@@ -73,8 +82,11 @@ class EventServiceProvider extends ServiceProvider
         Naturalidade::observe(NaturalidadeObserver::class);
         Notificacao::observe(NotificacaoObserver::class);
         Operacao::observe(OperacaoObserver::class);
+        OrdemServico::observe(OrdemServicoObserver::class);
+        Proposta::observe(PropostaObserver::class);
         Situacao::observe(SituacaoObserver::class);
         User::observe(UserObserver::class);
+        Veiculo::observe(VeiculoObserver::class);
     }
 
     public function shouldDiscoverEvents()

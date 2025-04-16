@@ -77,6 +77,9 @@ require __DIR__.'/routes_fornecedores.php';
 //Servicos
 require __DIR__.'/routes_servicos.php';
 
+//Ordens Servicos
+require __DIR__.'/routes_ordens_servicos.php';
+
 //Propostas
 require __DIR__.'/routes_propostas.php';
 
@@ -91,3 +94,9 @@ require __DIR__.'/routes_submodulos.php';
 
 //Qrcodes
 require __DIR__.'/routes_qrcodes.php';
+
+//Veículos
+require __DIR__.'/routes_veiculos.php';
+
+//Clientes Executivos
+require __DIR__.'/routes_clientes_executivos.php';

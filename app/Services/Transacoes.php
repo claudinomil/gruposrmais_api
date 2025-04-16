@@ -7,6 +7,7 @@ use App\Models\Brigada;
 use App\Models\BrigadaEscala;
 use App\Models\BrigadaRonda;
 use App\Models\Cliente;
+use App\Models\ClienteExecutivo;
 use App\Models\ClienteServico;
 use App\Models\ContratacaoTipo;
 use App\Models\Departamento;
@@ -14,6 +15,8 @@ use App\Models\EdificacaoClassificacao;
 use App\Models\Empresa;
 use App\Models\EscalaFrequencia;
 use App\Models\EscalaTipo;
+use App\Models\FormaPagamento;
+use App\Models\FormaPagamentoStatus;
 use App\Models\Funcionario;
 use App\Models\Genero;
 use App\Models\Grupo;
@@ -24,6 +27,10 @@ use App\Models\Nacionalidade;
 use App\Models\Naturalidade;
 use App\Models\Funcao;
 use App\Models\Escolaridade;
+use App\Models\OrdemServico;
+use App\Models\OrdemServicoPrioridade;
+use App\Models\OrdemServicoStatus;
+use App\Models\OrdemServicoTipo;
 use App\Models\Proposta;
 use App\Models\PropostaServico;
 use App\Models\SegurancaMedida;
@@ -36,6 +43,11 @@ use App\Models\Estado;
 use App\Models\Transacao;
 use App\Models\User;
 
+use App\Models\Veiculo;
+use App\Models\VeiculoCategoria;
+use App\Models\VeiculoCombustivel;
+use App\Models\VeiculoMarca;
+use App\Models\VeiculoModelo;
 use App\Models\VisitaTecnica;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -207,6 +219,43 @@ class Transacoes
                 $search_servico = $servico['name'];
 
                 $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $search_cliente . "/" . $search_servico . "<br>";
+            }
+        }
+
+        //Opção para o campo ordem_servico_id
+        if ($op == 9) {
+            if (($dadoAtual != "") and ($dadoAtual != 0)) {
+                $ordem_servico = OrdemServico::where('id', $dadoAtual)->get()[0];
+                $search_data_abertura_ordem_servico = $ordem_servico['data_abertura'];
+                $search_numero_ordem_servico = $ordem_servico['numero_ordem_servico'];
+
+                //Se não tiver cliente_id é porque foi escolhido ordem de serviço interna
+                if ($ordem_servico['cliente_id'] == '') {
+                    $cliente = Empresa::where('id', $ordem_servico['empresa_id'])->get(['name'])[0];
+                    $search_cliente = $cliente['name'];
+                } else {
+                    $cliente = Cliente::where('id', $ordem_servico['cliente_id'])->get(['name'])[0];
+                    $search_cliente = $cliente['name'];
+                }
+
+                $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $search_cliente . "/" . $search_data_abertura_ordem_servico . "/" . $search_numero_ordem_servico . "<br>";
+            }
+        }
+
+        //Opção para o campo veiculo_id
+        if ($op == 10) {
+            if (($dadoAtual != "") and ($dadoAtual != 0)) {
+                $veiculo = Veiculo::where('id', $dadoAtual)->get()[0];
+
+                $marca = VeiculoMarca::where('id', $veiculo['veiculo_marca_id'])->get(['name'])[0];
+                $search_marca = $marca['name'];
+
+                $modelo = VeiculoModelo::where('id', $veiculo['veiculo_modelo_id'])->get(['name'])[0];
+                $search_modelo = $modelo['name'];
+
+                $search_placa = $veiculo['placa'];
+
+                $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $search_marca . "/" . $search_modelo . "/" . $search_placa . "<br>";
             }
         }
 
@@ -517,6 +566,17 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['tipo'], $dadosAtual['tipo'], 'Tipo', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['observacao'], $dadosAtual['observacao'], 'Observação', '', '');
                 }
+
+                //Tabela clientes_documentos
+                if ($op == 3) {
+                    $dados .= '<b>:: Funcionários Documentos</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Funcionário', Cliente::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['caminho'], $dadosAtual['caminho'], 'Caminho', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_documento'], $dadosAtual['data_documento'], 'Data Documento', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['aviso'], $dadosAtual['aviso'], 'Aviso', '', '');
+                }
             }
 
             //fornecedores
@@ -769,6 +829,135 @@ class Transacoes
                     $dados .= $this->retornaDado(2, $dadosAnterior['funcionario_id'], $dadosAtual['funcionario_id'], 'Funcionário', Funcionario::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['funcionario_nome'], $dadosAtual['funcionario_nome'], 'Funcionário Nome', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['ala'], $dadosAtual['ala'], 'Ala', '', '');
+                }
+            }
+
+            //Ordens Serviço
+            if ($submodulo_id == 26) {
+                if ($op == 1) {
+                    $dados .= '<b>:: Ordens Serviços</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['numero_ordem_servico'], $dadosAtual['numero_ordem_servico'], 'Número Ordem Serviço', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['ano_ordem_servico'], $dadosAtual['ano_ordem_servico'], 'Ano Ordem Serviço', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['ordem_servico_tipo_id'], $dadosAtual['ordem_servico_tipo_id'], 'Tipo', OrdemServicoTipo::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['ordem_servico_status_id'], $dadosAtual['ordem_servico_status_id'], 'Status', OrdemServicoStatus::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_abertura'], $dadosAtual['data_abertura'], 'Data abertura', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['hora_abertura'], $dadosAtual['hora_abertura'], 'Hora abertura', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_prevista'], $dadosAtual['data_prevista'], 'Data prevista', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['hora_prevista'], $dadosAtual['hora_prevista'], 'Hora prevista', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_conclusao'], $dadosAtual['data_conclusao'], 'Data conclusão', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['hora_conclusao'], $dadosAtual['hora_conclusao'], 'Hora conclusão', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_finalizacao'], $dadosAtual['data_finalizacao'], 'Data finalização', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['hora_finalizacao'], $dadosAtual['hora_finalizacao'], 'Hora finalização', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Cliente', Cliente::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_nome'], $dadosAtual['cliente_nome'], 'Cliente nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_telefone'], $dadosAtual['cliente_telefone'], 'Cliente telefone', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_celular'], $dadosAtual['cliente_celular'], 'Cliente celular', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_email'], $dadosAtual['cliente_email'], 'Cliente email', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_logradouro'], $dadosAtual['cliente_logradouro'], 'Cliente logradouro', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_bairro'], $dadosAtual['cliente_bairro'], 'Cliente bairro', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_cidade'], $dadosAtual['cliente_cidade'], 'Cliente cidade', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['descricao_servico'], $dadosAtual['descricao_servico'], 'Descrição serviço', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['ordem_servico_prioridade_id'], $dadosAtual['ordem_servico_prioridade_id'], 'Prioridade', OrdemServicoPrioridade::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['observacao'], $dadosAtual['observacao'], 'Observação', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['valor_total'], $dadosAtual['valor_total'], 'Valor Total', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['porcentagem_desconto'], $dadosAtual['porcentagem_desconto'], 'Porcentagem Desconto', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['valor_desconto'], $dadosAtual['valor_desconto'], 'Valor Desconto', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['forma_pagamento_id'], $dadosAtual['forma_pagamento_id'], 'Forma pagamento', FormaPagamento::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['forma_pagamento_status_id'], $dadosAtual['forma_pagamento_status_id'], 'Forma pagamento status', FormaPagamentoStatus::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['forma_pagamento_observacao'], $dadosAtual['forma_pagamento_observacao'], 'Forma Pagamento Observação', '', '');
+                }
+
+                //Tabela ordens_servicos_servicos
+                if ($op == 2) {
+                    $dados .= '<b>:: Ordens Serviços Serviços</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(9, $dadosAnterior['ordem_servico_id'], $dadosAtual['ordem_servico_id'], 'Cliente/Data/Número', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['servico_id'], $dadosAtual['servico_id'], 'Serviço', Servico::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['servico_nome'], $dadosAtual['servico_nome'], 'Serviço Nome', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['responsavel_funcionario_id'], $dadosAtual['responsavel_funcionario_id'], 'Responsável', Funcionario::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['responsavel_funcionario_nome'], $dadosAtual['responsavel_funcionario_nome'], 'Responsável nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['servico_item'], $dadosAtual['servico_item'], 'Serviço Item', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['servico_valor'], $dadosAtual['servico_valor'], 'Serviço Valor', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['servico_quantidade'], $dadosAtual['servico_quantidade'], 'Serviço Quantidade', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['servico_valor_total'], $dadosAtual['servico_valor_total'], 'Serviço Valor Total', '', '');
+                }
+
+                //Tabela ordens_servicos_veiculos
+                if ($op == 3) {
+                    $dados .= '<b>:: Ordens Serviços Veículos</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(9, $dadosAnterior['ordem_servico_id'], $dadosAtual['ordem_servico_id'], 'Cliente/Data/Número', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['veiculo_id'], $dadosAtual['veiculo_id'], 'Veículo', Veiculo::class, 'placa');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['veiculo_item'], $dadosAtual['veiculo_item'], 'Veículo Item', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['veiculo_marca'], $dadosAtual['veiculo_marca'], 'Veículo Marca', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['veiculo_modelo'], $dadosAtual['veiculo_modelo'], 'Veículo Modelo', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['veiculo_placa'], $dadosAtual['veiculo_placa'], 'Veículo Placa', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['veiculo_combustivel'], $dadosAtual['veiculo_combustivel'], 'Veículo Combustível', '', '');
+                }
+
+                //Tabela ordens_servicos_executivos
+                if ($op == 4) {
+                    $dados .= '<b>:: Ordens Serviços Executivos</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(9, $dadosAnterior['ordem_servico_id'], $dadosAtual['ordem_servico_id'], 'Cliente/Data/Número', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_executivo_id'], $dadosAtual['cliente_executivo_id'], 'Cliente Executivo', ClienteExecutivo::class, 'executivo_nome');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_executivo_item'], $dadosAtual['cliente_executivo_item'], 'Executivo Item', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_executivo_nome'], $dadosAtual['cliente_executivo_nome'], 'Executivo Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_executivo_funcao'], $dadosAtual['cliente_executivo_funcao'], 'Executivo Função', '', '');
+                    $dados .= $this->retornaDado(10, $dadosAnterior['cliente_executivo_veiculo_id'], $dadosAtual['cliente_executivo_veiculo_id'], 'Veículo', '', '');
+                }
+
+                //Tabela ordens_servicos_destinos
+                if ($op == 5) {
+                    $dados .= '<b>:: Ordens Serviços Destinos</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(9, $dadosAnterior['ordem_servico_id'], $dadosAtual['ordem_servico_id'], 'Cliente/Data/Número', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['destino_ordem'], $dadosAtual['destino_ordem'], 'Destino Ordem', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['destino_cep'], $dadosAtual['destino_cep'], 'Destino CEP', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['destino_logradouro'], $dadosAtual['destino_logradouro'], 'Destino Logradouro', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['destino_bairro'], $dadosAtual['destino_bairro'], 'Destino Bairro', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['destino_localidade'], $dadosAtual['destino_localidade'], 'Destino Localidade', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['destino_uf'], $dadosAtual['destino_uf'], 'Destino UF', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['destino_numero'], $dadosAtual['destino_numero'], 'Destino Número', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['destino_complemento'], $dadosAtual['destino_complemento'], 'Destino Complemento', '', '');
+                }
+
+                //Tabela ordens_servicos_equipes
+                if ($op == 6) {
+                    $dados .= '<b>:: Ordens Serviços Equipes</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(9, $dadosAnterior['ordem_servico_id'], $dadosAtual['ordem_servico_id'], 'Cliente/Data/Número', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['equipe_funcionario_id'], $dadosAtual['equipe_funcionario_id'], 'Equipe Funcionário', Funcionario::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['equipe_funcionario_item'], $dadosAtual['equipe_funcionario_item'], 'Equipe Funcionário Item', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['equipe_funcionario_nome'], $dadosAtual['equipe_funcionario_nome'], 'Equipe Funcionário Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['equipe_funcionario_funcao'], $dadosAtual['equipe_funcionario_funcao'], 'Equipe Funcionário Função', '', '');
+                    $dados .= $this->retornaDado(10, $dadosAnterior['equipe_funcionario_veiculo_id'], $dadosAtual['equipe_funcionario_veiculo_id'], 'Veículo', '', '');
+                }
+            }
+
+            //veiculos
+            if ($submodulo_id == 27) {
+                if ($op == 1) {
+                    $dados .= '<b>:: Veículos</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['veiculo_marca_id'], $dadosAtual['veiculo_marca_id'], 'Veículo Marca', VeiculoMarca::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['veiculo_modelo_id'], $dadosAtual['veiculo_modelo_id'], 'Veículo Modelo', VeiculoModelo::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['placa'], $dadosAtual['placa'], 'Placa', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['renavam'], $dadosAtual['renavam'], 'Renavam', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['chassi'], $dadosAtual['chassi'], 'Chassi', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['ano_modelo'], $dadosAtual['ano_modelo'], 'Ano Modelo', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['ano_fabricacao'], $dadosAtual['ano_fabricacao'], 'Ano Fabricação', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cor'], $dadosAtual['cor'], 'Cor', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['veiculo_combustivel_id'], $dadosAtual['veiculo_combustivel_id'], 'Veículo Combustível', VeiculoCombustivel::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['veiculo_categoria_id'], $dadosAtual['veiculo_categoria_id'], 'Veículo Categoria', VeiculoCategoria::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['gnv'], $dadosAtual['gnv'], 'GNV', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['blindado'], $dadosAtual['blindado'], 'Blindado', '', '');
+                }
+            }
+
+            //clientes_executivos
+            if ($submodulo_id == 28) {
+                if ($op == 1) {
+                    $dados .= '<b>:: Clientes Executivos</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Cliente', Cliente::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['executivo_nome'], $dadosAtual['executivo_nome'], 'Executivo Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['executivo_funcao'], $dadosAtual['executivo_funcao'], 'Executivo Função', '', '');
                 }
             }
 

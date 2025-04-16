@@ -55,7 +55,11 @@ class FuncionarioController extends Controller
     public function show($id)
     {
         try {
-            $registro = $this->funcionario->find($id);
+            $registro = Funcionario
+                ::leftJoin('funcoes', 'funcionarios.funcao_id', '=', 'funcoes.id')
+                ->select(['funcionarios.*', 'funcoes.name as funcaoName'])
+                ->where('funcionarios.id', '=', $id)
+                ->get()[0];
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);

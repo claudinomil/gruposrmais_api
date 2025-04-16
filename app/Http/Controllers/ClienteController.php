@@ -6,6 +6,7 @@ use App\Facades\SuporteFacade;
 use App\Http\Requests\ClienteStoreRequest;
 use App\Http\Requests\ClienteUpdateRequest;
 use App\Models\Banco;
+use App\Models\ClienteDocumento;
 use App\Models\ClienteSegurancaMedida;
 use App\Models\ClienteServico;
 use App\Models\EdificacaoClassificacao;
@@ -15,6 +16,8 @@ use App\Models\Estado;
 use App\Models\IncendioRisco;
 use App\Models\SegurancaMedida;
 use App\Models\Cliente;
+use App\Facades\Transacoes;
+use Illuminate\Http\Request;
 
 class ClienteController extends Controller
 {
@@ -159,6 +162,107 @@ class ClienteController extends Controller
         }
     }
 
+    public function modal_info($id)
+    {
+        try {
+            $registro = array();
+
+            //Cliente
+            $cliente = Cliente
+                ::leftJoin('identidade_orgaos', 'clientes.identidade_orgao_id', '=', 'identidade_orgaos.id')
+                ->leftJoin('estados', 'clientes.identidade_estado_id', '=', 'estados.id')
+                ->leftJoin('generos', 'clientes.genero_id', '=', 'generos.id')
+                ->leftJoin('clientes as principal_clientes', 'clientes.principal_cliente_id', '=', 'principal_clientes.id')
+                ->leftJoin('bancos', 'clientes.banco_id', '=', 'bancos.id')
+                ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'bancos.name as bancoName'])
+                ->where('clientes.id', '=', $id)
+                ->get();
+
+            $registro['cliente'] = $cliente[0];
+
+            //Serviços do Cliente
+            $cliente_servicos = ClienteServico
+                ::leftJoin('servicos', 'clientes_servicos.servico_id', '=', 'servicos.id')
+                ->select(['clientes_servicos.*', 'servicos.name as servicoName'])
+                ->where('clientes_servicos.cliente_id', '=', $id)
+                ->get();
+
+            $registro['cliente_servicos'] = $cliente_servicos;
+
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function upload_documento_pdf(Request $request)
+    {
+        try {
+            //Atualisar objeto Auth::user()
+            SuporteFacade::setUserLogged($request['empresa_id']);
+
+            //Incluir Registro
+            if ($request['acao'] == 1) {
+                //Registro
+                ClienteDocumento::create($request->all());
+
+                //Transação
+                Transacoes::transacaoRecord(3, 1, 'clientes', $request, $request);
+
+                //Return
+                return $this->sendResponse('Documento enviado com sucesso.', 2000, null, $request);
+            }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function documentos_pdf($cliente_id)
+    {
+        try {
+            $registros = ClienteDocumento
+                ::where('cliente_id', $cliente_id)
+                ->get();
+
+            return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function deletar_documento_pdf($cliente_documento_id, $empresa_id)
+    {
+        //Atualisar objeto Auth::user()
+        SuporteFacade::setUserLogged($empresa_id);
+
+        $registro = ClienteDocumento::find($cliente_documento_id);
+
+        if (!$registro) {
+            return $this->sendResponse('Documento não encontrado.', 4040, null, $registro);
+        } else {
+            //Deletar
+            $registro->delete();
+
+            //gravar transacao
+            Transacoes::transacaoRecord(3, 3, 'clientes', $registro, $registro);
+
+            //Return
+            return $this->sendResponse('Documento excluído com sucesso.', 2000, null, $registro['caminho']);
+        }
+    }
+
     public function visita_tecnica($id)
     {
         try {
@@ -204,39 +308,6 @@ class ClienteController extends Controller
 
                 return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
             }
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return $this->sendResponse($e->getMessage(), 5000, null, null);
-            }
-
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-        }
-    }
-
-    public function extraData($id)
-    {
-        try {
-            $registro = array();
-
-            //Cliente
-            $cliente = Cliente::
-                leftJoin('clientes as principal_clientes', 'clientes.principal_cliente_id', '=', 'principal_clientes.id')
-                ->select(['clientes.*', 'principal_clientes.name as principalClienteName'])
-                ->where('clientes.id', '=', $id)
-                ->get();
-
-            $registro['cliente'] = $cliente[0];
-
-            //Serviços do Cliente
-            $cliente_servicos = ClienteServico::
-                leftJoin('servicos', 'clientes_servicos.servico_id', '=', 'servicos.id')
-                ->select(['clientes_servicos.*', 'servicos.name as servicoName'])
-                ->where('clientes_servicos.cliente_id', '=', $id)
-                ->get();
-
-            $registro['cliente_servicos'] = $cliente_servicos;
-
-            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return $this->sendResponse($e->getMessage(), 5000, null, null);
@@ -292,22 +363,6 @@ class ClienteController extends Controller
             return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
         }
     }
-
-//    public function search($field, $value, $empresa_id)
-//    {
-//        $registros = $this->cliente
-//            ->leftJoin('identidade_orgaos', 'clientes.identidade_orgao_id', '=', 'identidade_orgaos.id')
-//            ->leftJoin('estados', 'clientes.identidade_estado_id', '=', 'estados.id')
-//            ->leftJoin('generos', 'clientes.genero_id', '=', 'generos.id')
-//            ->leftJoin('clientes as principal_clientes', 'clientes.principal_cliente_id', '=', 'principal_clientes.id')
-//            ->leftJoin('bancos', 'clientes.banco_id', '=', 'bancos.id')
-//            ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'bancos.name as bancoName'])
-//            ->where('clientes.empresa_id', '=', $empresa_id)
-//            ->where($field, 'like', '%' . $value . '%')
-//            ->get();
-//
-//        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
-//    }
 
     public function filter($array_dados, $empresa_id)
     {
