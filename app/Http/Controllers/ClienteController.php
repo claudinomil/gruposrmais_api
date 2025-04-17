@@ -343,6 +343,16 @@ class ClienteController extends Controller
                 if (SuporteFacade::verificarRelacionamento('clientes_servicos', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Serviços.', 2040, null, null);
                 }
+
+                //Tabela clientes_executivos
+                if (SuporteFacade::verificarRelacionamento('clientes_executivos', 'cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Executivos.', 2040, null, null);
+                }
+
+                //Tabela ordens_servicos
+                if (SuporteFacade::verificarRelacionamento('ordens_servicos', 'cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Ordem de Serviço.', 2040, null, null);
+                }
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

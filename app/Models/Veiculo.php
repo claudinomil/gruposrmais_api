@@ -27,4 +27,8 @@ class Veiculo extends Model
         'blindado',
         'veiculo_categoria_id'
     ];
+
+    public function setPlacaAttribute($value) {$this->attributes['placa'] = mb_strtoupper($value);}
+    public function setRenavamAttribute($value) {$this->attributes['renavam'] = mb_strtoupper($value);}
+    public function setCorAttribute($value) {$this->attributes['cor'] = mb_strtoupper($value);}
 }
