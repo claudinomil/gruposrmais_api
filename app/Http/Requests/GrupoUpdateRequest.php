@@ -28,8 +28,10 @@ class GrupoUpdateRequest extends FormRequest
             'name' => [
                 'required',
                 'min:3',
-                Rule::unique('grupos')->ignore($this->id),
-                ]
+                Rule::unique('grupos')->where(function ($query) {
+                    return $query->where('empresa_id', $this->empresa_id);
+                }),
+            ]
         ];
     }
 

@@ -24,7 +24,13 @@ class GrupoStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'min:3', 'unique:grupos']
+            'name' => [
+                'required',
+                'min:3',
+                Rule::unique('grupos')->where(function ($query) {
+                    return $query->where('empresa_id', $this->empresa_id);
+                }),
+            ]
         ];
     }
 
