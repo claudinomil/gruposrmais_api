@@ -15,8 +15,8 @@ class UsersSeeder extends Seeder
             'name' => 'CLAUDINO MIL HOMENS DE MORAES',
             'email' => 'claudinomoraes@yahoo.com.br',
             'password' => Hash::make('12345678'),
-            //'email_verified_at' => now(),
-            //'user_confirmed_at' => now(),
+            'email_verified_at' => now(),
+            'user_confirmed_at' => now(),
             'avatar' => 'build/assets/images/users/avatar-0.png',
             'created_at' => now()
         ]);

@@ -48,8 +48,8 @@ use App\Observers\PropostaObserver;
 use App\Observers\SituacaoObserver;
 use App\Observers\FerramentaObserver;
 use App\Observers\UserObserver;
-
 use App\Observers\VeiculoObserver;
+
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
