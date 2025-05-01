@@ -6,7 +6,9 @@ use App\Facades\SuporteFacade;
 use App\Http\Requests\GrupoStoreRequest;
 use App\Http\Requests\GrupoUpdateRequest;
 use App\Models\GrupoPermissao;
+use App\Models\GrupoRelatorio;
 use App\Models\Permissao;
+use App\Models\Relatorio;
 use App\Models\Submodulo;
 use Illuminate\Support\Facades\DB;
 use App\Models\Grupo;
@@ -106,6 +108,9 @@ class GrupoController extends Controller
                 $registro[$dado->permissaoName] = true; //Guarda nome das Permissoes do Grupo
             }
 
+            //relatorios
+            $registro['relatorios'] = GrupoRelatorio::where('grupo_id', $dados[0]->id)->get();
+
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
@@ -130,6 +135,9 @@ class GrupoController extends Controller
 
             //Permissões
             $registros['permissoes'] = Permissao::all();
+
+            //Relatorios
+            $registros['relatorios'] = Relatorio::select('relatorios.*', 'agrupamentos.name as relatorio_agrupamento')->join('agrupamentos', 'agrupamentos.id', 'relatorios.agrupamento_id')->orderby('agrupamentos.ordem_visualizacao')->orderby('relatorios.ordem_visualizacao')->get();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -194,6 +202,13 @@ class GrupoController extends Controller
                         $permissao_id = $id[0]['id'];
                         GrupoPermissao::create(['grupo_id' => $grupo_id, 'permissao_id' => $permissao_id]);
                     }
+                }
+            }
+
+            //Incluindo registros na tabela grupos_relatorios
+            for($i=1; $i<=100; $i++) {
+                if (isset($request['relatorio_'.$i])) {
+                    GrupoRelatorio::create(['grupo_id' => $grupo_id, 'relatorio_id' => $i]);
                 }
             }
 
@@ -269,6 +284,16 @@ class GrupoController extends Controller
                     }
                 }
 
+                //Deletando registros na tabela grupos_relatorios
+                GrupoRelatorio::where('grupo_id', $grupo_id)->delete();
+
+                //Incluindo registros na tabela grupos_relatorios
+                for($i=1; $i<=100; $i++) {
+                    if (isset($request['relatorio_'.$i])) {
+                        GrupoRelatorio::create(['grupo_id' => $grupo_id, 'relatorio_id' => $i]);
+                    }
+                }
+
                 return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
             }
         } catch (\Exception $e) {
@@ -301,6 +326,9 @@ class GrupoController extends Controller
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //Deletar antes na tabela grupopermissoes
                 DB::table('grupos_permissoes')->where('grupo_id', $id)->delete();
+
+                //Deletar antes na tabela grupos_relatorios
+                DB::table('grupos_relatorios')->where('grupo_id', $id)->delete();
 
                 $registro->delete();
 

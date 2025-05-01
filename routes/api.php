@@ -100,3 +100,6 @@ require __DIR__.'/routes_veiculos.php';
 
 //Clientes Executivos
 require __DIR__.'/routes_clientes_executivos.php';
+
+//Relatórios
+require __DIR__.'/routes_relatorios.php';

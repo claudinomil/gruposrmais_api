@@ -7,31 +7,23 @@ use Illuminate\Validation\Rule;
 
 class GrupoUpdateRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
     public function authorize()
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
     public function rules()
     {
         return [
             'name' => [
                 'required',
                 'min:3',
-                Rule::unique('grupos')->where(function ($query) {
-                    return $query->where('empresa_id', $this->empresa_id);
-                }),
-            ]
+                Rule::unique('grupos')
+                    ->ignore($this->id)
+                    ->where(function ($query) {
+                        return $query->where('empresa_id', $this->empresa_id);
+                    }),
+            ],
         ];
     }
 

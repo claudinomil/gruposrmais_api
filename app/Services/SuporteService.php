@@ -1138,4 +1138,77 @@ class SuporteService
     }
     //Visitas Técnicas - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     //Visitas Técnicas - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    /*
+     * Retornar data formatada
+     * A) Recebe formatos de datas: 99/99/9999 ou 99-99-9999 ou 9999/99/99 ou 9999-99-99
+     * B) Depois retorna essa data no formato pedido pelo usuário
+     * @PARAM op=1 = recebe qualquer data e retorna 99/99/9999
+     * @PARAM op=2 = recebe qualquer data e retorna 99-99-9999
+     * @PARAM op=3 = recebe qualquer data e retorna 9999/99/99
+     * @PARAM op=4 = recebe qualquer data e retorna 9999-99-99
+     */
+    public function getDataFormatada($op, $data)
+    {
+        //Variáveis para formatar o retorno
+        $dia = '';
+        $mes = '';
+        $ano = '';
+
+        //Verificando recebimento da data
+        if ($data == '') {
+            $data = null;
+        } else {
+            //Retirando espaços
+            $data = trim($data);
+            $data = str_replace(" ", "", $data);
+
+            //Formato: 9999-99-99
+            if (is_numeric(substr($data, 0, 4)) and substr($data, 4, 1) == '-' and is_numeric(substr($data, 5, 2)) and substr($data, 7, 1) == '-' and is_numeric(substr($data, 8, 2))) {
+                $dia = substr($data, 8, 2);
+                $mes = substr($data, 5, 2);
+                $ano = substr($data, 0, 4);
+            }
+
+            //Formato: 9999/99/99
+            if (is_numeric(substr($data, 0, 4)) and substr($data, 4, 1) == '/' and is_numeric(substr($data, 5, 2)) and substr($data, 7, 1) == '/' and is_numeric(substr($data, 8, 2))) {
+                $dia = substr($data, 8, 2);
+                $mes = substr($data, 5, 2);
+                $ano = substr($data, 0, 4);
+            }
+
+            //Formato: 99-99-9999
+            if (is_numeric(substr($data, 0, 2)) and substr($data, 2, 1) == '-' and is_numeric(substr($data, 3, 2)) and substr($data, 5, 1) == '-' and is_numeric(substr($data, 6, 4))) {
+                $dia = substr($data, 0, 2);
+                $mes = substr($data, 3, 2);
+                $ano = substr($data, 6, 4);
+            }
+
+            //Formato: 99/99/9999
+            if (is_numeric(substr($data, 0, 2)) and substr($data, 2, 1) == '/' and is_numeric(substr($data, 3, 2)) and substr($data, 5, 1) == '/' and is_numeric(substr($data, 6, 4))) {
+                $dia = substr($data, 0, 2);
+                $mes = substr($data, 3, 2);
+                $ano = substr($data, 6, 4);
+            }
+        }
+
+        //Retorno
+        if ($dia == '' or $mes == '' or $ano == '' or $dia == '00' or $mes == '00' or $ano == '0000') {
+            $data = null;
+        } else {
+            //Retorna no formato (99/99/9999)
+            if ($op == 1) {$data = $dia.'/'.$mes.'/'.$ano;}
+
+            //Retorna no formato (99-99-9999)
+            if ($op == 2) {$data = $dia.'-'.$mes.'-'.$ano;}
+
+            //Retorna no formato (9999/99/99)
+            if ($op == 3) {$data = $ano.'/'.$mes.'/'.$dia;}
+
+            //Retorna no formato (9999-99-99)
+            if ($op == 4) {$data = $ano.'-'.$mes.'-'.$dia;}
+        }
+
+        return $data;
+    }
 }
