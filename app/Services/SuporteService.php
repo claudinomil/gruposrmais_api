@@ -690,6 +690,12 @@ class SuporteService
                     $dadosAtual['destino_uf'] = $request['destino_uf'][$i];
                     $dadosAtual['destino_numero'] = $request['destino_numero'][$i];
                     $dadosAtual['destino_complemento'] = $request['destino_complemento'][$i];
+                    $dadosAtual['destino_data_agendada'] = $request['destino_data_agendada_'.$request['destino_ordem'][$i]];
+                    $dadosAtual['destino_hora_agendada'] = $request['destino_hora_agendada_'.$request['destino_ordem'][$i]];
+                    $dadosAtual['destino_data_inicio'] = $request['destino_data_inicio_'.$request['destino_ordem'][$i]];
+                    $dadosAtual['destino_hora_inicio'] = $request['destino_hora_inicio_'.$request['destino_ordem'][$i]];
+                    $dadosAtual['destino_data_termino'] = $request['destino_data_termino_'.$request['destino_ordem'][$i]];
+                    $dadosAtual['destino_hora_termino'] = $request['destino_hora_termino_'.$request['destino_ordem'][$i]];
 
                     //Incluir
                     OrdemServicoDestino::create($dadosAtual);

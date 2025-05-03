@@ -1,105 +1,117 @@
 <?php
 
+use App\Http\Middleware\LogApiRequest;
 use Illuminate\Support\Facades\Route;
 
+
+//Descomentar para controlar as requisições feitas para a API
+//Route::middleware([LogApiRequest::class])->group(function () {
+
+
 //Auth
-require __DIR__.'/routes_auth.php';
+require __DIR__ . '/routes_auth.php';
 
 //Empresas
-require __DIR__.'/routes_empresas.php';
+require __DIR__ . '/routes_empresas.php';
 
 //Ferramentas
-require __DIR__.'/routes_ferramentas.php';
+require __DIR__ . '/routes_ferramentas.php';
 
 //Notificacoes
-require __DIR__.'/routes_notificacoes.php';
+require __DIR__ . '/routes_notificacoes.php';
 
 //Transacoes
-require __DIR__.'/routes_transacoes.php';
+require __DIR__ . '/routes_transacoes.php';
 
 //Grupos
-require __DIR__.'/routes_grupos.php';
+require __DIR__ . '/routes_grupos.php';
 
 //Users
-require __DIR__.'/routes_users.php';
+require __DIR__ . '/routes_users.php';
 
 //Bancos
-require __DIR__.'/routes_bancos.php';
+require __DIR__ . '/routes_bancos.php';
 
 //Departamentos
-require __DIR__.'/routes_departamentos.php';
+require __DIR__ . '/routes_departamentos.php';
 
 //Funcionarios
-require __DIR__.'/routes_funcionarios.php';
+require __DIR__ . '/routes_funcionarios.php';
 
 //Generos
-require __DIR__.'/routes_generos.php';
+require __DIR__ . '/routes_generos.php';
 
 //EstadosCivis
-require __DIR__.'/routes_estados_civis.php';
+require __DIR__ . '/routes_estados_civis.php';
 
 //Nacionalidades
-require __DIR__.'/routes_nacionalidades.php';
+require __DIR__ . '/routes_nacionalidades.php';
 
 //Naturalidades
-require __DIR__.'/routes_naturalidades.php';
+require __DIR__ . '/routes_naturalidades.php';
 
 //Funcoes
-require __DIR__.'/routes_funcoes.php';
+require __DIR__ . '/routes_funcoes.php';
 
 //Escolaridades
-require __DIR__.'/routes_escolaridades.php';
+require __DIR__ . '/routes_escolaridades.php';
 
 //Identityorgans
-require __DIR__.'/routes_identidade_orgaos.php';
+require __DIR__ . '/routes_identidade_orgaos.php';
 
 //Operacoes
-require __DIR__.'/routes_operacoes.php';
+require __DIR__ . '/routes_operacoes.php';
 
 //Situacoes
-require __DIR__.'/routes_situacoes.php';
+require __DIR__ . '/routes_situacoes.php';
 
 //Estados
-require __DIR__.'/routes_estados.php';
+require __DIR__ . '/routes_estados.php';
 
 //Clientes
-require __DIR__.'/routes_clientes.php';
+require __DIR__ . '/routes_clientes.php';
 
 //Clientes Servicos
-require __DIR__.'/routes_clientes_servicos.php';
+require __DIR__ . '/routes_clientes_servicos.php';
 
 //Dashboards
-require __DIR__.'/routes_dashboards.php';
+require __DIR__ . '/routes_dashboards.php';
 
 //Fornecedores
-require __DIR__.'/routes_fornecedores.php';
+require __DIR__ . '/routes_fornecedores.php';
 
 //Servicos
-require __DIR__.'/routes_servicos.php';
+require __DIR__ . '/routes_servicos.php';
 
 //Ordens Servicos
-require __DIR__.'/routes_ordens_servicos.php';
+require __DIR__ . '/routes_ordens_servicos.php';
 
 //Propostas
-require __DIR__.'/routes_propostas.php';
+require __DIR__ . '/routes_propostas.php';
 
 //Visitas Técnicas
-require __DIR__.'/routes_visitas_tecnicas.php';
+require __DIR__ . '/routes_visitas_tecnicas.php';
 
 //Brigadas Incêndios
-require __DIR__.'/routes_brigadas.php';
+require __DIR__ . '/routes_brigadas.php';
 
 //Submodulos
-require __DIR__.'/routes_submodulos.php';
+require __DIR__ . '/routes_submodulos.php';
 
 //Qrcodes
-require __DIR__.'/routes_qrcodes.php';
+require __DIR__ . '/routes_qrcodes.php';
 
 //Veículos
-require __DIR__.'/routes_veiculos.php';
+require __DIR__ . '/routes_veiculos.php';
 
 //Clientes Executivos
-require __DIR__.'/routes_clientes_executivos.php';
+require __DIR__ . '/routes_clientes_executivos.php';
 
 //Relatórios
-require __DIR__.'/routes_relatorios.php';
+require __DIR__ . '/routes_relatorios.php';
+
+//Mapas
+require __DIR__ . '/routes_mapas.php';
+
+
+//});
