@@ -11,5 +11,5 @@ Route::prefix('mapas')->group(function () {
     Route::delete('/destroy/{id}/{empresa_id}', [MapaController::class, 'destroy'])->middleware(['auth:api']);
     Route::get('/auxiliary/tables/{empresa_id}', [MapaController::class, 'auxiliary'])->middleware(['auth:api']);
 
-    Route::get('/visualizar_mapa_1/{data_inicio}/{data_fim}', [MapaController::class, 'visualizar_mapa_1'])->middleware(['auth:api']);
+    Route::get('/visualizar_mapa/{id}', [MapaController::class, 'visualizar_mapa'])->middleware(['auth:api']);
 });

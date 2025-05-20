@@ -3,24 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Facades\SuporteFacade;
-use App\Http\Requests\MapaStoreRequest;
-use App\Http\Requests\MapaUpdateRequest;
+use App\Http\Requests\MapaPontoInteresseStoreRequest;
+use App\Http\Requests\MapaPontoInteresseUpdateRequest;
 use App\Models\MapaPontoTipo;
 use Illuminate\Support\Facades\DB;
-use App\Models\Mapa;
+use App\Models\MapaPontoInteresse;
 
-class MapaController extends Controller
+class MapaPontoInteresseController extends Controller
 {
-    private $mapa;
+    private $mapa_ponto_interesse;
 
-    public function __construct(Mapa $mapa)
+    public function __construct(MapaPontoInteresse $mapa_ponto_interesse)
     {
-        $this->mapa = $mapa;
+        $this->mapa_ponto_interesse = $mapa_ponto_interesse;
     }
 
     public function index($empresa_id)
     {
-        $registros = $this->mapa->all();
+        $registros = $this->mapa_ponto_interesse->all();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
@@ -28,8 +28,8 @@ class MapaController extends Controller
     public function show($id)
     {
         try {
-            $registro = Mapa
-                ::where('mapas.id', '=', $id)
+            $registro = MapaPontoInteresse
+                ::where('mapas_pontos_interesse.id', '=', $id)
                 ->get()[0];
 
             if (!$registro) {
@@ -64,7 +64,7 @@ class MapaController extends Controller
         }
     }
 
-    public function store(MapaStoreRequest $request, $empresa_id)
+    public function store(MapaPontoInteresseStoreRequest $request, $empresa_id)
     {
         try {
             //Atualisar objeto Auth::user()
@@ -74,7 +74,7 @@ class MapaController extends Controller
             $request['empresa_id'] = $empresa_id;
 
             //Incluindo registro
-            $this->mapa->create($request->all());
+            $this->mapa_ponto_interesse->create($request->all());
 
             return $this->sendResponse('Registro criado com sucesso.', 2010, null, null);
         } catch (\Exception $e) {
@@ -86,10 +86,10 @@ class MapaController extends Controller
         }
     }
 
-    public function update(MapaUpdateRequest $request, $id, $empresa_id)
+    public function update(MapaPontoInteresseUpdateRequest $request, $id, $empresa_id)
     {
         try {
-            $registro = $this->mapa->find($id);
+            $registro = $this->mapa_ponto_interesse->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
@@ -114,7 +114,7 @@ class MapaController extends Controller
     public function destroy($id, $empresa_id)
     {
         try {
-            $registro = $this->mapa->find($id);
+            $registro = $this->mapa_ponto_interesse->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
@@ -150,7 +150,7 @@ class MapaController extends Controller
 
 
         //Registros
-        $registros = $this->mapa
+        $registros = $this->mapa_ponto_interesse
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;
@@ -201,13 +201,10 @@ class MapaController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
 
-    public function visualizar_mapa($id)
+    public function mapa_pontos_tipo($mapa_ponto_tipo_id)
     {
-        $registros = $this->mapa
-            ->join('mapas_modelos', 'mapas.modelo_id', '=', 'mapas_modelos.id')
-            ->join('mapas_itens', 'mapas.id', '=', 'mapas_itens.mapa_id')
-            ->select(['mapas.*', 'mapas_modelos.name as mapaModeloName', 'mapas_itens.*'])
-            ->where('mapas.id', $id)
+        $registros = MapaPontoInteresse
+            ::where('mapas_pontos_interesse.mapa_ponto_tipo_id', '=', $mapa_ponto_tipo_id)
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
