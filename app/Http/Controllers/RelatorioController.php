@@ -55,7 +55,7 @@ class RelatorioController extends Controller
         $content['grupo_relatorios'] = GrupoRelatorio
             ::join('relatorios', 'relatorios.id', 'grupos_relatorios.relatorio_id')
             ->select('relatorios.id as relatorio_id', 'relatorios.agrupamento_id', 'relatorios.name as relatorio_name', 'relatorios.descricao as relatorio_descricao', 'relatorios.ordem_visualizacao as relatorio_ordem_visualizacao')
-            ->where('grupos_relatorios.grupo_id', Auth::user()->id)
+            ->where('grupos_relatorios.grupo_id', Auth::user()->grupo_id)
             ->orderby('relatorios.agrupamento_id', 'ASC')
             ->orderby('relatorios.ordem_visualizacao', 'ASC')
             ->get();
