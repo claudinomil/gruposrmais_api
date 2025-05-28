@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Facades\SuporteFacade;
 use App\Http\Requests\MapaStoreRequest;
 use App\Http\Requests\MapaUpdateRequest;
+use App\Models\MapaPontoInteresse;
 use App\Models\MapaPontoTipo;
+use App\Models\OrdemServico;
+use App\Models\OrdemServicoDestino;
 use Illuminate\Support\Facades\DB;
 use App\Models\Mapa;
 
@@ -53,6 +56,9 @@ class MapaController extends Controller
 
             //Mapas Pontos Tipos
             $registros['mapas_pontos_tipos'] = MapaPontoTipo::all();
+
+            //Ordens de Serviços
+            $registros['ordens_servicos'] = OrdemServico::where('ordem_servico_tipo_id', 3)->orderby('id', 'DESC')->get();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -211,5 +217,46 @@ class MapaController extends Controller
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+    }
+
+    public function ordem_servico_destinos($ordem_servico_id)
+    {
+        try {
+            $registros = OrdemServicoDestino
+                ::where('ordem_servico_id', '=', $ordem_servico_id)
+                ->get();
+
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function buscar_pontos_interesse($query)
+    {
+        try {
+            $registros = MapaPontoInteresse
+                ::select('mapas_pontos_interesse.*', 'mapas_pontos_tipos.name as mapa_ponto_tipo')
+                ->join('mapas_pontos_tipos', 'mapas_pontos_tipos.id', '=', 'mapas_pontos_interesse.mapa_ponto_tipo_id')
+                ->where(function($q) use ($query) {
+                    $q->where('mapas_pontos_tipos.name', 'LIKE', "%{$query}%")
+                        ->orWhere('mapas_pontos_interesse.name', 'LIKE', "%{$query}%")
+                        ->orWhere('mapas_pontos_interesse.descricao', 'LIKE', "%{$query}%");
+                })
+                ->limit(12)
+                ->get();
+
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
     }
 }

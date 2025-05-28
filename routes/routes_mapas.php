@@ -12,4 +12,8 @@ Route::prefix('mapas')->group(function () {
     Route::get('/auxiliary/tables/{empresa_id}', [MapaController::class, 'auxiliary'])->middleware(['auth:api']);
 
     Route::get('/visualizar_mapa/{id}', [MapaController::class, 'visualizar_mapa'])->middleware(['auth:api']);
+
+    Route::get('/ordem_servico_destinos/{ordem_servico_id}', [MapaController::class, 'ordem_servico_destinos'])->middleware(['auth:api']);
+
+    Route::get('/buscar_pontos_interesse/{query}', [MapaController::class, 'buscar_pontos_interesse'])->middleware(['auth:api']);
 });

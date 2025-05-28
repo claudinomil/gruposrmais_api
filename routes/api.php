@@ -116,5 +116,8 @@ require __DIR__ . '/routes_mapas.php';
 //Mapas Pontos Interesse
 require __DIR__ . '/routes_mapas_pontos_interesse.php';
 
+//Relatórios Exaustões
+require __DIR__ . '/routes_relatorios_exaustoes.php';
+
 
 //});

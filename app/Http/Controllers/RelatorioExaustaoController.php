@@ -3,24 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Facades\SuporteFacade;
-use App\Http\Requests\MapaPontoInteresseStoreRequest;
-use App\Http\Requests\MapaPontoInteresseUpdateRequest;
-use App\Models\MapaPontoTipo;
-use Illuminate\Support\Facades\DB;
-use App\Models\MapaPontoInteresse;
+use App\Http\Requests\RelatorioExaustaoStoreRequest;
+use App\Http\Requests\RelatorioExaustaoUpdateRequest;
+use App\Models\Cliente;
+use App\Models\RelatorioExaustao;
+use App\Models\RelatorioExaustaoStatus;
 
-class MapaPontoInteresseController extends Controller
+class RelatorioExaustaoController extends Controller
 {
-    private $mapa_ponto_interesse;
+    private $relatorio_exaustao;
 
-    public function __construct(MapaPontoInteresse $mapa_ponto_interesse)
+    public function __construct(RelatorioExaustao $relatorio_exaustao)
     {
-        $this->mapa_ponto_interesse = $mapa_ponto_interesse;
+        $this->relatorio_exaustao = $relatorio_exaustao;
     }
 
     public function index($empresa_id)
     {
-        $registros = $this->mapa_ponto_interesse->all();
+        $registros = $this->relatorio_exaustao
+            ->join('clientes', 'relatorios_exaustoes.cliente_id', '=', 'clientes.id')
+            ->Join('relatorio_exaustao_status', 'relatorios_exaustoes.relatorio_exaustao_status_id', '=', 'relatorio_exaustao_status.id')
+            ->select(['relatorios_exaustoes.*', 'clientes.name as clienteName', 'relatorio_exaustao_status.name as relatorioExaustaoStatusName'])
+            ->where('clientes.empresa_id', $empresa_id)
+            ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
@@ -28,8 +33,8 @@ class MapaPontoInteresseController extends Controller
     public function show($id)
     {
         try {
-            $registro = MapaPontoInteresse
-                ::where('mapas_pontos_interesse.id', '=', $id)
+            $registro = $this->relatorio_exaustao
+                ->where('id', '=', $id)
                 ->get()[0];
 
             if (!$registro) {
@@ -51,8 +56,11 @@ class MapaPontoInteresseController extends Controller
         try {
             $registros = array();
 
-            //Mapas Pontos Tipos
-            $registros['mapas_pontos_tipos'] = MapaPontoTipo::all();
+            //Clientes
+            $registros['clientes'] = Cliente::where('empresa_id', '=', $empresa_id)->get();
+
+            //Relatórios Exaustões Status
+            $registros['relatorio_exaustao_status'] = RelatorioExaustaoStatus::all();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -64,18 +72,47 @@ class MapaPontoInteresseController extends Controller
         }
     }
 
-    public function store(MapaPontoInteresseStoreRequest $request, $empresa_id)
+    public function store(RelatorioExaustaoStoreRequest $request, $empresa_id)
     {
         try {
             //Atualisar objeto Auth::user()
             SuporteFacade::setUserLogged($empresa_id);
 
+            //Acertos campos''''''''''''''''''''''''''''''''''''''''''''''''
+            //relatorio_exaustao_status_id
+            $request['relatorio_exaustao_status_id'] = 1;
+
+            //numero_relatorio_exaustao
+            $reg = RelatorioExaustao::latest()->first();
+            if ($reg) {
+                $request['numero_relatorio_exaustao'] = $reg['numero_relatorio_exaustao'] + 1;
+            } else {
+                $request['numero_relatorio_exaustao'] = 1;
+            }
+
+            //data_abertura
+            $request['data_abertura'] = date('d/m/Y');
+
+            //hora_abertura
+            $request['hora_abertura'] = date('H:i:s');
+
+            //ano_relatorio_exaustao
+            $request['ano_relatorio_exaustao'] = substr($request['data_abertura'], 6, 4);
+
+            //data_prevista
+            $request['data_prevista'] = $request['data_abertura'];
+
+            //hora_prevista
+            $request['hora_prevista'] = $request['hora_abertura'];
+            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
             //Colocar empresa_id no Request
             $request['empresa_id'] = $empresa_id;
 
             //Incluindo registro
-            $this->mapa_ponto_interesse->create($request->all());
+            $registro = $this->relatorio_exaustao->create($request->all());
 
+            //Return
             return $this->sendResponse('Registro criado com sucesso.', 2010, null, null);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -86,10 +123,10 @@ class MapaPontoInteresseController extends Controller
         }
     }
 
-    public function update(MapaPontoInteresseUpdateRequest $request, $id, $empresa_id)
+    public function update(RelatorioExaustaoUpdateRequest $request, $id, $empresa_id)
     {
         try {
-            $registro = $this->mapa_ponto_interesse->find($id);
+            $registro = $this->relatorio_exaustao->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
@@ -100,6 +137,7 @@ class MapaPontoInteresseController extends Controller
                 //Alterando registro
                 $registro->update($request->all());
 
+                //Return
                 return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
             }
         } catch (\Exception $e) {
@@ -114,7 +152,7 @@ class MapaPontoInteresseController extends Controller
     public function destroy($id, $empresa_id)
     {
         try {
-            $registro = $this->mapa_ponto_interesse->find($id);
+            $registro = $this->relatorio_exaustao->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
@@ -150,7 +188,10 @@ class MapaPontoInteresseController extends Controller
 
 
         //Registros
-        $registros = $this->mapa_ponto_interesse
+        $registros = $this->relatorio_exaustao
+            ->Join('clientes', 'relatorios_exaustoes.cliente_id', '=', 'clientes.id')
+            ->select(['relatorios_exaustoes.*', 'clientes.name as clienteName'])
+            ->where('clientes.empresa_id', '=', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;
@@ -197,17 +238,6 @@ class MapaPontoInteresseController extends Controller
 
         //Código SQL Bruto
         //$sql = DB::getQueryLog();
-
-        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
-    }
-
-    public function mapa_pontos_tipo($mapa_ponto_tipo_id)
-    {
-        $registros = MapaPontoInteresse
-            ::join('mapas_pontos_tipos', 'mapas_pontos_tipos.id', 'mapas_pontos_interesse.mapa_ponto_tipo_id')
-            ->where('mapas_pontos_interesse.mapa_ponto_tipo_id', '=', $mapa_ponto_tipo_id)
-            ->select('mapas_pontos_interesse.*', 'mapas_pontos_tipos.name as mapa_ponto_tipo')
-            ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }

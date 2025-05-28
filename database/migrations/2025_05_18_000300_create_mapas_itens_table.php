@@ -13,42 +13,40 @@ class CreateMapasItensTable extends Migration
             $table->id();
             $table->foreignId('mapa_id')->constrained('mapas');
 
-            //Se for um Ponto
-            $table->foreignId('mapa_ponto_tipo_id')->constrained('mapas_pontos_tipos');
-            $table->string('ponto_nome');
-            $table->string('ponto_descricao')->nullable();
-            $table->string('ponto_latitude');
-            $table->string('ponto_longitude');
-            $table->string('ponto_icone');
+            /*
+             * item_tipo_id
+             * 1 : POI Sistema Individual
+             * 2 : POI Sistema Grupo
+             * 3 : Ponto Personalizado
+             * 4 : POI Google Grupo
+             * 5 : Rota Personalizada
+             * 6 : Rotas Órdem Serviço
+             * 7 : Polígonos Comunidades
+             */
+            $table->integer('item_tipo_id');
 
-            //Se for uma Rota
+            $table->foreignId('mapa_ponto_tipo_id')->nullable()->constrained('mapas_pontos_tipos');
             $table->foreignId('ordem_servico_id')->nullable()->constrained('ordens_servicos');
-            $table->string('rota_nome');
-            $table->string('rota_descricao')->nullable();
-
-            $table->string('rota_origem_nome');
-            $table->string('rota_origem_descricao')->nullable();
-            $table->string('rota_origem_latitude');
-            $table->string('rota_origem_longitude');
-            $table->string('rota_origem_cep')->nullable();
-            $table->string('rota_origem_numero')->nullable();
-            $table->string('rota_origem_complemento')->nullable();
-            $table->string('rota_origem_logradouro')->nullable();
-            $table->string('rota_origem_bairro')->nullable();
-            $table->string('rota_origem_localidade')->nullable();
-            $table->string('rota_origem_uf')->nullable();
-
-            $table->string('rota_destino_nome');
-            $table->string('rota_destino_descricao')->nullable();
-            $table->string('rota_destino_latitude');
-            $table->string('rota_destino_longitude');
-            $table->string('rota_destino_cep')->nullable();
-            $table->string('rota_destino_numero')->nullable();
-            $table->string('rota_destino_complemento')->nullable();
-            $table->string('rota_destino_logradouro')->nullable();
-            $table->string('rota_destino_bairro')->nullable();
-            $table->string('rota_destino_localidade')->nullable();
-            $table->string('rota_destino_uf')->nullable();
+            $table->string('item_name')->nullable();
+            $table->string('item_descricao')->nullable();
+            $table->string('google_grupo')->nullable();
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
+            $table->string('icone')->nullable();
+            $table->string('origem_cep')->nullable();
+            $table->string('origem_numero')->nullable();
+            $table->string('origem_complemento')->nullable();
+            $table->string('origem_logradouro')->nullable();
+            $table->string('origem_bairro')->nullable();
+            $table->string('origem_localidade')->nullable();
+            $table->string('origem_uf')->nullable();
+            $table->string('destino_cep')->nullable();
+            $table->string('destino_numero')->nullable();
+            $table->string('destino_complemento')->nullable();
+            $table->string('destino_logradouro')->nullable();
+            $table->string('destino_bairro')->nullable();
+            $table->string('destino_localidade')->nullable();
+            $table->string('destino_uf')->nullable();
         });
     }
 

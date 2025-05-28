@@ -76,7 +76,7 @@ class UserController extends Controller
             $registros['users_configuracoes'] = UserConfiguracao::where('empresa_id', '=', $empresa_id)->get();
 
             //Grupos
-            $registros['grupos'] = Grupo::where('empresa_id', '=', $empresa_id)->get();
+            $registros['grupos'] = Grupo::all(); //where('empresa_id', '=', $empresa_id)->get();
 
             //Situações
             $registros['situacoes'] = Situacao::all();
@@ -537,19 +537,26 @@ class UserController extends Controller
         }
     }
 
-    public function logout()
-    {
-        if (Auth::check()) {
-            //Removendo Token
-            $user = Auth::user()->token();
-            $user->revoke();
+//    public function logout()
+//    {
+//        auth()->logout();
+//
+//        return $this->sendResponse('Logout realizado com sucesso e o token foi excluído.', 4001, null, null);
+//    }
 
-            return $this->sendResponse('Logout realizado com sucesso e o token foi excluído.', 4001, null, null);
-
-        }
-
-        return $this->sendResponse('Logout não realizado.', 5000, null, null);
-    }
+//    public function logout()
+//    {
+//        if (Auth::check()) {
+//            //Removendo Token
+//            $user = Auth::user()->token();
+//            $user->revoke();
+//
+//            return $this->sendResponse('Logout realizado com sucesso e o token foi excluído.', 4001, null, null);
+//
+//        }
+//
+//        return $this->sendResponse('Logout não realizado.', 5000, null, null);
+//    }
 
     public function exist($email)
     {

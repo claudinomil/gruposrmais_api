@@ -25,7 +25,7 @@ Route::prefix('users')->group(function () {
     Route::get('/user/permissoes/settings/{searchSubmodulo}/{empresa_id}', [UserController::class, 'userPermissoesSettings'])->middleware(['auth:api']);
 
     //Logout
-    Route::post('logout', [UserController::class, 'logout'])->middleware(['auth:api']);
+    //Route::post('logout', [UserController::class, 'logout'])->middleware(['auth:api']);
 });
 
 //Verifica se usuário existe (pelo email)
