@@ -58,7 +58,7 @@ class MapaController extends Controller
             $registros['mapas_pontos_tipos'] = MapaPontoTipo::all();
 
             //Ordens de Serviços
-            $registros['ordens_servicos'] = OrdemServico::where('ordem_servico_tipo_id', 3)->orderby('id', 'DESC')->get();
+            $registros['ordens_servicos'] = OrdemServico::where('empresa_id', $empresa_id)->where('ordem_servico_tipo_id', 3)->orderby('id', 'DESC')->get();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
