@@ -24,8 +24,8 @@ use App\Models\PropostaServico;
 use App\Models\SegurancaMedida;
 use App\Models\Servico;
 use App\Models\UserConfiguracao;
-use App\Models\VisitaTecnica;
-use App\Models\VisitaTecnicaSegurancaMedida;
+use App\Models\APAGARVT;
+use App\Models\APAGARVTControllerSegurancaMedida;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -991,157 +991,163 @@ class SuporteService
     //Visitas Técnicas - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     //Visitas Técnicas - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-    /*
-     * Criar Visita Técnica ao criar um Serviço de Visita Técnica para um cliente
-     */
-    public function createVisitaTecnica($cliente_servico_id, $empresa_id)
-    {
-        //Gravar Visita Técnica
-        $visita_tecnica = VisitaTecnica::create(
-            [
-                'empresa_id' => $empresa_id,
-                'cliente_servico_id' => $cliente_servico_id
-            ]
-        );
 
-        //Gravar dados vindos do Cliente
-        $this->updateVisitaTecnica($visita_tecnica['id']);
-    }
+//ESSE CODIGO COMENTADO ABAIXO É DA ANTIGA VISITA TECNICA DE INCENDIO
 
-    /*
-     * Atualizar registro na tabela visitas_tecnicas e visitas_tecnicas_seguranca_medidas com os dados vindos da tabela clientes
-     * Atualização não será feita em alguns Status do Serviço (id=1 : EXECUTADO)
-     */
-    public function updateVisitaTecnica($visita_tecnica_id)
-    {
-        $visita_tecnica = VisitaTecnica
-            ::Join('clientes_servicos', 'visitas_tecnicas.cliente_servico_id', '=', 'clientes_servicos.id')
-            ->select(['clientes_servicos.cliente_id'])
-            ->where('visitas_tecnicas.id', '=', $visita_tecnica_id)
-            ->where('clientes_servicos.servico_status_id', '!=', 1)
-            ->get();
+//    /*
+//     * Criar Visita Técnica ao criar um Serviço de Visita Técnica para um cliente
+//     */
+//    public function createVisitaTecnica($cliente_servico_id, $empresa_id)
+//    {
+//        //Gravar Visita Técnica
+//        $visita_tecnica = APAGARVT::create(
+//            [
+//                'empresa_id' => $empresa_id,
+//                'cliente_servico_id' => $cliente_servico_id
+//            ]
+//        );
+//
+//        //Gravar dados vindos do Cliente
+//        $this->updateVisitaTecnica($visita_tecnica['id']);
+//    }
+//
+//    /*
+//     * Atualizar registro na tabela visitas_tecnicas e visitas_tecnicas_seguranca_medidas com os dados vindos da tabela clientes
+//     * Atualização não será feita em alguns Status do Serviço (id=1 : EXECUTADO)
+//     */
+//    public function updateVisitaTecnica($visita_tecnica_id)
+//    {
+//        $visita_tecnica = APAGARVT
+//            ::Join('clientes_servicos', 'visitas_tecnicas.cliente_servico_id', '=', 'clientes_servicos.id')
+//            ->select(['clientes_servicos.cliente_id'])
+//            ->where('visitas_tecnicas.id', '=', $visita_tecnica_id)
+//            ->where('clientes_servicos.servico_status_id', '!=', 1)
+//            ->get();
+//
+//        if ($visita_tecnica->count() == 1) {
+//            $cliente_id = $visita_tecnica[0]['cliente_id'];
+//
+//            //Buscando dados para incluir no registro de visita tecnica'''''''''''''''''''''''''''''''''''''''''''''''''
+//            $dados = Cliente::find($cliente_id);
+//
+//            //Buscando Risco Incendio
+//            if (isset($dados['incendio_risco_id']) and $dados['incendio_risco_id'] != '') {
+//                $incendio_risco = IncendioRisco::where('id', '=', $dados['incendio_risco_id'])->get('name');
+//                $dados['incendio_risco'] = $incendio_risco[0]['name'];
+//            } else {
+//                $dados['incendio_risco'] = '';
+//            }
+//
+//            //Edificacao Classificacao
+//            if (isset($dados['edificacao_classificacao_id']) and $dados['edificacao_classificacao_id'] != '') {
+//                $edificacao_classificacao = EdificacaoClassificacao::where('id', '=', $dados['edificacao_classificacao_id'])->get();
+//                $dados['grupo'] = $edificacao_classificacao[0]['grupo'];
+//                $dados['ocupacao_uso'] = $edificacao_classificacao[0]['ocupacao_uso'];
+//                $dados['divisao'] = $edificacao_classificacao[0]['divisao'];
+//                $dados['descricao'] = $edificacao_classificacao[0]['descricao'];
+//                $dados['definicao'] = $edificacao_classificacao[0]['definicao'];
+//            } else {
+//                $dados['grupo'] = '';
+//                $dados['ocupacao_uso'] = '';
+//                $dados['divisao'] = '';
+//                $dados['descricao'] = '';
+//                $dados['definicao'] = '';
+//            }
+//
+//            //buscar dados das medidas de segurança
+//            $cliente_seguranca_medidas = ClienteSegurancaMedida
+//                ::leftJoin('seguranca_medidas', 'clientes_seguranca_medidas.seguranca_medida_id', '=', 'seguranca_medidas.id')
+//                ->select(['clientes_seguranca_medidas.*', 'seguranca_medidas.name as seguranca_medida_nome'])
+//                ->where('clientes_seguranca_medidas.cliente_id', '=', $cliente_id)
+//                ->orderBy('clientes_seguranca_medidas.pavimento')
+//                ->orderBy('seguranca_medidas.name')
+//                ->get();
+//            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+//
+//            //Salvando dados na tabela visitas_tecnicas'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+//            $data = array();
+//
+//            $data['id'] = $visita_tecnica_id;
+//            $data['numero_pavimentos'] = $dados['numero_pavimentos'];
+//            $data['altura'] = $dados['altura'];
+//            $data['area_total_construida'] = $dados['area_total_construida'];
+//            $data['lotacao'] = $dados['lotacao'];
+//            $data['carga_incendio'] = $dados['carga_incendio'];
+//            $data['incendio_risco'] = $dados['incendio_risco'];
+//            $data['grupo'] = $dados['grupo'];
+//            $data['divisao'] = $dados['divisao'];
+//            $data['ocupacao_uso'] = $dados['ocupacao_uso'];
+//            $data['descricao'] = $dados['descricao'];
+//            $data['definicao'] = $dados['definicao'];
+//            $data['projeto_scip'] = $dados['projeto_scip'];
+//            $data['laudo_exigencias'] = $dados['laudo_exigencias'];
+//            $data['certificado_aprovacao'] = $dados['certificado_aprovacao'];
+//            $data['certificado_aprovacao_simplificado'] = $dados['certificado_aprovacao_simplificado'];
+//            $data['certificado_aprovacao_assistido'] = $dados['certificado_aprovacao_assistido'];
+//
+//            APAGARVT::where('id', '=', $visita_tecnica_id)->update($data);
+//            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+//
+//            //Salvando dados na tabela visitas_tecnicas_seguranca_medidas'''''''''''''''''''''''''''''''''''''''''''''''
+//            //Deletando registros
+//            APAGARVTControllerSegurancaMedida::where('visita_tecnica_id', $visita_tecnica_id)->delete();
+//
+//            foreach ($cliente_seguranca_medidas as $cliente_seguranca_medida) {
+//                APAGARVTControllerSegurancaMedida::create(
+//                    [
+//                        'visita_tecnica_id' => $visita_tecnica_id,
+//                        'pavimento' => $cliente_seguranca_medida['pavimento'],
+//                        'seguranca_medida_id' => $cliente_seguranca_medida['seguranca_medida_id'],
+//                        'seguranca_medida_nome' => $cliente_seguranca_medida['seguranca_medida_nome'],
+//                        'seguranca_medida_quantidade' => $cliente_seguranca_medida['quantidade'],
+//                        'seguranca_medida_tipo' => $cliente_seguranca_medida['tipo'],
+//                        'seguranca_medida_observacao' => $cliente_seguranca_medida['observacao']
+//                    ]
+//                );
+//            }
+//            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+//        }
+//    }
+//
+//    /*
+//     * Deletar registro na tabela visitas_tecnicas e visitas_tecnicas_seguranca_medidas de acordo com o cliente_servico_id deletado
+//     */
+//    public function deleteVisitaTecnica($cliente_servico_id)
+//    {
+//        //Buscar id da Visita Técnica
+//        $visita_tecnica = APAGARVT::where('cliente_servico_id', $cliente_servico_id)->get()[0];
+//        $visita_tecnica_id = $visita_tecnica['id'];
+//
+//        //Apagando registros na tabela visitas_tecnicas_seguranca_medidas
+//        APAGARVTControllerSegurancaMedida::where('visita_tecnica_id', $visita_tecnica_id)->delete();
+//
+//        //Apagando registro na tabela visitas_tecnicas
+//        APAGARVT::where('id', $visita_tecnica_id)->delete();
+//    }
+//
+//    /*
+//     * Atualizar visitas_tecnicas e visitas_tecnicas_seguranca_medidas de um determinado Cliente
+//     * Atualização não será feita em alguns Status do Serviço (id=1 : EXECUTADO)
+//     */
+//    public function updateVisitaTecnicaCliente($cliente_id)
+//    {
+//        $visitas_tecnicas = APAGARVT
+//            ::Join('clientes_servicos', 'visitas_tecnicas.cliente_servico_id', '=', 'clientes_servicos.id')
+//            ->select(['visitas_tecnicas.id'])
+//            ->where('clientes_servicos.cliente_id', '=', $cliente_id)
+//            ->where('clientes_servicos.servico_status_id', '!=', 1)
+//            ->get();
+//
+//        foreach ($visitas_tecnicas as $visita_tecnica) {
+//            $visita_tecnica_id = $visita_tecnica['id'];
+//
+//            //Gravar dados vindos do Cliente
+//            $this->updateVisitaTecnica($visita_tecnica_id);
+//        }
+//    }
 
-        if ($visita_tecnica->count() == 1) {
-            $cliente_id = $visita_tecnica[0]['cliente_id'];
 
-            //Buscando dados para incluir no registro de visita tecnica'''''''''''''''''''''''''''''''''''''''''''''''''
-            $dados = Cliente::find($cliente_id);
 
-            //Buscando Risco Incendio
-            if (isset($dados['incendio_risco_id']) and $dados['incendio_risco_id'] != '') {
-                $incendio_risco = IncendioRisco::where('id', '=', $dados['incendio_risco_id'])->get('name');
-                $dados['incendio_risco'] = $incendio_risco[0]['name'];
-            } else {
-                $dados['incendio_risco'] = '';
-            }
-
-            //Edificacao Classificacao
-            if (isset($dados['edificacao_classificacao_id']) and $dados['edificacao_classificacao_id'] != '') {
-                $edificacao_classificacao = EdificacaoClassificacao::where('id', '=', $dados['edificacao_classificacao_id'])->get();
-                $dados['grupo'] = $edificacao_classificacao[0]['grupo'];
-                $dados['ocupacao_uso'] = $edificacao_classificacao[0]['ocupacao_uso'];
-                $dados['divisao'] = $edificacao_classificacao[0]['divisao'];
-                $dados['descricao'] = $edificacao_classificacao[0]['descricao'];
-                $dados['definicao'] = $edificacao_classificacao[0]['definicao'];
-            } else {
-                $dados['grupo'] = '';
-                $dados['ocupacao_uso'] = '';
-                $dados['divisao'] = '';
-                $dados['descricao'] = '';
-                $dados['definicao'] = '';
-            }
-
-            //buscar dados das medidas de segurança
-            $cliente_seguranca_medidas = ClienteSegurancaMedida
-                ::leftJoin('seguranca_medidas', 'clientes_seguranca_medidas.seguranca_medida_id', '=', 'seguranca_medidas.id')
-                ->select(['clientes_seguranca_medidas.*', 'seguranca_medidas.name as seguranca_medida_nome'])
-                ->where('clientes_seguranca_medidas.cliente_id', '=', $cliente_id)
-                ->orderBy('clientes_seguranca_medidas.pavimento')
-                ->orderBy('seguranca_medidas.name')
-                ->get();
-            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-            //Salvando dados na tabela visitas_tecnicas'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-            $data = array();
-
-            $data['id'] = $visita_tecnica_id;
-            $data['numero_pavimentos'] = $dados['numero_pavimentos'];
-            $data['altura'] = $dados['altura'];
-            $data['area_total_construida'] = $dados['area_total_construida'];
-            $data['lotacao'] = $dados['lotacao'];
-            $data['carga_incendio'] = $dados['carga_incendio'];
-            $data['incendio_risco'] = $dados['incendio_risco'];
-            $data['grupo'] = $dados['grupo'];
-            $data['divisao'] = $dados['divisao'];
-            $data['ocupacao_uso'] = $dados['ocupacao_uso'];
-            $data['descricao'] = $dados['descricao'];
-            $data['definicao'] = $dados['definicao'];
-            $data['projeto_scip'] = $dados['projeto_scip'];
-            $data['laudo_exigencias'] = $dados['laudo_exigencias'];
-            $data['certificado_aprovacao'] = $dados['certificado_aprovacao'];
-            $data['certificado_aprovacao_simplificado'] = $dados['certificado_aprovacao_simplificado'];
-            $data['certificado_aprovacao_assistido'] = $dados['certificado_aprovacao_assistido'];
-
-            VisitaTecnica::where('id', '=', $visita_tecnica_id)->update($data);
-            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-            //Salvando dados na tabela visitas_tecnicas_seguranca_medidas'''''''''''''''''''''''''''''''''''''''''''''''
-            //Deletando registros
-            VisitaTecnicaSegurancaMedida::where('visita_tecnica_id', $visita_tecnica_id)->delete();
-
-            foreach ($cliente_seguranca_medidas as $cliente_seguranca_medida) {
-                VisitaTecnicaSegurancaMedida::create(
-                    [
-                        'visita_tecnica_id' => $visita_tecnica_id,
-                        'pavimento' => $cliente_seguranca_medida['pavimento'],
-                        'seguranca_medida_id' => $cliente_seguranca_medida['seguranca_medida_id'],
-                        'seguranca_medida_nome' => $cliente_seguranca_medida['seguranca_medida_nome'],
-                        'seguranca_medida_quantidade' => $cliente_seguranca_medida['quantidade'],
-                        'seguranca_medida_tipo' => $cliente_seguranca_medida['tipo'],
-                        'seguranca_medida_observacao' => $cliente_seguranca_medida['observacao']
-                    ]
-                );
-            }
-            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        }
-    }
-
-    /*
-     * Deletar registro na tabela visitas_tecnicas e visitas_tecnicas_seguranca_medidas de acordo com o cliente_servico_id deletado
-     */
-    public function deleteVisitaTecnica($cliente_servico_id)
-    {
-        //Buscar id da Visita Técnica
-        $visita_tecnica = VisitaTecnica::where('cliente_servico_id', $cliente_servico_id)->get()[0];
-        $visita_tecnica_id = $visita_tecnica['id'];
-
-        //Apagando registros na tabela visitas_tecnicas_seguranca_medidas
-        VisitaTecnicaSegurancaMedida::where('visita_tecnica_id', $visita_tecnica_id)->delete();
-
-        //Apagando registro na tabela visitas_tecnicas
-        VisitaTecnica::where('id', $visita_tecnica_id)->delete();
-    }
-
-    /*
-     * Atualizar visitas_tecnicas e visitas_tecnicas_seguranca_medidas de um determinado Cliente
-     * Atualização não será feita em alguns Status do Serviço (id=1 : EXECUTADO)
-     */
-    public function updateVisitaTecnicaCliente($cliente_id)
-    {
-        $visitas_tecnicas = VisitaTecnica
-            ::Join('clientes_servicos', 'visitas_tecnicas.cliente_servico_id', '=', 'clientes_servicos.id')
-            ->select(['visitas_tecnicas.id'])
-            ->where('clientes_servicos.cliente_id', '=', $cliente_id)
-            ->where('clientes_servicos.servico_status_id', '!=', 1)
-            ->get();
-
-        foreach ($visitas_tecnicas as $visita_tecnica) {
-            $visita_tecnica_id = $visita_tecnica['id'];
-
-            //Gravar dados vindos do Cliente
-            $this->updateVisitaTecnica($visita_tecnica_id);
-        }
-    }
     //Visitas Técnicas - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     //Visitas Técnicas - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 

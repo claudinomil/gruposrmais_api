@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class VisitaTecnicaSegurancaMedida extends Model
+class APAGARVTControllerSegurancaMedida extends Model
 {
     use HasFactory;
 

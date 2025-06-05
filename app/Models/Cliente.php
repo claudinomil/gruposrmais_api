@@ -59,11 +59,23 @@ class Cliente extends Model
         'carga_incendio',
         'incendio_risco_id',
         'edificacao_classificacao_id',
-        'projeto_scip',
-        'laudo_exigencias',
-        'certificado_aprovacao',
-        'certificado_aprovacao_simplificado',
-        'certificado_aprovacao_assistido'
+        'doc_cbmerj_projeto_scip',
+        'doc_cbmerj_laudo_exigencias',
+        'doc_cbmerj_certificado_aprovacao',
+        'doc_cbmerj_certificado_aprovacao_simplificado',
+        'doc_cbmerj_certificado_aprovacao_assistido',
+        'doc_pj_cnpj',
+        'doc_pj_representante_legal',
+        'doc_pj_contrato_social',
+        'doc_pj_rgi',
+        'doc_pj_contrato_locacao',
+        'doc_pf_cpf',
+        'doc_pf_representante_legal',
+        'doc_pf_contrato_social',
+        'doc_pf_rgi',
+        'doc_pf_contrato_locacao',
+        'doc_vt_memoria_descritiva',
+        'doc_vt_certificado_funcionamento'
     ];
 
     protected $dates = [

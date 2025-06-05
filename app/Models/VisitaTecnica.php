@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 
 class VisitaTecnica extends Model
 {
@@ -14,71 +13,39 @@ class VisitaTecnica extends Model
     protected $table = 'visitas_tecnicas';
 
     protected $fillable = [
-        'empresa_id',
-        'cliente_servico_id',
-        'numero_pavimentos',
-        'altura',
-        'area_total_construida',
-        'lotacao',
-        'carga_incendio',
-        'incendio_risco',
-        'grupo',
-        'ocupacao_uso',
-        'divisao',
-        'descricao',
-        'definicao',
-        'projeto_scip',
-        'projeto_scip_numero',
-        'laudo_exigencias',
-        'laudo_exigencias_numero',
-        'laudo_exigencias_data_emissao',
-        'laudo_exigencias_data_vencimento',
-        'certificado_aprovacao',
-        'certificado_aprovacao_numero',
-        'certificado_aprovacao_simplificado',
-        'certificado_aprovacao_simplificado_numero',
-        'certificado_aprovacao_assistido',
-        'certificado_aprovacao_assistido_numero',
-        'executado_data',
-        'executado_user_id'
+        'visita_tecnica_tipo_id',
+        'numero_visita_tecnica',
+        'ano_visita_tecnica',
+        'data_abertura',
+        'hora_abertura',
+        'data_prevista',
+        'hora_prevista',
+        'data_conclusao',
+        'hora_conclusao',
+        'data_finalizacao',
+        'hora_finalizacao',
+        'visita_tecnica_status_id',
+        'cliente_id',
+        'cliente_nome',
+        'cliente_telefone',
+        'cliente_celular',
+        'cliente_email',
+        'cliente_logradouro',
+        'cliente_bairro',
+        'cliente_cidade'
     ];
 
-    protected function setLaudoExigenciasDataEmissaoAttribute($value) {
-        if ($value != '') {
-            $this->attributes['laudo_exigencias_data_emissao'] = \Carbon\Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');
-        } else {
-            $this->attributes['laudo_exigencias_data_emissao'] = null;
-        }
-    }
-    protected function getLaudoExigenciasDataEmissaoAttribute($value) {
-        if ($value !== null) {
-            return \Illuminate\Support\Carbon::parse($value)->format('d/m/Y');
-        }
-    }
+    protected $dates = [
+        'data_abertura',
+        'data_prevista',
+        'data_conclusao',
+        'data_finalizacao'
+    ];
 
-    protected function setLaudoExigenciasDataVencimentoAttribute($value) {
-        if ($value != '') {
-            $this->attributes['laudo_exigencias_data_vencimento'] = \Carbon\Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');
-        } else {
-            $this->attributes['laudo_exigencias_data_vencimento'] = null;
-        }
-    }
-    protected function getLaudoExigenciasDataVencimentoAttribute($value) {
-        if ($value !== null) {
-            return \Illuminate\Support\Carbon::parse($value)->format('d/m/Y');
-        }
-    }
-
-    protected function setExecutadoDataAttribute($value) {
-        if ($value != '') {
-            $this->attributes['executado_data'] = \Carbon\Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');
-        } else {
-            $this->attributes['executado_data'] = null;
-        }
-    }
-    protected function getExecutadoDataAttribute($value) {
-        if ($value !== null) {
-            return \Illuminate\Support\Carbon::parse($value)->format('d/m/Y');
-        }
-    }
+    public function setDataAberturaAttribute($value) {if ($value != '') {$this->attributes['data_abertura'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
+    public function setDataPrevistaAttribute($value) {if ($value != '') {$this->attributes['data_prevista'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
+    public function setDataConclusaoAttribute($value) {if ($value != '') {$this->attributes['data_conclusao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
+    public function setDataFinalizacaoAttribute($value) {if ($value != '') {$this->attributes['data_finalizacao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
+    public function setClienteNomeAttribute($value) {$this->attributes['cliente_nome'] = mb_strtoupper($value);}
+    public function setClienteEmailAttribute($value) {$this->attributes['cliente_email'] = mb_strtolower($value);}
 }

@@ -4,11 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateRelatorioExaustaoStatusTable extends Migration
+class CreateVisitaTecnicaStatusTable extends Migration
 {
     public function up()
     {
-        Schema::create('relatorio_exaustao_status', function (Blueprint $table) {
+        Schema::create('visita_tecnica_status', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->timestamps();
@@ -17,6 +17,6 @@ class CreateRelatorioExaustaoStatusTable extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('relatorio_exaustao_status');
+        Schema::dropIfExists('visita_tecnica_status');
     }
 }

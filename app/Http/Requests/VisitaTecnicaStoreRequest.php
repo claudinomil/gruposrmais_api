@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class RelatorioExaustaoUpdateRequest extends FormRequest
+class VisitaTecnicaStoreRequest extends FormRequest
 {
     public function authorize()
     {
@@ -15,14 +14,16 @@ class RelatorioExaustaoUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'cliente_id' => ['required']
+            'visita_tecnica_tipo_id' => ['required'],
+            'cliente_id' => ['required_if:visita_tecnica_tipo_id,1,2'],
         ];
     }
 
     public function messages()
     {
         return [
-            'cliente_id.required' => 'O Cliente é requerido.'
+            'visita_tecnica_tipo_id.required' => 'O Tipo é requerido.',
+            'cliente_id.required_if' => 'O Cliente é requerido.',
         ];
     }
 

@@ -148,7 +148,7 @@ class ClienteController extends Controller
                 SuporteFacade::editClienteSegurancaMedida(1, $id, $request);
 
                 //Atualizar Visitas Técnicas para esse Cliente''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                SuporteFacade::updateVisitaTecnicaCliente($id);
+                //SuporteFacade::updateVisitaTecnicaCliente($id);
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
@@ -230,6 +230,7 @@ class ClienteController extends Controller
         try {
             $registros = ClienteDocumento
                 ::where('cliente_id', $cliente_id)
+                ->orderby('documento')
                 ->get();
 
             return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);

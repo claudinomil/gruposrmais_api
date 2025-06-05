@@ -48,7 +48,7 @@ use App\Models\VeiculoCategoria;
 use App\Models\VeiculoCombustivel;
 use App\Models\VeiculoMarca;
 use App\Models\VeiculoModelo;
-use App\Models\VisitaTecnica;
+use App\Models\APAGARVT;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -205,7 +205,7 @@ class Transacoes
         //Opção para o campo visita_tecnica_id
         if ($op == 8) {
             if (($dadoAtual != "") and ($dadoAtual != 0)) {
-                $visita_tecnica = VisitaTecnica::where('id', $dadoAtual)->get()[0];
+                $visita_tecnica = APAGARVT::where('id', $dadoAtual)->get()[0];
                 $search_cliente_servico_id = $visita_tecnica['cliente_servico_id'];
 
                 $cliente_servico = ClienteServico::where('id', $search_cliente_servico_id)->get()[0];
@@ -549,11 +549,23 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['carga_incendio'], $dadosAtual['carga_incendio'], 'Carga Incêndio', '', '');
                     $dados .= $this->retornaDado(2, $dadosAnterior['incendio_risco_id'], $dadosAtual['incendio_risco_id'], 'Incêndio Risco', IncendioRisco::class, 'name');
                     $dados .= $this->retornaDado(2, $dadosAnterior['edificacao_classificacao_id'], $dadosAtual['edificacao_classificacao_id'], 'Edificação Classificação', EdificacaoClassificacao::class, 'divisao');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['projeto_scip'], $dadosAtual['projeto_scip'], 'Projeto SCIP', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['laudo_exigencias'], $dadosAtual['laudo_exigencias'], 'Laudo Exigências', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['certificado_aprovacao'], $dadosAtual['certificado_aprovacao'], 'Certificado Aprovação', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['certificado_aprovacao_simplificado'], $dadosAtual['certificado_aprovacao_simplificado'], 'Certificado Aprovação Simplificado', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['certificado_aprovacao_assistido'], $dadosAtual['certificado_aprovacao_assistido'], 'Certificado Aprovação Assistido', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_cbmerj_projeto_scip'], $dadosAtual['doc_cbmerj_projeto_scip'], 'Doc. CBMERJ Projeto SCIP', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_cbmerj_laudo_exigencias'], $dadosAtual['doc_cbmerj_laudo_exigencias'], 'Doc. CBMERJ Laudo Exigências', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_cbmerj_certificado_aprovacao'], $dadosAtual['doc_cbmerj_certificado_aprovacao'], 'Doc. CBMERJ Certificado Aprovação', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_cbmerj_certificado_aprovacao_simplificado'], $dadosAtual['doc_cbmerj_certificado_aprovacao_simplificado'], 'Doc. CBMERJ Certificado Aprovação Simplificado', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_cbmerj_certificado_aprovacao_assistido'], $dadosAtual['doc_cbmerj_certificado_aprovacao_assistido'], 'Doc. CBMERJ Certificado Aprovação Assistido', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_pj_cnpj'], $dadosAtual['doc_pj_cnpj'], 'Doc. PJ CNPJ', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_pj_representante_legal'], $dadosAtual['doc_pj_representante_legal'], 'Doc. PJ Representante Legal', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_pj_contrato_social'], $dadosAtual['doc_pj_contrato_social'], 'Doc. PJ Contrato Social', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_pj_rgi'], $dadosAtual['doc_pj_rgi'], 'Doc. PJ RGI', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_pj_contrato_locacao'], $dadosAtual['doc_pj_contrato_locacao'], 'Doc. PJ Contrato Locação', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_pf_cpf'], $dadosAtual['doc_pf_cpf'], 'Doc. PF ', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_pf_representante_legal'], $dadosAtual['doc_pf_representante_legal'], 'Doc. PF Representante Legal', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_pf_contrato_social'], $dadosAtual['doc_pf_contrato_social'], 'Doc. PF Contrato Social', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_pf_rgi'], $dadosAtual['doc_pf_rgi'], 'Doc. PF RGI', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_pf_contrato_locacao'], $dadosAtual['doc_pf_contrato_locacao'], 'Doc. PF Contrato Locação', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_vt_memoria_descritiva'], $dadosAtual['doc_vt_memoria_descritiva'], 'Doc. VT Memória Descritiva', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['doc_vt_certificado_funcionamento'], $dadosAtual['doc_vt_certificado_funcionamento'], 'Doc. VT Certificado Funcionamento', '', '');
                 }
 
                 //Tabela clientes_seguranca_medidas
