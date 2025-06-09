@@ -13,6 +13,7 @@ use App\Models\VisitaTecnicaStatus;
 use App\Models\VisitaTecnicaTipo;
 use Illuminate\Support\Facades\DB;
 use App\Models\VisitaTecnica;
+use Illuminate\Http\Request;
 
 class VisitaTecnicaController extends Controller
 {
@@ -216,6 +217,10 @@ class VisitaTecnicaController extends Controller
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
+                //Apagar dados na tabela funcionarios_documentos''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                VisitaTecnicaDado::where('visita_tecnica_id', '=', $id)->delete();
+                //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 $registro->delete();
 
@@ -293,5 +298,27 @@ class VisitaTecnicaController extends Controller
         //$sql = DB::getQueryLog();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+    }
+    public function updatePergunta(Request $request, $visita_tecnica_dado_id)
+    {
+        try {
+            $registro = VisitaTecnicaDado::find($visita_tecnica_dado_id);
+
+            if (!$registro) {
+                return $this->sendResponse('Registro não encontrado.', 2040, null, null);
+            } else {
+                //Alterando registro
+                $registro->update($request->all());
+
+                //Return
+                return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
+            }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
     }
 }

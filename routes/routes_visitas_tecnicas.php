@@ -11,4 +11,7 @@ Route::prefix('visitas_tecnicas')->group(function () {
     Route::delete('/destroy/{id}/{empresa_id}', [VisitaTecnicaController::class, 'destroy'])->middleware(['auth:api']);
 
     Route::get('/auxiliary/tables/{empresa_id}', [VisitaTecnicaController::class, 'auxiliary'])->middleware(['auth:api']);
+
+    //Rotas Perguntas individuais
+    Route::put('/pergunta/updatePergunta/{visita_tecnica_dado_id}', [VisitaTecnicaController::class, 'updatePergunta'])->middleware(['auth:api']);
 });
