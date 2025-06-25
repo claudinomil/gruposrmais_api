@@ -57,7 +57,66 @@ class Funcionario extends Model
         'data_demissao',
         'data_cadastro',
         'data_afastamento',
-        'foto'
+        'pix_tipo_id',
+        'pix_chave',
+        'foto',
+        'fumante',
+        'quantidade_cigarros_dia',
+        'bebida_alcoolica',
+        'bebida_alcoolica_frequencia',
+        'historico_familiar_doenca_cardiaca',
+        'medicacao_continua',
+        'medicacao_continua_qual',
+        'hospitalizado',
+        'hospitalizado_quando_porque',
+        'plano_saude',
+        'historico_convulcoes_epilepsia',
+        'casos_cancer_familia',
+        'casos_cancer_familia_tipos',
+        'atividade_fisica',
+        'atividade_fisica_frequencia',
+        'tipo_sanguineo',
+        'fator_rh',
+        'contato_1_nome',
+        'contato_1_descricao',
+        'contato_1_telefone',
+        'contato_1_celular',
+        'contato_2_nome',
+        'contato_2_descricao',
+        'contato_2_telefone',
+        'contato_2_celular',
+        'contato_3_nome',
+        'contato_3_descricao',
+        'contato_3_telefone',
+        'contato_3_celular',
+        'contato_4_nome',
+        'contato_4_descricao',
+        'contato_4_telefone',
+        'contato_4_celular',
+        'contato_5_nome',
+        'contato_5_descricao',
+        'contato_5_telefone',
+        'contato_5_celular',
+        'alergia_1_nome',
+        'alergia_1_descricao',
+        'alergia_2_nome',
+        'alergia_2_descricao',
+        'alergia_3_nome',
+        'alergia_3_descricao',
+        'alergia_4_nome',
+        'alergia_4_descricao',
+        'alergia_5_nome',
+        'alergia_5_descricao',
+        'doenca_1_nome',
+        'doenca_1_descricao',
+        'doenca_2_nome',
+        'doenca_2_descricao',
+        'doenca_3_nome',
+        'doenca_3_descricao',
+        'doenca_4_nome',
+        'doenca_4_descricao',
+        'doenca_5_nome',
+        'doenca_5_descricao'
     ];
 
     protected $dates = [
@@ -98,4 +157,35 @@ class Funcionario extends Model
     public function setDataDemissaoAttribute($value) {if ($value != '') {$this->attributes['data_demissao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
     public function setDataCadastroAttribute($value) {if ($value != '') {$this->attributes['data_cadastro'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
     public function setDataAfastamentoAttribute($value) {if ($value != '') {$this->attributes['data_afastamento'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
+
+    public function setContato1NomeAttribute($value) {$this->attributes['contato_1_nome'] = mb_strtoupper($value);}
+    public function setContato1DescricaoAttribute($value) {$this->attributes['contato_1_descricao'] = mb_strtoupper($value);}
+    public function setContato2NomeAttribute($value) {$this->attributes['contato_2_nome'] = mb_strtoupper($value);}
+    public function setContato2DescricaoAttribute($value) {$this->attributes['contato_2_descricao'] = mb_strtoupper($value);}
+    public function setContato3NomeAttribute($value) {$this->attributes['contato_3_nome'] = mb_strtoupper($value);}
+    public function setContato3DescricaoAttribute($value) {$this->attributes['contato_3_descricao'] = mb_strtoupper($value);}
+    public function setContato4NomeAttribute($value) {$this->attributes['contato_4_nome'] = mb_strtoupper($value);}
+    public function setContato4DescricaoAttribute($value) {$this->attributes['contato_4_descricao'] = mb_strtoupper($value);}
+    public function setContato5NomeAttribute($value) {$this->attributes['contato_5_nome'] = mb_strtoupper($value);}
+    public function setContato5DescricaoAttribute($value) {$this->attributes['contato_5_descricao'] = mb_strtoupper($value);}
+    public function setAlergia1NomeAttribute($value) {$this->attributes['alergia_1_nome'] = mb_strtoupper($value);}
+    public function setAlergia1DescricaoAttribute($value) {$this->attributes['alergia_1_descricao'] = mb_strtoupper($value);}
+    public function setAlergia2NomeAttribute($value) {$this->attributes['alergia_2_nome'] = mb_strtoupper($value);}
+    public function setAlergia2DescricaoAttribute($value) {$this->attributes['alergia_2_descricao'] = mb_strtoupper($value);}
+    public function setAlergia3NomeAttribute($value) {$this->attributes['alergia_3_nome'] = mb_strtoupper($value);}
+    public function setAlergia3DescricaoAttribute($value) {$this->attributes['alergia_3_descricao'] = mb_strtoupper($value);}
+    public function setAlergia4NomeAttribute($value) {$this->attributes['alergia_4_nome'] = mb_strtoupper($value);}
+    public function setAlergia4DescricaoAttribute($value) {$this->attributes['alergia_4_descricao'] = mb_strtoupper($value);}
+    public function setAlergia5NomeAttribute($value) {$this->attributes['alergia_5_nome'] = mb_strtoupper($value);}
+    public function setAlergia5DescricaoAttribute($value) {$this->attributes['alergia_5_descricao'] = mb_strtoupper($value);}
+    public function setDoenca1NomeAttribute($value) {$this->attributes['doenca_1_nome'] = mb_strtoupper($value);}
+    public function setDoenca1DescricaoAttribute($value) {$this->attributes['doenca_1_descricao'] = mb_strtoupper($value);}
+    public function setDoenca2NomeAttribute($value) {$this->attributes['doenca_2_nome'] = mb_strtoupper($value);}
+    public function setDoenca2DescricaoAttribute($value) {$this->attributes['doenca_2_descricao'] = mb_strtoupper($value);}
+    public function setDoenca3NomeAttribute($value) {$this->attributes['doenca_3_nome'] = mb_strtoupper($value);}
+    public function setDoenca3DescricaoAttribute($value) {$this->attributes['doenca_3_descricao'] = mb_strtoupper($value);}
+    public function setDoenca4NomeAttribute($value) {$this->attributes['doenca_4_nome'] = mb_strtoupper($value);}
+    public function setDoenca4DescricaoAttribute($value) {$this->attributes['doenca_4_descricao'] = mb_strtoupper($value);}
+    public function setDoenca5NomeAttribute($value) {$this->attributes['doenca_5_nome'] = mb_strtoupper($value);}
+    public function setDoenca5DescricaoAttribute($value) {$this->attributes['doenca_5_descricao'] = mb_strtoupper($value);}
 }

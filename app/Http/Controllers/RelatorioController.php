@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Facades\SuporteFacade;
+use App\Models\ClienteExecutivo;
 use App\Models\Ferramenta;
+use App\Models\Funcionario;
 use App\Models\Notificacao;
 use App\Models\Operacao;
 use App\Models\Relatorio;
@@ -30,6 +32,8 @@ class RelatorioController extends Controller
         $content['users'] = User::join('users_configuracoes', 'users_configuracoes.user_id', 'users.id')->where('empresa_id', $empresa_id)->orderby('name')->get();
         $content['submodulos'] = Submodulo::orderby('name')->get();
         $content['operacoes'] = Operacao::orderby('name')->get();
+        $content['clientes_executivos'] = ClienteExecutivo::join('clientes', 'clientes.id', 'clientes_executivos.cliente_id')->select('clientes_executivos.*')->where('clientes.empresa_id', $empresa_id)->orderby('clientes_executivos.executivo_nome')->get();
+        $content['funcionarios'] = Funcionario::where('empresa_id', $empresa_id)->orderby('name')->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
     }

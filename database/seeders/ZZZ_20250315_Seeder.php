@@ -8,6 +8,7 @@ use App\Models\GrupoPermissao;
 use App\Models\OrdemServicoPrioridade;
 use App\Models\OrdemServicoStatus;
 use App\Models\OrdemServicoTipo;
+use App\Models\Relatorio;
 use App\Models\Servico;
 use App\Models\ServicoTipo;
 use App\Models\VeiculoCategoria;

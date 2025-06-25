@@ -6,6 +6,7 @@ use App\Facades\SuporteFacade;
 use App\Facades\Transacoes;
 use App\Http\Requests\FuncionarioStoreRequest;
 use App\Http\Requests\FuncionarioUpdateRequest;
+use App\Models\ClienteExecutivo;
 use App\Models\Departamento;
 use App\Models\Genero;
 use App\Models\ContratacaoTipo;
@@ -22,46 +23,28 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Funcionario;
 use App\Models\FuncionarioDocumento;
 
-class FuncionarioController extends Controller
+class GuestController extends Controller
 {
-    private $funcionario;
-
-    public function __construct(Funcionario $funcionario)
-    {
-        $this->funcionario = $funcionario;
-    }
-
-    public function index($empresa_id)
-    {
-        $registros = DB::table('funcionarios')
-            ->leftJoin('identidade_orgaos', 'funcionarios.personal_identidade_orgao_id', '=', 'identidade_orgaos.id')
-            ->leftJoin('estados', 'funcionarios.personal_identidade_estado_id', '=', 'estados.id')
-            ->leftJoin('generos', 'funcionarios.genero_id', '=', 'generos.id')
-            ->leftJoin('contratacao_tipos', 'funcionarios.contratacao_tipo_id', '=', 'contratacao_tipos.id')
-            ->leftJoin('departamentos', 'funcionarios.departamento_id', '=', 'departamentos.id')
-            ->leftJoin('funcoes', 'funcionarios.funcao_id', '=', 'funcoes.id')
-            ->leftJoin('escolaridades', 'funcionarios.escolaridade_id', '=', 'escolaridades.id')
-            ->leftJoin('estados_civis', 'funcionarios.estado_civil_id', '=', 'estados_civis.id')
-            ->leftJoin('bancos', 'funcionarios.banco_id', '=', 'bancos.id')
-            ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName'])
-            ->where('funcionarios.empresa_id', $empresa_id)
-            ->orderby('funcionarios.name')
-            ->get();
-
-        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
-    }
-
-    public function show($id)
+    public function validar_cartao_emergencial($submodulo, $id)
     {
         try {
-            $registro = Funcionario
-                ::leftJoin('funcoes', 'funcionarios.funcao_id', '=', 'funcoes.id')
-                ->select(['funcionarios.*', 'funcoes.name as funcaoName'])
-                ->where('funcionarios.id', '=', $id)
-                ->get()[0];
+            if ($submodulo == 'clientes_executivos') {
+                $registro = ClienteExecutivo::where('id', '=', $id)->get()[0];
+            }
+
+            if ($submodulo == 'funcionarios') {
+                $registro = Funcionario
+                    ::leftJoin('nacionalidades', 'funcionarios.nacionalidade_id', 'nacionalidades.id')
+                    ->leftJoin('identidade_orgaos', 'funcionarios.personal_identidade_orgao_id', '=', 'identidade_orgaos.id')
+                    ->leftJoin('estados', 'funcionarios.personal_identidade_estado_id', '=', 'estados.id')
+                    ->leftJoin('generos', 'funcionarios.genero_id', '=', 'generos.id')
+                    ->select(['funcionarios.*', 'nacionalidades.name as nacionalidadeName', 'identidade_orgaos.name as identidadeOrgaoName', 'estados.name as identidadeEstadoName', 'generos.name as generoName'])
+                    ->where('funcionarios.id', '=', $id)
+                    ->get()[0];
+            }
 
             if (!$registro) {
-                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
+                return $this->sendResponse('Registro não encontrado.', 2040, null, null);
             } else {
                 return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
             }

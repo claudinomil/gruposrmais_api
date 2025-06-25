@@ -18,6 +18,9 @@ Route::prefix('funcionarios')->group(function () {
     Route::get('/modalInfo/documentos_pdf/{funcionario_id}', [FuncionarioController::class, 'documentos_pdf'])->middleware(['auth:api']);
     Route::delete('/modalInfo/deletar_documento_pdf/destroy/{id}/{empresa_id}', [FuncionarioController::class, 'deletar_documento_pdf'])->middleware(['auth:api']);
 
+    //Dados para Cartões Emergenciais
+    Route::get('/cartoes_emergenciais/dados/{empresa_id}/{ids}', [FuncionarioController::class, 'cartoes_emergenciais_dados'])->middleware(['auth:api']);
+
     //Ação: funcionario_acao_1
     Route::get('/funcionarioAcao1/funcionario_acao_1_grade_funcionarios/{empresa_id}', [FuncionarioController::class, 'funcionario_acao_1_grade_funcionarios'])->middleware(['auth:api']);
     Route::get('/funcionarioAcao1/funcionario_acao_1_gerar_pdf_dados/{funcionarios_ids}/{empresa_id}', [FuncionarioController::class, 'funcionario_acao_1_gerar_pdf_dados'])->middleware(['auth:api']);

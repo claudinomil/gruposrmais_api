@@ -584,7 +584,6 @@ class Transacoes
                     $dados .= '<b>:: Funcionários Documentos</b>'.'<br><br>';
                     $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Funcionário', Cliente::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['caminho'], $dadosAtual['caminho'], 'Caminho', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['data_documento'], $dadosAtual['data_documento'], 'Data Documento', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['aviso'], $dadosAtual['aviso'], 'Aviso', '', '');

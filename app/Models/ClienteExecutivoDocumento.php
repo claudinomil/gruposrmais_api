@@ -6,16 +6,16 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ClienteDocumento extends Model
+class ClienteExecutivoDocumento extends Model
 {
     use HasFactory;
 
-    protected $table = 'clientes_documentos';
+    protected $table = 'clientes_executivos_documentos';
 
     protected $fillable = [
-        'cliente_id',
+        'cliente_executivo_id',
         'name',
-        'documento',
+        'descricao',
         'caminho',
         'data_documento',
         'aviso'

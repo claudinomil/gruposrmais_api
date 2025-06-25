@@ -4,14 +4,15 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateClientesDocumentosTable extends Migration
+class CreateClientesExecutivosDocumentosTable extends Migration
 {
     public function up()
     {
-        Schema::create('clientes_documentos', function (Blueprint $table) {
+        Schema::create('clientes_executivos_documentos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cliente_id')->constrained('clientes');
+            $table->foreignId('cliente_executivo_id')->constrained('clientes_executivos');
             $table->string('name');
+            $table->string('descricao');
             $table->string('caminho');
             $table->date('data_documento')->nullable();
             $table->integer('aviso');
@@ -21,6 +22,6 @@ class CreateClientesDocumentosTable extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('clientes_documentos');
+        Schema::dropIfExists('clientes_executivos_documentos');
     }
 }
