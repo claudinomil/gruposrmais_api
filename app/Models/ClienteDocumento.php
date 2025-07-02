@@ -14,8 +14,7 @@ class ClienteDocumento extends Model
 
     protected $fillable = [
         'cliente_id',
-        'name',
-        'documento',
+        'documento_id',
         'caminho',
         'data_documento',
         'aviso'

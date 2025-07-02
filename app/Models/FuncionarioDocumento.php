@@ -14,8 +14,7 @@ class FuncionarioDocumento extends Model
 
     protected $fillable = [
         'funcionario_id',
-        'name',
-        'descricao',
+        'documento_id',
         'caminho',
         'data_documento',
         'aviso'

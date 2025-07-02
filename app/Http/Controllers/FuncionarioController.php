@@ -7,6 +7,8 @@ use App\Facades\Transacoes;
 use App\Http\Requests\FuncionarioStoreRequest;
 use App\Http\Requests\FuncionarioUpdateRequest;
 use App\Models\Departamento;
+use App\Models\Documento;
+use App\Models\DocumentoFonte;
 use App\Models\Genero;
 use App\Models\ContratacaoTipo;
 use App\Models\IdentidadeOrgao;
@@ -111,6 +113,16 @@ class FuncionarioController extends Controller
 
             //Funções
             $registros['funcoes'] = Funcao::where('empresa_id', '=', $empresa_id)->get();
+
+            //Documentos
+            $registros['documentos'] = Documento
+                ::join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
+                ->join('documento_fontes', 'documentos.documento_fonte_id', 'documento_fontes.id')
+                ->select('documentos.*', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
+                ->where('documentos.documento_submodulo_id', 2)
+                ->orderby('documento_fontes.ordem', 'ASC')
+                ->orderby('documentos.ordem', 'ASC')
+                ->get();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -392,8 +404,18 @@ class FuncionarioController extends Controller
     public function documentos_pdf($funcionario_id)
     {
         try {
-            $registros = FuncionarioDocumento
-                ::where('funcionario_id', $funcionario_id)
+            $registros = array();
+
+            $registros['documento_fontes'] = DocumentoFonte::orderby('ordem', 'ASC')->get();
+
+            $registros['funcionarios_documentos'] = FuncionarioDocumento
+                ::join('documentos', 'funcionarios_documentos.documento_id', 'documentos.id')
+                ->join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
+                ->join('documento_fontes', 'documentos.documento_fonte_id', 'documento_fontes.id')
+                ->select('funcionarios_documentos.*', 'documentos.documento_fonte_id', 'documentos.name as documentoName', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
+                ->where('funcionarios_documentos.funcionario_id', $funcionario_id)
+                ->orderby('documento_fontes.ordem', 'ASC')
+                ->orderby('documentos.ordem', 'ASC')
                 ->get();
 
             return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -491,6 +513,13 @@ class FuncionarioController extends Controller
 
             return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
         }
+    }
+
+    public function cartoes_emergenciais_registros()
+    {
+        $registros = $this->funcionario->orderby('id')->get(['id']);
+
+        return response()->json($registros, 200);
     }
 
     public function cartoes_emergenciais_dados($empresa_id, $ids)

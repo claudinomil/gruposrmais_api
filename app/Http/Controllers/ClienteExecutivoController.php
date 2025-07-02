@@ -360,6 +360,13 @@ class ClienteExecutivoController extends Controller
         }
     }
 
+    public function cartoes_emergenciais_registros()
+    {
+        $registros = $this->cliente_executivo->orderby('id')->get(['id']);
+
+        return response()->json($registros, 200);
+    }
+
     public function cartoes_emergenciais_dados($empresa_id, $ids)
     {
         try {

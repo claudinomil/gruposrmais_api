@@ -19,6 +19,7 @@ Route::prefix('funcionarios')->group(function () {
     Route::delete('/modalInfo/deletar_documento_pdf/destroy/{id}/{empresa_id}', [FuncionarioController::class, 'deletar_documento_pdf'])->middleware(['auth:api']);
 
     //Dados para Cartões Emergenciais
+    Route::get('/cartoes_emergenciais/registros', [FuncionarioController::class, 'cartoes_emergenciais_registros'])->middleware(['auth:api']);
     Route::get('/cartoes_emergenciais/dados/{empresa_id}/{ids}', [FuncionarioController::class, 'cartoes_emergenciais_dados'])->middleware(['auth:api']);
 
     //Ação: funcionario_acao_1

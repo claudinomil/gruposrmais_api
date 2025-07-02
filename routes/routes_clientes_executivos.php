@@ -19,5 +19,6 @@ Route::prefix('clientes_executivos')->group(function () {
     Route::delete('/modalInfo/deletar_documento_pdf/destroy/{id}/{empresa_id}', [ClienteExecutivoController::class, 'deletar_documento_pdf'])->middleware(['auth:api']);
 
     //Dados para Cartões Emergenciais
+    Route::get('/cartoes_emergenciais/registros', [ClienteExecutivoController::class, 'cartoes_emergenciais_registros'])->middleware(['auth:api']);
     Route::get('/cartoes_emergenciais/dados/{empresa_id}/{ids}', [ClienteExecutivoController::class, 'cartoes_emergenciais_dados'])->middleware(['auth:api']);
 });

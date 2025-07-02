@@ -9,6 +9,8 @@ use App\Models\Banco;
 use App\Models\ClienteDocumento;
 use App\Models\ClienteSegurancaMedida;
 use App\Models\ClienteServico;
+use App\Models\Documento;
+use App\Models\DocumentoFonte;
 use App\Models\EdificacaoClassificacao;
 use App\Models\Genero;
 use App\Models\IdentidadeOrgao;
@@ -93,6 +95,16 @@ class ClienteController extends Controller
 
             //Segurança Medidas
             $registros['seguranca_medidas'] = SegurancaMedida::all();
+
+            //Documentos
+            $registros['documentos'] = Documento
+                ::join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
+                ->join('documento_fontes', 'documentos.documento_fonte_id', 'documento_fontes.id')
+                ->select('documentos.*', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
+                ->where('documentos.documento_submodulo_id', 1)
+                ->orderby('documento_fontes.ordem', 'ASC')
+                ->orderby('documentos.ordem', 'ASC')
+                ->get();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -228,9 +240,18 @@ class ClienteController extends Controller
     public function documentos_pdf($cliente_id)
     {
         try {
-            $registros = ClienteDocumento
-                ::where('cliente_id', $cliente_id)
-                ->orderby('documento')
+            $registros = array();
+
+            $registros['documento_fontes'] = DocumentoFonte::orderby('ordem', 'ASC')->get();
+
+            $registros['clientes_documentos'] = ClienteDocumento
+                ::join('documentos', 'clientes_documentos.documento_id', 'documentos.id')
+                ->join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
+                ->join('documento_fontes', 'documentos.documento_fonte_id', 'documento_fontes.id')
+                ->select('clientes_documentos.*', 'documentos.documento_fonte_id', 'documentos.name as documentoName', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
+                ->where('clientes_documentos.cliente_id', $cliente_id)
+                ->orderby('documento_fontes.ordem', 'ASC')
+                ->orderby('documentos.ordem', 'ASC')
                 ->get();
 
             return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
