@@ -13,6 +13,7 @@ class VisitaTecnica extends Model
     protected $table = 'visitas_tecnicas';
 
     protected $fillable = [
+        'empresa_id',
         'visita_tecnica_tipo_id',
         'numero_visita_tecnica',
         'ano_visita_tecnica',

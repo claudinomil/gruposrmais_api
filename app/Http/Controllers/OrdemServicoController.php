@@ -92,7 +92,7 @@ class OrdemServicoController extends Controller
             $registros = array();
 
             //Clientes
-            $registros['clientes'] = Cliente::where('empresa_id', '=', $empresa_id)->get();
+            $registros['clientes'] = Cliente::all();
 
             //Servicos
             $registros['servicos'] = Servico::where('empresa_id', '=', $empresa_id)->get();
@@ -101,7 +101,6 @@ class OrdemServicoController extends Controller
             $funcionarios = Funcionario
                 ::leftJoin('funcoes', 'funcionarios.funcao_id', '=', 'funcoes.id')
                 ->select(['funcionarios.*', 'funcoes.name as funcaoName'])
-                ->where('funcionarios.empresa_id', '=', $empresa_id)
                 ->get();
 
             $registros['funcionarios'] = $funcionarios;
@@ -131,7 +130,6 @@ class OrdemServicoController extends Controller
                 ->leftJoin('veiculo_combustiveis', 'veiculos.veiculo_combustivel_id', '=', 'veiculo_combustiveis.id')
                 ->leftJoin('veiculo_categorias', 'veiculos.veiculo_categoria_id', '=', 'veiculo_categorias.id')
                 ->select(['veiculos.*', 'veiculo_marcas.name as veiculoMarcaName', 'veiculo_modelos.name as veiculoModeloName', 'veiculo_combustiveis.name as veiculoCombustivelName', 'veiculo_categorias.name as veiculoCategoriaName'])
-                ->where('veiculos.empresa_id', '=', $empresa_id)
                 ->get();
 
             $registros['veiculos'] = $veiculos;

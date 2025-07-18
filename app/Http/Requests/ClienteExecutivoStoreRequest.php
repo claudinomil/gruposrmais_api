@@ -16,7 +16,8 @@ class ClienteExecutivoStoreRequest extends FormRequest
         return [
             'cliente_id' => ['required', 'integer'],
             'executivo_nome' => ['required'],
-            'executivo_funcao' => ['required']
+            'executivo_funcao' => ['required'],
+            'nome_profissional' => ['required', 'min:3']
         ];
     }
 
@@ -26,7 +27,9 @@ class ClienteExecutivoStoreRequest extends FormRequest
             'cliente_id.required' => 'O Cliente é requerido.',
             'cliente_id.integer' => 'O Cliente deve ser um ítem da lista.',
             'executivo_nome.required' => 'O Nome é requerido.',
-            'executivo_funcao.required' => 'A Função é requerido.'
+            'executivo_funcao.required' => 'A Função é requerido.',
+            'nome_profissional.required' => 'O Nome Profissional é requerido.',
+            'nome_profissional.min' => 'O Nome Profissional deve ter pelo menos 3 caracteres.'
         ];
     }
 

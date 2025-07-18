@@ -9,5 +9,6 @@ Route::prefix('veiculos')->group(function () {
     Route::post('/store/{empresa_id}', [VeiculoController::class, 'store'])->middleware(['auth:api']);
     Route::put('/update/{id}/{empresa_id}', [VeiculoController::class, 'update'])->middleware(['auth:api']);
     Route::delete('/destroy/{id}/{empresa_id}', [VeiculoController::class, 'destroy'])->middleware(['auth:api']);
+
     Route::get('/auxiliary/tables/{empresa_id}', [VeiculoController::class, 'auxiliary'])->middleware(['auth:api']);
 });

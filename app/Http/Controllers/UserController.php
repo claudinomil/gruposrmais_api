@@ -76,7 +76,7 @@ class UserController extends Controller
             $registros['users_configuracoes'] = UserConfiguracao::where('empresa_id', '=', $empresa_id)->get();
 
             //Grupos
-            $registros['grupos'] = Grupo::all(); //where('empresa_id', '=', $empresa_id)->get();
+            $registros['grupos'] = Grupo::all();
 
             //Situações
             $registros['situacoes'] = Situacao::all();
@@ -322,16 +322,6 @@ class UserController extends Controller
                 if (SuporteFacade::verificarRelacionamento('transacoes', 'user_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir.<br>Registro relacionado com Transações.', 2040, null, null);
                 }
-
-                //Tabela notificacoes
-                if (SuporteFacade::verificarRelacionamento('notificacoes', 'user_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Notificações.', 2040, null, null);
-                }
-
-                //Tabela ferramentas
-                if (SuporteFacade::verificarRelacionamento('ferramentas', 'user_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Ferramentas.', 2040, null, null);
-                }
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -455,39 +445,6 @@ class UserController extends Controller
 
                 //Layouts Styles
                 $registros['layouts_styles'] = LayoutStyle::all();
-
-                //Ferramentas
-                $registros['ferramentas'] = DB::table('ferramentas')
-                    ->join('users', 'ferramentas.user_id', '=', 'users.id')
-                    ->select(['ferramentas.*', 'users.name as userName'])
-                    ->where('ferramentas.user_id', Auth::user()->id)
-                    ->orderBy('name', 'asc')
-                    ->get();
-
-
-                //Notificações não lidas pelo Usuário Logado''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                //Buscar ids das notificações lidas pelo Usuário
-                $notIn = DB::table('notificacoes_lidas')
-                    ->leftJoin('notificacoes', 'notificacoes.id', '=', 'notificacoes_lidas.notificacao_id')
-                    ->select('notificacoes_lidas.notificacao_id')
-                    ->where('notificacoes_lidas.user_id', '=', Auth::user()->id)
-                    ->get();
-
-                $notificacoesNotIn = array();
-                foreach ($notIn as $item) {$notificacoesNotIn[] = $item->notificacao_id;}
-
-                //Buscando Notificações não lidas
-                $registros['notificacoes'] = DB::table('notificacoes')
-                    ->leftJoin('users', 'users.id', '=', 'notificacoes.user_id')
-                    ->leftJoin('notificacoes_lidas', 'notificacoes_lidas.notificacao_id', '=', 'notificacoes.id')
-                    ->select(['notificacoes.*', 'users.name as userName', 'users.avatar as userAvatar'])
-                    ->whereNotIn('notificacoes.id', $notificacoesNotIn)
-                    ->orderBy('notificacoes.date', 'desc')
-                    ->orderBy('notificacoes.time', 'desc')
-                    ->orderBy('notificacoes.title', 'asc')
-                    ->limit(10)
-                    ->get();
-                //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 //Dados para o CRUD ajax''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //Submódulo variavel Permissão

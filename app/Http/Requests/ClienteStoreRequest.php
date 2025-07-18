@@ -25,6 +25,7 @@ class ClienteStoreRequest extends FormRequest
     {
         return [
             'principal_cliente_id' => ['nullable', 'integer', 'numeric'],
+            'rede_cliente_id' => ['nullable', 'integer', 'numeric'],
             'status' => ['required'],
             'tipo' => ['required'],
             'name' => ['required', 'min:3'],
@@ -61,6 +62,7 @@ class ClienteStoreRequest extends FormRequest
     {
         return [
             'principal_cliente_id.integer' => 'O Cliente Principal deve ser um ítem da lista.',
+            'rede_cliente_id.integer' => 'O Cliente Rede deve ser um ítem da lista.',
             'status.required' => 'O Status é requerido.',
             'tipo.required' => 'O Tipo é requerido.',
             'name.required' => 'O Nome é requerido.',

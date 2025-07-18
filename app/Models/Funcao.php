@@ -12,7 +12,6 @@ class Funcao extends Model
     protected $table = 'funcoes';
 
     protected $fillable = [
-        'empresa_id',
         'name'
     ];
 

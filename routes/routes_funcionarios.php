@@ -14,9 +14,9 @@ Route::prefix('funcionarios')->group(function () {
     //Modal funcionarios_modal_info
     Route::get('/modalInfo/modal_info/{id}', [FuncionarioController::class, 'modal_info'])->middleware(['auth:api']);
     Route::put('/uploadFoto/upload_foto/{id}', [FuncionarioController::class, 'upload_foto'])->middleware(['auth:api']);
-    Route::post('/uploadDocumentoPdf/upload_documento_pdf', [FuncionarioController::class, 'upload_documento_pdf'])->middleware(['auth:api']);
-    Route::get('/modalInfo/documentos_pdf/{funcionario_id}', [FuncionarioController::class, 'documentos_pdf'])->middleware(['auth:api']);
-    Route::delete('/modalInfo/deletar_documento_pdf/destroy/{id}/{empresa_id}', [FuncionarioController::class, 'deletar_documento_pdf'])->middleware(['auth:api']);
+    Route::post('/uploadDocumento/upload_documento', [FuncionarioController::class, 'upload_documento'])->middleware(['auth:api']);
+    Route::get('/modalInfo/documentos/{funcionario_id}', [FuncionarioController::class, 'documentos'])->middleware(['auth:api']);
+    Route::delete('/modalInfo/deletar_documento/destroy/{id}/{empresa_id}', [FuncionarioController::class, 'deletar_documento'])->middleware(['auth:api']);
 
     //Dados para Cartões Emergenciais
     Route::get('/cartoes_emergenciais/registros', [FuncionarioController::class, 'cartoes_emergenciais_registros'])->middleware(['auth:api']);

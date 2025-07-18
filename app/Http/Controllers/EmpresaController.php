@@ -102,19 +102,14 @@ class EmpresaController extends Controller
                 SuporteFacade::setUserLogged($empresa_id);
 
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                //Tabela funcionarios
-                if (SuporteFacade::verificarRelacionamento('funcionarios', 'empresa_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Funcionários.', 2040, null, null);
+                //Tabela ordens_servicos
+                if (SuporteFacade::verificarRelacionamento('ordens_servicos', 'empresa_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Ordens Serviços.', 2040, null, null);
                 }
 
-                //Tabela fornecedores
-                if (SuporteFacade::verificarRelacionamento('fornecedores', 'empresa_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Fornecedores.', 2040, null, null);
-                }
-
-                //Tabela clientes
-                if (SuporteFacade::verificarRelacionamento('clientes', 'empresa_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes.', 2040, null, null);
+                //Tabela visitas_tecnicas
+                if (SuporteFacade::verificarRelacionamento('visitas_tecnicas', 'empresa_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Visitas Técnicas.', 2040, null, null);
                 }
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 

@@ -60,7 +60,7 @@ class PropostaController extends Controller
             $registros = array();
 
             //Clientes
-            $registros['clientes'] = Cliente::where('empresa_id', '=', $empresa_id)->get();
+            $registros['clientes'] = Cliente::all();
 
             //Servicos
             $registros['servicos'] = Servico::where('empresa_id', '=', $empresa_id)->get();

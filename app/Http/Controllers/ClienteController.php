@@ -30,16 +30,16 @@ class ClienteController extends Controller
         $this->cliente = $cliente;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = $this->cliente
             ->leftJoin('identidade_orgaos', 'clientes.identidade_orgao_id', '=', 'identidade_orgaos.id')
             ->leftJoin('estados', 'clientes.identidade_estado_id', '=', 'estados.id')
             ->leftJoin('generos', 'clientes.genero_id', '=', 'generos.id')
             ->leftJoin('clientes as principal_clientes', 'clientes.principal_cliente_id', '=', 'principal_clientes.id')
+            ->leftJoin('clientes as rede_clientes', 'clientes.rede_cliente_id', '=', 'rede_clientes.id')
             ->leftJoin('bancos', 'clientes.banco_id', '=', 'bancos.id')
-            ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'bancos.name as bancoName'])
-            ->where('clientes.empresa_id', $empresa_id)
+            ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'rede_clientes.name as redeClienteName', 'bancos.name as bancoName'])
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -67,7 +67,7 @@ class ClienteController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -75,8 +75,8 @@ class ClienteController extends Controller
             //Gêneros
             $registros['generos'] = Genero::all();
 
-            //Principal Clientes
-            $registros['principal_clientes'] = Cliente::where('empresa_id', '=', $empresa_id)->get();
+            //Clientes
+            $registros['clientes'] = Cliente::all();
 
             //Bancos
             $registros['bancos'] = Banco::all();
@@ -121,9 +121,6 @@ class ClienteController extends Controller
         try {
             //Atualisar objeto Auth::user()
             SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
 
             //Incluindo registro
             $registro = $this->cliente->create($request->all());
@@ -185,8 +182,9 @@ class ClienteController extends Controller
                 ->leftJoin('estados', 'clientes.identidade_estado_id', '=', 'estados.id')
                 ->leftJoin('generos', 'clientes.genero_id', '=', 'generos.id')
                 ->leftJoin('clientes as principal_clientes', 'clientes.principal_cliente_id', '=', 'principal_clientes.id')
+                ->leftJoin('clientes as rede_clientes', 'clientes.rede_cliente_id', '=', 'rede_clientes.id')
                 ->leftJoin('bancos', 'clientes.banco_id', '=', 'bancos.id')
-                ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'bancos.name as bancoName'])
+                ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'rede_clientes.name as redeClienteName', 'bancos.name as bancoName'])
                 ->where('clientes.id', '=', $id)
                 ->get();
 
@@ -211,7 +209,7 @@ class ClienteController extends Controller
         }
     }
 
-    public function upload_documento_pdf(Request $request)
+    public function upload_documento(Request $request)
     {
         try {
             //Atualisar objeto Auth::user()
@@ -237,7 +235,7 @@ class ClienteController extends Controller
         }
     }
 
-    public function documentos_pdf($cliente_id)
+    public function documentos($cliente_id)
     {
         try {
             $registros = array();
@@ -264,7 +262,7 @@ class ClienteController extends Controller
         }
     }
 
-    public function deletar_documento_pdf($cliente_documento_id, $empresa_id)
+    public function deletar_documento($cliente_documento_id, $empresa_id)
     {
         //Atualisar objeto Auth::user()
         SuporteFacade::setUserLogged($empresa_id);
@@ -356,6 +354,11 @@ class ClienteController extends Controller
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes.', 2040, null, null);
                 }
 
+                //Tabela clientes
+                if (SuporteFacade::verificarRelacionamento('clientes', 'rede_cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes.', 2040, null, null);
+                }
+
                 //Tabela propostas
                 if (SuporteFacade::verificarRelacionamento('propostas', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Propostas.', 2040, null, null);
@@ -396,7 +399,7 @@ class ClienteController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
@@ -411,9 +414,9 @@ class ClienteController extends Controller
             ->leftJoin('estados', 'clientes.identidade_estado_id', '=', 'estados.id')
             ->leftJoin('generos', 'clientes.genero_id', '=', 'generos.id')
             ->leftJoin('clientes as principal_clientes', 'clientes.principal_cliente_id', '=', 'principal_clientes.id')
+            ->leftJoin('clientes as rede_clientes', 'clientes.rede_cliente_id', '=', 'rede_clientes.id')
             ->leftJoin('bancos', 'clientes.banco_id', '=', 'bancos.id')
-            ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'bancos.name as bancoName'])
-            ->where('clientes.empresa_id', '=', $empresa_id)
+            ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'rede_clientes.name as redeClienteName', 'bancos.name as bancoName'])
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

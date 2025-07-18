@@ -1,24 +1,13 @@
 <?php
 
-use App\Http\Middleware\LogApiRequest;
-use Illuminate\Support\Facades\Route;
-
-
-//Descomentar para controlar as requisições feitas para a API
-//Route::middleware([LogApiRequest::class])->group(function () {
-
-
 //Auth
 require __DIR__ . '/routes_auth.php';
 
+//BackUp
+require __DIR__ . '/routes_administrador.php';
+
 //Empresas
 require __DIR__ . '/routes_empresas.php';
-
-//Ferramentas
-require __DIR__ . '/routes_ferramentas.php';
-
-//Notificacoes
-require __DIR__ . '/routes_notificacoes.php';
 
 //Transacoes
 require __DIR__ . '/routes_transacoes.php';
@@ -118,5 +107,3 @@ require __DIR__ . '/routes_visitas_tecnicas.php';
 
 //Guests
 require __DIR__ . '/routes_guests.php';
-
-//});

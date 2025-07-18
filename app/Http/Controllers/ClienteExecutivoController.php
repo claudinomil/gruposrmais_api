@@ -29,7 +29,6 @@ class ClienteExecutivoController extends Controller
         $registros = $this->cliente_executivo
             ->leftJoin('clientes', 'clientes_executivos.cliente_id', '=', 'clientes.id')
             ->select(['clientes_executivos.*', 'clientes.name as clienteName'])
-            ->where('clientes.empresa_id', $empresa_id)
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -60,7 +59,7 @@ class ClienteExecutivoController extends Controller
             $registros = array();
 
             //Clientes
-            $registros['clientes'] = Cliente::where('empresa_id', '=', $empresa_id)->get();
+            $registros['clientes'] = Cliente::all();
 
             //Gêneros
             $registros['generos'] = Genero::all();
@@ -187,7 +186,6 @@ class ClienteExecutivoController extends Controller
         $registros = $this->cliente_executivo
             ->leftJoin('clientes', 'clientes_executivos.cliente_id', '=', 'clientes.id')
             ->select(['clientes_executivos.*', 'clientes.name as clienteName'])
-            ->where('clientes.empresa_id', '=', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;
@@ -296,7 +294,7 @@ class ClienteExecutivoController extends Controller
         }
     }
 
-    public function upload_documento_pdf(Request $request)
+    public function upload_documento(Request $request)
     {
         try {
             //Atualisar objeto Auth::user()
@@ -322,7 +320,7 @@ class ClienteExecutivoController extends Controller
         }
     }
 
-    public function documentos_pdf($cliente_executivo_id)
+    public function documentos($cliente_executivo_id)
     {
         try {
             $registros = ClienteExecutivoDocumento
@@ -339,7 +337,7 @@ class ClienteExecutivoController extends Controller
         }
     }
 
-    public function deletar_documento_pdf($cliente_executivo_documento_id, $empresa_id)
+    public function deletar_documento($cliente_executivo_documento_id, $empresa_id)
     {
         //Atualisar objeto Auth::user()
         SuporteFacade::setUserLogged($empresa_id);
@@ -376,7 +374,6 @@ class ClienteExecutivoController extends Controller
                 ::leftJoin('generos', 'clientes_executivos.genero_id', '=', 'generos.id')
                 ->leftJoin('clientes', 'clientes_executivos.cliente_id', '=', 'clientes.id')
                 ->select(['clientes_executivos.*', 'generos.name as generoName', 'clientes.name as clienteName'])
-                ->where('clientes.empresa_id', '=', $empresa_id)
                 ->wherein('clientes_executivos.id', $ids)
                 ->get();
 

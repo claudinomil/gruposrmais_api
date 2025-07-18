@@ -13,8 +13,9 @@ class Funcionario extends Model
     protected $table = 'funcionarios';
 
     protected $fillable = [
-        'empresa_id',
+        'tomador_servico_cliente_id',
         'name',
+        'nome_profissional',
         'data_nascimento',
         'contratacao_tipo_id',
         'genero_id',

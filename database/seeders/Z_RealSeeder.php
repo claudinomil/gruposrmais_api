@@ -20,7 +20,6 @@ class Z_RealSeeder extends Seeder
 
         //Cadastrando os Funcionários que já estavam no Banco de Dados''''''''''''''''''''''''''''''''''''''''''''''''''
         Funcionario::create([
-            'empresa_id' => 1,
             'id' => 2,
             'name' => 'KARINY SOARES CORRÊA',
             'data_nascimento' => '06/07/1980',
@@ -70,7 +69,6 @@ class Z_RealSeeder extends Seeder
         ]);
 
         Funcionario::create([
-            'empresa_id' => 1,
             'id' => 3,
             'name' => 'SHEILA DA SILVA GONÇALVES',
             'data_nascimento' => '20/07/1976',
@@ -120,7 +118,6 @@ class Z_RealSeeder extends Seeder
         ]);
 
         Funcionario::create([
-            'empresa_id' => 1,
             'id' => 4,
             'name' => 'LEONARDO ANDREI DOS SANTOS',
             'data_nascimento' => '25/02/1992',
@@ -170,7 +167,6 @@ class Z_RealSeeder extends Seeder
         ]);
 
         Funcionario::create([
-            'empresa_id' => 1,
             'id' => 5,
             'name' => 'CHRISTIAN DOS SANTOS VILLELA',
             'data_nascimento' => '13/02/1973',
@@ -387,14 +383,14 @@ class Z_RealSeeder extends Seeder
         //EMPRESA id:2 - INÍCIO'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
         //Departamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        Departamento::create(['id' => 6, 'empresa_id' => 2, 'name' => 'OPERACIONAL']);
+        Departamento::create(['id' => 6, 'name' => 'OPERACIONAL']);
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
         //Funções'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        Funcao::create(['id' => 10, 'empresa_id' => 2, 'name' => 'BOMBEIRO CIVIL']);
-        Funcao::create(['id' => 11, 'empresa_id' => 2, 'name' => 'APOIO']);
-        Funcao::create(['id' => 12, 'empresa_id' => 2, 'name' => 'CORDENADOR']);
-        Funcao::create(['id' => 13, 'empresa_id' => 2, 'name' => 'VIDEOMAKER']);
+        Funcao::create(['id' => 10, 'name' => 'BOMBEIRO CIVIL']);
+        Funcao::create(['id' => 11, 'name' => 'APOIO']);
+        Funcao::create(['id' => 12, 'name' => 'CORDENADOR']);
+        Funcao::create(['id' => 13, 'name' => 'VIDEOMAKER']);
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
         //Cadastrando os Funcionários que vão trabalhar como Temporários no Carnaval de 2025''''''''''''''''''''''''''''
@@ -575,7 +571,6 @@ class Z_RealSeeder extends Seeder
 
         foreach ($funcionarios as $funcionario) {
             Funcionario::create([
-                'empresa_id' => 2,
                 'name' => $funcionario['nome'],
                 'data_nascimento' => $funcionario['data_nascimento'],
                 'contratacao_tipo_id' => 4,

@@ -74,7 +74,7 @@ class ClienteServicoController extends Controller
             $registros = array();
 
             //Clientes
-            $registros['clientes'] = Cliente::where('empresa_id', '=', $empresa_id)->get();
+            $registros['clientes'] = Cliente::all();
 
             //Servicos
             $registros['servicos'] = Servico::where('empresa_id', '=', $empresa_id)->get();
@@ -83,7 +83,7 @@ class ClienteServicoController extends Controller
             $registros['servico_status'] = ServicoStatus::all();
 
             //Funcionarios
-            $registros['funcionarios'] = Funcionario::where('empresa_id', '=', $empresa_id)->get();
+            $registros['funcionarios'] = Funcionario::all();
 
             //Escala Tipos
             $registros['escala_tipos'] = EscalaTipo::all();

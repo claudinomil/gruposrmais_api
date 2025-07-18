@@ -2,19 +2,15 @@
 
 namespace App\Services;
 
-use App\API\ApiReturn;
 use App\Facades\Transacoes;
 use App\Models\Brigada;
 use App\Models\BrigadaEscala;
 use App\Models\BrigadaRonda;
 use App\Models\BrigadaRondaSegurancaMedida;
-use App\Models\Cliente;
 use App\Models\ClienteSegurancaMedida;
 use App\Models\ClienteServico;
 use App\Models\ClienteServicoBrigadista;
-use App\Models\EdificacaoClassificacao;
 use App\Models\Empresa;
-use App\Models\IncendioRisco;
 use App\Models\OrdemServicoDestino;
 use App\Models\OrdemServicoEquipe;
 use App\Models\OrdemServicoExecutivo;
@@ -22,10 +18,7 @@ use App\Models\OrdemServicoServico;
 use App\Models\OrdemServicoVeiculo;
 use App\Models\PropostaServico;
 use App\Models\SegurancaMedida;
-use App\Models\Servico;
 use App\Models\UserConfiguracao;
-use App\Models\APAGARVT;
-use App\Models\APAGARVTControllerSegurancaMedida;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;

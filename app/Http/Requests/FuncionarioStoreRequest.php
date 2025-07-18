@@ -24,7 +24,9 @@ class FuncionarioStoreRequest extends FormRequest
     public function rules()
     {
         return [
+            'tomador_servico_cliente_id' => ['nullable', 'integer', 'numeric'],
             'name' => ['required', 'min:3'],
+            'nome_profissional' => ['required', 'min:3'],
             'data_nascimento' => ['required', 'date_format:d/m/Y'],
             'contratacao_tipo_id' => ['required', 'integer', 'numeric'],
             'genero_id' => ['required', 'integer', 'numeric'],
@@ -69,8 +71,11 @@ class FuncionarioStoreRequest extends FormRequest
     public function messages()
     {
         return [
+            'tomador_servico_cliente_id.integer' => 'O Tomador de Serviço deve ser um ítem da lista.',
             'name.required' => 'O Nome é requerido.',
             'name.min' => 'O Nome deve ter pelo menos 3 caracteres.',
+            'nome_profissional.required' => 'O Nome Profissional é requerido.',
+            'nome_profissional.min' => 'O Nome Profissional deve ter pelo menos 3 caracteres.',
             'data_nascimento.required' => 'O Nascimento é requerido.',
             'data_nascimento.date_format' => 'O Nascimento não é uma data válida.',
             'contratacao_tipo_id.required' => 'O Tipo de Contratação é requerido.',

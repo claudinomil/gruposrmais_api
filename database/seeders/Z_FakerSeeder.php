@@ -23,7 +23,6 @@ class Z_FakerSeeder extends Seeder
         //Funcionários
         for($i=1; $i<=5; $i++) {
             Funcionario::create([
-                'empresa_id' => 1,
                 'name' => $faker->name,
                 'data_nascimento' => $faker->date('d/m/Y'),
                 'contratacao_tipo_id' => 1,
@@ -86,7 +85,6 @@ class Z_FakerSeeder extends Seeder
         //Clientes
         for($i=1; $i<=3; $i++) {
             Cliente::create([
-                'empresa_id' => 1,
                 'status' => 1,
                 'tipo' => 1,
                 'name' => $faker->name,
@@ -107,7 +105,6 @@ class Z_FakerSeeder extends Seeder
             ]);
 
             Cliente::create([
-                'empresa_id' => 1,
                 'status' => 1,
                 'tipo' => 2,
                 'name' => $faker->name,
@@ -132,7 +129,6 @@ class Z_FakerSeeder extends Seeder
         $cores = ['Branco', 'Preto', 'Prata', 'Cinza', 'Vermelho', 'Azul', 'Verde', 'Amarelo', 'Laranja', 'Marrom'];
         for($i=1; $i<=10; $i++) {
             Veiculo::create([
-                'empresa_id' => 1,
                 'veiculo_marca_id' => $faker->numberBetween(1, 6),
                 'veiculo_modelo_id' => $faker->numberBetween(1, 6),
                 'placa' => $faker->regexify('[A-Z]{3}[0-9][A-Z][0-9]{2}'),

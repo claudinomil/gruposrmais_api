@@ -14,9 +14,9 @@ Route::prefix('clientes_executivos')->group(function () {
     //Modal clientes_executivos_modal_info
     Route::get('/modalInfo/modal_info/{id}', [ClienteExecutivoController::class, 'modal_info'])->middleware(['auth:api']);
     Route::put('/uploadFoto/upload_foto/{id}', [ClienteExecutivoController::class, 'upload_foto'])->middleware(['auth:api']);
-    Route::post('/uploadDocumentoPdf/upload_documento_pdf', [ClienteExecutivoController::class, 'upload_documento_pdf'])->middleware(['auth:api']);
-    Route::get('/modalInfo/documentos_pdf/{cliente_executivo_id}', [ClienteExecutivoController::class, 'documentos_pdf'])->middleware(['auth:api']);
-    Route::delete('/modalInfo/deletar_documento_pdf/destroy/{id}/{empresa_id}', [ClienteExecutivoController::class, 'deletar_documento_pdf'])->middleware(['auth:api']);
+    Route::post('/uploadDocumento/upload_documento', [ClienteExecutivoController::class, 'upload_documento'])->middleware(['auth:api']);
+    Route::get('/modalInfo/documentos/{cliente_executivo_id}', [ClienteExecutivoController::class, 'documentos'])->middleware(['auth:api']);
+    Route::delete('/modalInfo/deletar_documento/destroy/{id}/{empresa_id}', [ClienteExecutivoController::class, 'deletar_documento'])->middleware(['auth:api']);
 
     //Dados para Cartões Emergenciais
     Route::get('/cartoes_emergenciais/registros', [ClienteExecutivoController::class, 'cartoes_emergenciais_registros'])->middleware(['auth:api']);

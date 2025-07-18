@@ -29,7 +29,6 @@ class VeiculoController extends Controller
             ->leftJoin('veiculo_marcas', 'veiculos.veiculo_marca_id', '=', 'veiculo_marcas.id')
             ->leftJoin('veiculo_modelos', 'veiculos.veiculo_modelo_id', '=', 'veiculo_modelos.id')
             ->select(['veiculos.*', 'veiculo_categorias.name as veiculoCategoriaName', 'veiculo_combustiveis.name as veiculoCombustivelName', 'veiculo_marcas.name as veiculoMarcaName', 'veiculo_modelos.name as veiculoModeloName'])
-            ->where('veiculos.empresa_id', $empresa_id)
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -184,7 +183,6 @@ class VeiculoController extends Controller
             ->leftJoin('veiculo_marcas', 'veiculos.veiculo_marca_id', '=', 'veiculo_marcas.id')
             ->leftJoin('veiculo_modelos', 'veiculos.veiculo_modelo_id', '=', 'veiculo_modelos.id')
             ->select(['veiculos.*', 'veiculo_categorias.name as veiculoCategoriaName', 'veiculo_combustiveis.name as veiculoCombustivelName', 'veiculo_marcas.name as veiculoMarcaName', 'veiculo_modelos.name as veiculoModeloName'])
-            ->where('veiculos.empresa_id', '=', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

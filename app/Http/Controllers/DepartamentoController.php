@@ -19,7 +19,7 @@ class DepartamentoController extends Controller
 
     public function index($empresa_id)
     {
-        $registros = $this->departamento->where('departamentos.empresa_id', $empresa_id)->get();
+        $registros = $this->departamento->all();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
     }
@@ -123,13 +123,6 @@ class DepartamentoController extends Controller
         }
     }
 
-//    public function search($field, $value, $empresa_id)
-//    {
-//        $registros = $this->departamento->where('departamentos.empresa_id', '=', $empresa_id)->where($field, 'like', '%'.$value.'%')->get();
-//
-//        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
-//    }
-
     public function filter($array_dados, $empresa_id)
     {
         //Filtros enviados pelo Client
@@ -141,7 +134,6 @@ class DepartamentoController extends Controller
 
         //Registros
         $registros = $this->departamento
-            ->where('departamentos.empresa_id', '=', $empresa_id)
             ->select(['departamentos.*'])
             ->where(function($query) use($filtros) {
                 //Variavel para controle

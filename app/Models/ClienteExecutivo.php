@@ -16,6 +16,7 @@ class ClienteExecutivo extends Model
         'cliente_id',
         'executivo_nome',
         'executivo_funcao',
+        'nome_profissional',
         'genero_id',
         'data_nascimento',
         'nacionalidade_id',

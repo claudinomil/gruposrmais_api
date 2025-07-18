@@ -323,33 +323,6 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['layout_style'], $dadosAtual['layout_style'], 'Layout Style', '', '');
                 }
             }
-
-            //notificacoes
-            if ($submodulo_id == 3) {
-                if ($op == 1) {
-                    $dados .= '<b>:: Notificações</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['date'], $dadosAtual['date'], 'Data', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['time'], $dadosAtual['time'], 'Hora', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['title'], $dadosAtual['title'], 'Título', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['notificacao'], $dadosAtual['notificacao'], 'Notificação', '', '');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['user_id'], $dadosAtual['user_id'], 'Usuário', User::class, 'name');
-                }
-            }
-
-            //ferramentas
-            if ($submodulo_id == 5) {
-                if ($op == 1) {
-                    $dados .= '<b>:: Ferramentas</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['url'], $dadosAtual['url'], 'URL', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['icon'], $dadosAtual['icon'], 'Ícone', '', '');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['user_id'], $dadosAtual['user_id'], 'Usuário', User::class, 'name');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['viewing_order'], $dadosAtual['viewing_order'], 'Ordem Visualização', '', '');
-                }
-            }
             //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
             //bancos
@@ -365,7 +338,6 @@ class Transacoes
             if ($submodulo_id == 7) {
                 if ($op == 1) {
                     $dados .= '<b>:: Departamentos</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
                 }
             }
@@ -415,7 +387,6 @@ class Transacoes
             if ($submodulo_id == 13) {
                 if ($op == 1) {
                     $dados .= '<b>:: Funções</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
                 }
             }
@@ -424,7 +395,7 @@ class Transacoes
             if ($submodulo_id == 14) {
                 if ($op == 1) {
                     $dados .= '<b>:: Funcionários</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['tomador_servico_cliente_id'], $dadosAtual['tomador_servico_cliente_id'], 'Tomador Serviço', Cliente::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['data_nascimento'], $dadosAtual['data_nascimento'], 'Data Nascimento', '', '');
                     $dados .= $this->retornaDado(2, $dadosAnterior['contratacao_tipo_id'], $dadosAtual['contratacao_tipo_id'], 'Tipo Contratação', ContratacaoTipo::class, 'name');
@@ -503,8 +474,8 @@ class Transacoes
             if ($submodulo_id == 16) {
                 if ($op == 1) {
                     $dados .= '<b>:: Clientes</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
                     $dados .= $this->retornaDado(2, $dadosAnterior['principal_cliente_id'], $dadosAtual['principal_cliente_id'], 'Cliente Principal', Cliente::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['rede_cliente_id'], $dadosAtual['rede_cliente_id'], 'Cliente Rede', Cliente::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['status'], $dadosAtual['status'], 'Status', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['tipo'], $dadosAtual['tipo'], 'Tipo', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
@@ -577,7 +548,6 @@ class Transacoes
             if ($submodulo_id == 18) {
                 if ($op == 1) {
                     $dados .= '<b>:: Fornecedores</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['status'], $dadosAtual['status'], 'Status', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['tipo'], $dadosAtual['tipo'], 'Tipo', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
@@ -929,7 +899,6 @@ class Transacoes
             if ($submodulo_id == 27) {
                 if ($op == 1) {
                     $dados .= '<b>:: Veículos</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
                     $dados .= $this->retornaDado(2, $dadosAnterior['veiculo_marca_id'], $dadosAtual['veiculo_marca_id'], 'Veículo Marca', VeiculoMarca::class, 'name');
                     $dados .= $this->retornaDado(2, $dadosAnterior['veiculo_modelo_id'], $dadosAtual['veiculo_modelo_id'], 'Veículo Modelo', VeiculoModelo::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['placa'], $dadosAtual['placa'], 'Placa', '', '');

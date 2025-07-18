@@ -30,7 +30,6 @@ class FornecedorController extends Controller
             ->leftJoin('generos', 'fornecedores.genero_id', '=', 'generos.id')
             ->leftJoin('bancos', 'fornecedores.banco_id', '=', 'bancos.id')
             ->select(['fornecedores.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'bancos.name as bancoName'])
-            ->where('fornecedores.empresa_id', $empresa_id)
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -87,9 +86,6 @@ class FornecedorController extends Controller
         try {
             //Atualisar objeto Auth::user()
             SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
 
             //Incluindo registro
             $this->fornecedor->create($request->all());
@@ -185,22 +181,7 @@ class FornecedorController extends Controller
         }
     }
 
-//    public function search($field, $value, $empresa_id)
-//    {
-//        $registros = DB::table('fornecedores')
-//            ->leftJoin('identidade_orgaos', 'fornecedores.identidade_orgao_id', '=', 'identidade_orgaos.id')
-//            ->leftJoin('estados', 'fornecedores.identidade_estado_id', '=', 'estados.id')
-//            ->leftJoin('generos', 'fornecedores.genero_id', '=', 'generos.id')
-//            ->leftJoin('bancos', 'fornecedores.banco_id', '=', 'bancos.id')
-//            ->select(['fornecedores.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'bancos.name as bancoName'])
-//            ->where('fornecedores.empresa_id', '=', $empresa_id)
-//            ->where($field, 'like', '%' . $value . '%')
-//            ->get();
-//
-//        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
-//    }
-
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
@@ -216,7 +197,6 @@ class FornecedorController extends Controller
             ->leftJoin('generos', 'fornecedores.genero_id', '=', 'generos.id')
             ->leftJoin('bancos', 'fornecedores.banco_id', '=', 'bancos.id')
             ->select(['fornecedores.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'bancos.name as bancoName'])
-            ->where('fornecedores.empresa_id', '=', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

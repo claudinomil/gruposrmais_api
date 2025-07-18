@@ -6,6 +6,7 @@ use App\Facades\SuporteFacade;
 use App\Facades\Transacoes;
 use App\Http\Requests\FuncionarioStoreRequest;
 use App\Http\Requests\FuncionarioUpdateRequest;
+use App\Models\Cliente;
 use App\Models\Departamento;
 use App\Models\Documento;
 use App\Models\DocumentoFonte;
@@ -45,8 +46,8 @@ class FuncionarioController extends Controller
             ->leftJoin('escolaridades', 'funcionarios.escolaridade_id', '=', 'escolaridades.id')
             ->leftJoin('estados_civis', 'funcionarios.estado_civil_id', '=', 'estados_civis.id')
             ->leftJoin('bancos', 'funcionarios.banco_id', '=', 'bancos.id')
-            ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName'])
-            ->where('funcionarios.empresa_id', $empresa_id)
+            ->leftJoin('clientes as tomador_servico_clientes', 'funcionarios.tomador_servico_cliente_id', '=', 'tomador_servico_clientes.id')
+            ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName', 'tomador_servico_clientes.name as tomadorServicoClienteName'])
             ->orderby('funcionarios.name')
             ->get();
 
@@ -109,10 +110,13 @@ class FuncionarioController extends Controller
             $registros['identidade_estados'] = Estado::all();
 
             //Departamentos
-            $registros['departamentos'] = Departamento::where('empresa_id', '=', $empresa_id)->get();
+            $registros['departamentos'] = Departamento::all();
 
             //Funções
-            $registros['funcoes'] = Funcao::where('empresa_id', '=', $empresa_id)->get();
+            $registros['funcoes'] = Funcao::all();
+
+            //Clientes
+            $registros['clientes'] = Cliente::all();
 
             //Documentos
             $registros['documentos'] = Documento
@@ -258,8 +262,8 @@ class FuncionarioController extends Controller
             ->leftJoin('escolaridades', 'funcionarios.escolaridade_id', '=', 'escolaridades.id')
             ->leftJoin('estados_civis', 'funcionarios.estado_civil_id', '=', 'estados_civis.id')
             ->leftJoin('bancos', 'funcionarios.banco_id', '=', 'bancos.id')
-            ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName'])
-            ->where('funcionarios.empresa_id', '=', $empresa_id)
+            ->leftJoin('clientes as tomador_servico_clientes', 'funcionarios.tomador_servico_cliente_id', '=', 'tomador_servico_clientes.id')
+            ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName', 'tomador_servico_clientes.name as tomadorServicoClienteName'])
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;
@@ -325,7 +329,8 @@ class FuncionarioController extends Controller
                 ->leftJoin('escolaridades', 'funcionarios.escolaridade_id', '=', 'escolaridades.id')
                 ->leftJoin('estados_civis', 'funcionarios.estado_civil_id', '=', 'estados_civis.id')
                 ->leftJoin('bancos', 'funcionarios.banco_id', '=', 'bancos.id')
-                ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName'])
+                ->leftJoin('clientes as tomador_servico_clientes', 'funcionarios.tomador_servico_cliente_id', '=', 'tomador_servico_clientes.id')
+                ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName', 'tomador_servico_clientes.name as tomadorServicoClienteName'])
                 ->where('funcionarios.id', '=', $id)
                 ->get();
 
@@ -375,7 +380,7 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function upload_documento_pdf(Request $request)
+    public function upload_documento(Request $request)
     {
         try {
             //Atualisar objeto Auth::user()
@@ -401,7 +406,7 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function documentos_pdf($funcionario_id)
+    public function documentos($funcionario_id)
     {
         try {
             $registros = array();
@@ -428,7 +433,7 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function deletar_documento_pdf($funcionario_documento_id, $empresa_id)
+    public function deletar_documento($funcionario_documento_id, $empresa_id)
     {
         //Atualisar objeto Auth::user()
         SuporteFacade::setUserLogged($empresa_id);
@@ -469,7 +474,6 @@ class FuncionarioController extends Controller
                 ->leftJoin('estados_civis', 'funcionarios.estado_civil_id', '=', 'estados_civis.id')
                 ->leftJoin('bancos', 'funcionarios.banco_id', '=', 'bancos.id')
                 ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName'])
-                ->where('funcionarios.empresa_id', $empresa_id)
                 ->whereIn('funcionarios.id', $ids_array)
                 ->get();
 
@@ -501,7 +505,6 @@ class FuncionarioController extends Controller
                 ->leftJoin('estados_civis', 'funcionarios.estado_civil_id', '=', 'estados_civis.id')
                 ->leftJoin('bancos', 'funcionarios.banco_id', '=', 'bancos.id')
                 ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName'])
-                ->where('funcionarios.empresa_id', $empresa_id)
                 ->orderBy('funcionarios.name')
                 ->get();
 
@@ -530,7 +533,6 @@ class FuncionarioController extends Controller
             $registros = Funcionario
                 ::leftJoin('generos', 'funcionarios.genero_id', '=', 'generos.id')
                 ->select(['funcionarios.*', 'generos.name as generoName'])
-                ->where('funcionarios.empresa_id', '=', $empresa_id)
                 ->wherein('funcionarios.id', $ids)
                 ->get();
 

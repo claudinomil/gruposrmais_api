@@ -10,7 +10,6 @@ class FuncionariosSeeder extends Seeder
     public function run()
     {
         Funcionario::create([
-            'empresa_id' => 1,
             'id' => 1,
             'name' => 'MARCUS VINICIUS MACHADO DE OLIVEIRA',
             'data_nascimento' => '21/06/1972',

@@ -19,7 +19,7 @@ class FuncaoController extends Controller
 
     public function index($empresa_id)
     {
-        $registros = $this->funcao->where('funcoes.empresa_id', $empresa_id)->get();
+        $registros = $this->funcao->all();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
     }
@@ -135,7 +135,6 @@ class FuncaoController extends Controller
         //Registros
         $registros = $this->funcao
             ->select(['funcoes.*'])
-            ->where('funcoes.empresa_id', '=', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

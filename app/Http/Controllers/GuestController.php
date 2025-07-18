@@ -356,7 +356,7 @@ class GuestController extends Controller
 //        }
 //    }
 //
-//    public function upload_documento_pdf(Request $request)
+//    public function upload_documento(Request $request)
 //    {
 //        try {
 //            //Atualisar objeto Auth::user()
@@ -382,7 +382,7 @@ class GuestController extends Controller
 //        }
 //    }
 //
-//    public function documentos_pdf($funcionario_id)
+//    public function documentos($funcionario_id)
 //    {
 //        try {
 //            $registros = FuncionarioDocumento
@@ -399,7 +399,7 @@ class GuestController extends Controller
 //        }
 //    }
 //
-//    public function deletar_documento_pdf($funcionario_documento_id, $empresa_id)
+//    public function deletar_documento($funcionario_documento_id, $empresa_id)
 //    {
 //        //Atualisar objeto Auth::user()
 //        SuporteFacade::setUserLogged($empresa_id);

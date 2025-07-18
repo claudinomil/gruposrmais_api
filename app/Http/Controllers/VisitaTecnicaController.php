@@ -30,7 +30,7 @@ class VisitaTecnicaController extends Controller
             ->leftJoin('visita_tecnica_tipos', 'visitas_tecnicas.visita_tecnica_tipo_id', '=', 'visita_tecnica_tipos.id')
             ->leftJoin('clientes', 'visitas_tecnicas.cliente_id', '=', 'clientes.id')
             ->select(['visitas_tecnicas.*', 'visita_tecnica_tipos.name as visitaTecnicaTipoName', 'clientes.name as clienteName'])
-            ->where('clientes.empresa_id', $empresa_id)
+            ->where('visitas_tecnicas.empresa_id', $empresa_id)
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -70,13 +70,12 @@ class VisitaTecnicaController extends Controller
             $registros = array();
 
             //Clientes
-            $registros['clientes'] = Cliente::where('empresa_id', '=', $empresa_id)->get();
+            $registros['clientes'] = Cliente::all();
 
             //Funcionários
             $funcionarios = Funcionario
                 ::leftJoin('funcoes', 'funcionarios.funcao_id', '=', 'funcoes.id')
                 ->select(['funcionarios.*', 'funcoes.name as funcaoName'])
-                ->where('funcionarios.empresa_id', '=', $empresa_id)
                 ->get();
 
             $registros['funcionarios'] = $funcionarios;
@@ -97,9 +96,15 @@ class VisitaTecnicaController extends Controller
         }
     }
 
-    public function store(VisitaTecnicaStoreRequest $request)
+    public function store(VisitaTecnicaStoreRequest $request, $empresa_id)
     {
         try {
+            //Atualisar objeto Auth::user()
+            SuporteFacade::setUserLogged($empresa_id);
+
+            //Colocar empresa_id no Request
+            $request['empresa_id'] = $empresa_id;
+
             //Acertos campos''''''''''''''''''''''''''''''''''''''''''''''''
             //visita_tecnica_status_id
             $request['visita_tecnica_status_id'] = 1;
@@ -249,7 +254,7 @@ class VisitaTecnicaController extends Controller
         $registros = $this->visita_tecnica
             ->leftJoin('clientes', 'visitas_tecnicas.cliente_id', '=', 'clientes.id')
             ->select(['visitas_tecnicas.*', 'clientes.name as clienteName'])
-            ->where('clientes.empresa_id', '=', $empresa_id)
+            ->where('visitas_tecnicas.empresa_id', '=', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

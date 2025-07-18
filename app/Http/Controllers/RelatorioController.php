@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Facades\SuporteFacade;
 use App\Models\ClienteExecutivo;
-use App\Models\Ferramenta;
 use App\Models\Funcionario;
-use App\Models\Notificacao;
 use App\Models\Operacao;
 use App\Models\Relatorio;
 use App\Models\Situacao;
@@ -32,8 +30,8 @@ class RelatorioController extends Controller
         $content['users'] = User::join('users_configuracoes', 'users_configuracoes.user_id', 'users.id')->where('empresa_id', $empresa_id)->orderby('name')->get();
         $content['submodulos'] = Submodulo::orderby('name')->get();
         $content['operacoes'] = Operacao::orderby('name')->get();
-        $content['clientes_executivos'] = ClienteExecutivo::join('clientes', 'clientes.id', 'clientes_executivos.cliente_id')->select('clientes_executivos.*')->where('clientes.empresa_id', $empresa_id)->orderby('clientes_executivos.executivo_nome')->get();
-        $content['funcionarios'] = Funcionario::where('empresa_id', $empresa_id)->orderby('name')->get();
+        $content['clientes_executivos'] = ClienteExecutivo::join('clientes', 'clientes.id', 'clientes_executivos.cliente_id')->select('clientes_executivos.*')->orderby('clientes_executivos.executivo_nome')->get();
+        $content['funcionarios'] = Funcionario::orderby('name')->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
     }
@@ -226,131 +224,6 @@ class RelatorioController extends Controller
             ->orderby('transacoes.date')
             ->orderby('submodulos.name')
             ->orderby('users.name')
-            ->get();
-
-        //Retorno
-        $content = array();
-        $content['relatorio_data'] = $relatorio_data;
-        $content['relatorio_hora'] = $relatorio_hora;
-        $content['relatorio_nome'] = $relatorio_nome;
-        $content['relatorio_parametros'] = $relatorio_parametros;
-        $content['relatorio_registros'] = $relatorio_registros;
-
-        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
-    }
-
-    public function relatorio4($empresa_id, $data, $title, $notificacao, $user_id, $idioma)
-    {
-        //Relatório Data
-        $relatorio_data = date('d/m/Y');
-
-        //Relatório Hora
-        $relatorio_hora = date('H:i:s');
-
-        //Relatório Nome
-        $relatorio = Relatorio::where('id', 4)->get();
-        $relatorio_nome = $relatorio[0]['name'];
-
-        //Parâmetros
-        $relatorio_parametros = '';
-
-        if ($data != 'xxxyyyzzz') {
-            $relatorio_parametros .= SuporteFacade::getDataFormatada(1, $data);
-        }
-        if ($title != 'xxxyyyzzz') {
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
-            $relatorio_parametros .= $title;
-        }
-        if ($notificacao != 'xxxyyyzzz') {
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
-            $relatorio_parametros .= $notificacao;
-        }
-        if ($user_id == 0) {
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
-            $relatorio_parametros .= 'Todos os Usuários';
-        } else {
-            $user = User::where('id', $user_id)->get();
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
-            $relatorio_parametros .= $user[0]['name'];
-        }
-        if ($idioma == 2) {$relatorio_parametros .= ' / '.'Inglês';}
-
-        //Registros
-        $relatorio_registros = Notificacao
-            ::join('users', 'users.id', 'notificacoes.user_id')
-            ->select('notificacoes.*', 'users.name as user')
-            ->where(function($query) use($data, $title, $notificacao, $user_id) {
-                if ($data != 'xxxyyyzzz') {$query->where('notificacoes.date', $data);}
-                if ($title != 'xxxyyyzzz') {$query->where('notificacoes.title', 'LIKE', '%'.$title.'%');}
-                if ($notificacao != 'xxxyyyzzz') {$query->where('notificacoes.notificacao', 'LIKE', '%'.$notificacao.'%');}
-                if ($user_id != 0) {$query->where('notificacoes.user_id', $user_id);}
-            })
-            ->orderby('notificacoes.date')
-            ->orderby('notificacoes.time')
-            ->orderby('notificacoes.user_id')
-            ->get();
-
-        //Retorno
-        $content = array();
-        $content['relatorio_data'] = $relatorio_data;
-        $content['relatorio_hora'] = $relatorio_hora;
-        $content['relatorio_nome'] = $relatorio_nome;
-        $content['relatorio_parametros'] = $relatorio_parametros;
-        $content['relatorio_registros'] = $relatorio_registros;
-
-        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
-    }
-
-    public function relatorio5($empresa_id, $name, $descricao, $url, $user_id, $idioma)
-    {
-        //Relatório Data
-        $relatorio_data = date('d/m/Y');
-
-        //Relatório Hora
-        $relatorio_hora = date('H:i:s');
-
-        //Relatório Nome
-        $relatorio = Relatorio::where('id', 5)->get();
-        $relatorio_nome = $relatorio[0]['name'];
-
-        //Parâmetros
-        $relatorio_parametros = '';
-
-        if ($name != 'xxxyyyzzz') {
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
-            $relatorio_parametros .= $name;
-        }
-        if ($descricao != 'xxxyyyzzz') {
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
-            $relatorio_parametros .= $descricao;
-        }
-        if ($url != 'xxxyyyzzz') {
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
-            $relatorio_parametros .= $url;
-        }
-        if ($user_id == 0) {
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
-            $relatorio_parametros .= 'Todos os Usuários';
-        } else {
-            $user = User::where('id', $user_id)->get();
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
-            $relatorio_parametros .= $user[0]['name'];
-        }
-        if ($idioma == 2) {$relatorio_parametros .= ' / '.'Inglês';}
-
-        //Registros
-        $relatorio_registros = Ferramenta
-            ::join('users', 'users.id', 'ferramentas.user_id')
-            ->select('ferramentas.*', 'users.name as user')
-            ->where(function($query) use($name, $descricao, $url, $user_id) {
-                if ($name != 'xxxyyyzzz') {$query->where('ferramentas.name', 'LIKE', '%'.$name.'%');}
-                if ($descricao != 'xxxyyyzzz') {$query->where('ferramentas.descricao', 'LIKE', '%'.$descricao.'%');}
-                if ($url != 'xxxyyyzzz') {$query->where('ferramentas.url', 'LIKE', '%'.$url.'%');}
-                if ($user_id != 0) {$query->where('ferramentas.user_id', $user_id);}
-            })
-            ->orderby('ferramentas.name')
-            ->orderby('ferramentas.url')
-            ->orderby('ferramentas.user_id')
             ->get();
 
         //Retorno
