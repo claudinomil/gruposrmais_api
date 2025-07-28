@@ -11,30 +11,28 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index($data, $empresa_id)
+    public function index($data)
     {
         $content = array();
 
         //Users
         if (substr($data, 0, 1) == 1) {
             //Quantidade de Registros
-            $content['dashboardsUsersQtd'] = User::join('users_configuracoes', 'users_configuracoes.user_id', 'users.id')->where('users_configuracoes.empresa_id', '=', $empresa_id)->count();
+            $content['dashboardsUsersQtd'] = User::count();
 
             //Distribuição por Grupos
             //$content['dashboardsUsersGrupos'] = DB::select("SELECT grupos.name, count(users.id) as qtd FROM users INNER JOIN grupos ON users.grupo_id=grupos.id GROUP BY grupos.name ORDER BY grupos.name");
             $content['dashboardsUsersGrupos'] = DB::select("
                         SELECT grupos.name, count(users.id) as qtd FROM users
-                        INNER JOIN users_configuracoes ON users.id=users_configuracoes.user_id 
-                        INNER JOIN grupos ON users_configuracoes.grupo_id=grupos.id 
-                        WHERE users_configuracoes.empresa_id = ".$empresa_id." GROUP BY grupos.name ORDER BY grupos.name
+                        INNER JOIN grupos ON users.grupo_id=grupos.id 
+                        GROUP BY grupos.name ORDER BY grupos.name
             ");
 
             //Distribuição por Situacoes
             $content['dashboardsUsersSituacoes'] = DB::select("
                         SELECT situacoes.name, count(users.id) as qtd FROM users 
-                        INNER JOIN users_configuracoes ON users.id=users_configuracoes.user_id 
-                        INNER JOIN situacoes ON users_configuracoes.situacao_id=situacoes.id 
-                        WHERE users_configuracoes.empresa_id = ".$empresa_id." GROUP BY situacoes.name ORDER BY situacoes.name
+                        INNER JOIN situacoes ON users.situacao_id=situacoes.id
+                        GROUP BY situacoes.name ORDER BY situacoes.name
             ");
         }
 

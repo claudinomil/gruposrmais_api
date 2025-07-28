@@ -119,7 +119,7 @@ class ZZZ_20250315_Seeder extends Seeder
         ServicoTipo::create(['id' => 4, 'name' => 'TRANSPORTE']);
 
         //Serviços
-        Servico::create(['id' => 7, 'empresa_id' => 1, 'name' => 'TRANSPORTE DE EXECUTIVOS', 'servico_tipo_id' => 4, 'valor' => '0.00']);
+        Servico::create(['id' => 7, 'name' => 'TRANSPORTE DE EXECUTIVOS', 'servico_tipo_id' => 4, 'valor' => '0.00']);
 
         //Veículo Categorias
         VeiculoCategoria::create(['id' => 1, 'name' => 'Particular']);

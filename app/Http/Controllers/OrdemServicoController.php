@@ -20,6 +20,7 @@ use App\Models\OrdemServicoTipo;
 use App\Models\OrdemServicoVeiculo;
 use App\Models\Servico;
 use App\Models\Veiculo;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\OrdemServico;
 
@@ -32,8 +33,10 @@ class OrdemServicoController extends Controller
         $this->ordem_servico = $ordem_servico;
     }
 
-    public function index($empresa_id)
+    public function index(Request $request)
     {
+        $empresa_id = $request->header('X-Empresa-Id');
+
         $registros = $this->ordem_servico
             ->leftJoin('ordem_servico_tipos', 'ordens_servicos.ordem_servico_tipo_id', '=', 'ordem_servico_tipos.id')
             ->leftJoin('clientes', 'ordens_servicos.cliente_id', '=', 'clientes.id')
@@ -86,7 +89,7 @@ class OrdemServicoController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -95,7 +98,7 @@ class OrdemServicoController extends Controller
             $registros['clientes'] = Cliente::all();
 
             //Servicos
-            $registros['servicos'] = Servico::where('empresa_id', '=', $empresa_id)->get();
+            $registros['servicos'] = Servico::all();
 
             //Funcionários
             $funcionarios = Funcionario
@@ -144,21 +147,19 @@ class OrdemServicoController extends Controller
         }
     }
 
-    public function store(OrdemServicoStoreRequest $request, $empresa_id)
+    public function store(OrdemServicoStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
+            //Empresa ID no $request
+            $request['empresa_id'] = $request->header('X-Empresa-Id');
 
             //Acertos campos''''''''''''''''''''''''''''''''''''''''''''''''
             //ordem_servico_status_id
             $request['ordem_servico_status_id'] = 1;
 
             //numero_ordem_servico
-            $reg = OrdemServico::latest()->first();
+            $reg = OrdemServico::orderBy('numero_ordem_servico', 'desc')->first();
+
             if ($reg) {
                 $request['numero_ordem_servico'] = $reg['numero_ordem_servico'] + 1;
             } else {
@@ -210,7 +211,7 @@ class OrdemServicoController extends Controller
         }
     }
 
-    public function update(OrdemServicoUpdateRequest $request, $id, $empresa_id)
+    public function update(OrdemServicoUpdateRequest $request, $id)
     {
         try {
             $registro = $this->ordem_servico->find($id);
@@ -218,9 +219,6 @@ class OrdemServicoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -251,7 +249,7 @@ class OrdemServicoController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->ordem_servico->find($id);
@@ -259,9 +257,6 @@ class OrdemServicoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -295,7 +290,7 @@ class OrdemServicoController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
@@ -308,7 +303,6 @@ class OrdemServicoController extends Controller
         $registros = $this->ordem_servico
             ->leftJoin('clientes', 'ordens_servicos.cliente_id', '=', 'clientes.id')
             ->select(['ordens_servicos.*', 'clientes.name as clienteName'])
-            ->where('ordens_servicos.empresa_id', '=', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

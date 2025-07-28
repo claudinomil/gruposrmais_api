@@ -18,7 +18,7 @@ class MapaPontoInteresseController extends Controller
         $this->mapa_ponto_interesse = $mapa_ponto_interesse;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = $this->mapa_ponto_interesse->all();
 
@@ -46,7 +46,7 @@ class MapaPontoInteresseController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -64,15 +64,9 @@ class MapaPontoInteresseController extends Controller
         }
     }
 
-    public function store(MapaPontoInteresseStoreRequest $request, $empresa_id)
+    public function store(MapaPontoInteresseStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
-
             //Incluindo registro
             $this->mapa_ponto_interesse->create($request->all());
 
@@ -86,7 +80,7 @@ class MapaPontoInteresseController extends Controller
         }
     }
 
-    public function update(MapaPontoInteresseUpdateRequest $request, $id, $empresa_id)
+    public function update(MapaPontoInteresseUpdateRequest $request, $id)
     {
         try {
             $registro = $this->mapa_ponto_interesse->find($id);
@@ -94,9 +88,6 @@ class MapaPontoInteresseController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -111,7 +102,7 @@ class MapaPontoInteresseController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->mapa_ponto_interesse->find($id);
@@ -119,9 +110,6 @@ class MapaPontoInteresseController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -140,7 +128,7 @@ class MapaPontoInteresseController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);

@@ -13,7 +13,7 @@ class SubmoduloController extends Controller
         $this->submodulo = $submodulo;
     }
 
-    public function research($fieldSearch, $fieldValue, $fieldReturn, $empresa_id)
+    public function research($fieldSearch, $fieldValue, $fieldReturn)
     {
         $registros = $this->submodulo->where($fieldSearch, 'like', '%' . $fieldValue . '%')->get($fieldReturn);
 

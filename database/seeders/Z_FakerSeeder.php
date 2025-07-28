@@ -6,7 +6,10 @@ use App\Models\Cliente;
 use App\Models\ClienteExecutivo;
 use App\Models\ClienteServico;
 use App\Models\Funcionario;
+use App\Models\OrdemServico;
+use App\Models\Proposta;
 use App\Models\Veiculo;
+use App\Models\VisitaTecnica;
 use Illuminate\Database\Seeder;
 
 class Z_FakerSeeder extends Seeder
@@ -83,11 +86,11 @@ class Z_FakerSeeder extends Seeder
         }
 
         //Clientes
-        for($i=1; $i<=3; $i++) {
+        for($i=1; $i<=2; $i++) {
             Cliente::create([
                 'status' => 1,
                 'tipo' => 1,
-                'name' => $faker->name,
+                'name' => 'REDE '.$i,
                 'cnpj' => $faker->cnpj(false),
                 'email' => $faker->email,
                 'telefone_1' => '21'.$faker->numerify('########'),
@@ -103,13 +106,48 @@ class Z_FakerSeeder extends Seeder
                 'uf' => 'RJ',
                 'created_at' => now()
             ]);
+        }
+        for($i=1; $i<=2; $i++) {
+            Cliente::create([
+                'status' => 1,
+                'tipo' => 1,
+                'rede_cliente_id' => $i,
+                'name' => 'SHOPPING '.$i,
+                'cnpj' => $faker->cnpj(false),
+                'email' => $faker->email,
+                'telefone_1' => '21'.$faker->numerify('########'),
+                'telefone_2' => '21'.$faker->numerify('########'),
+                'celular_1' => '21'.$faker->numerify('9########'),
+                'celular_2' => '21'.$faker->numerify('9########'),
+                'cep' => '20735130',
+                'numero' => '309',
+                'complemento' => '302',
+                'logradouro' => 'Rua Medina',
+                'bairro' => 'Meier',
+                'localidade' => 'Rio de Janeiro',
+                'uf' => 'RJ',
+                'created_at' => now()
+            ]);
+        }
+        for($i=1; $i<=15; $i++) {
+            if (($i % 2) == 0) {
+                $tipo = 2;
+                $cpf = $faker->cpf(false);
+                $cnpj = '';
+            } else {
+                $tipo = 1;
+                $cpf = '';
+                $cnpj = $faker->cnpj(false);
+            }
 
             Cliente::create([
                 'status' => 1,
-                'tipo' => 2,
+                'tipo' => $tipo,
                 'name' => $faker->name,
-                'cpf' => $faker->cpf(false),
+                'cnpj' => $cnpj,
+                'cpf' => $cpf,
                 'email' => $faker->email,
+                'principal_cliente_id' => $faker->numberBetween(3, 4),
                 'telefone_1' => '21'.$faker->numerify('########'),
                 'telefone_2' => '21'.$faker->numerify('########'),
                 'celular_1' => '21'.$faker->numerify('9########'),
@@ -209,6 +247,50 @@ class Z_FakerSeeder extends Seeder
                 'contato_2_parentesco' => $faker->randomElement($parentescos),
                 'contato_2_telefone' => '21'.$faker->numerify('########'),
                 'contato_2_celular' => '21'.$faker->numerify('9########'),
+            ]);
+        }
+
+        //Visitas Técnicas
+        for($i=1; $i<=10; $i++) {
+            VisitaTecnica::create([
+                'empresa_id' => $faker->numberBetween(1, 2),
+                'visita_tecnica_tipo_id' => $faker->numberBetween(1, 2),
+                'numero_visita_tecnica' => $i,
+                'ano_visita_tecnica' => '2025',
+                'data_abertura' => '24/07/2025',
+                'hora_abertura' => '18:09',
+                'data_prevista' => '24/07/2025',
+                'hora_prevista' => '18:09',
+                'visita_tecnica_status_id' => $faker->numberBetween(1, 2),
+                'cliente_id' => $faker->numberBetween(1, 3)
+            ]);
+        }
+
+        //Ordens de Serviços
+        for($i=1; $i<=10; $i++) {
+            OrdemServico::create([
+                'empresa_id' => $faker->numberBetween(1, 2),
+                'ordem_servico_tipo_id' => $faker->numberBetween(1, 3),
+                'numero_ordem_servico' => $i,
+                'ano_ordem_servico' => '2025',
+                'data_abertura' => '24/07/2025',
+                'hora_abertura' => '18:09',
+                'data_prevista' => '24/07/2025',
+                'hora_prevista' => '18:09',
+                'ordem_servico_status_id' => $faker->numberBetween(1, 2),
+                'cliente_id' => $faker->numberBetween(1, 3),
+                'ordem_servico_prioridade_id' => $faker->numberBetween(1, 3)
+            ]);
+        }
+
+        //Propostas
+        for($i=1; $i<=10; $i++) {
+            Proposta::create([
+                'empresa_id' => $faker->numberBetween(1, 2),
+                'data_proposta' => '24/07/2025',
+                'numero_proposta' => $i,
+                'ano_proposta' => '2025',
+                'cliente_id' => $faker->numberBetween(1, 3)
             ]);
         }
 

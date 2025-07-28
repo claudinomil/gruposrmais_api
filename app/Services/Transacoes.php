@@ -268,14 +268,13 @@ class Transacoes
      * @PARAM op=1 : Transação na tabela principal do Submódulo
      * @PARAM op=? : Transação em tabelas pivot ou outras tabelas referentes ao Submódulo
      */
-    public function transacaoRecord($op=1, $operacao, $submodulo, $dadosAnterior, $dadosAtual, $userLoggedId='', $userLoggedEmpresaId='') {
+    public function transacaoRecord($op=1, $operacao, $submodulo, $dadosAnterior, $dadosAtual, $userLoggedId='') {
         //Verificação do Usuário Logado
         $userVerificado = true;
 
-        if ($userLoggedId == '' and $userLoggedEmpresaId == '') {
+        if ($userLoggedId == '') {
             if (Auth::check()) {
                 $userLoggedId = Auth::user()->id;
-                $userLoggedEmpresaId = Auth::user()->empresa_id;
             } else {
                 $userVerificado = false;
             }
@@ -296,7 +295,6 @@ class Transacoes
             if ($submodulo_id == 1) {
                 if ($op == 1) {
                     $dados .= '<b>:: Grupos</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
                 }
             }
@@ -309,18 +307,6 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['email'], $dadosAtual['email'], 'E-mail', '', '');
                     $dados .= $this->retornaDado(2, $dadosAnterior['funcionario_id'], $dadosAtual['funcionario_id'], 'Funcionário', Funcionario::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['avatar'], $dadosAtual['avatar'], 'Avatar', '', '');
-                }
-
-                //Tabela users_configuracoes
-                if ($op == 2) {
-                    $dados .= '<b>:: Usuários Configurações</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['user_id'], $dadosAtual['user_id'], 'Usuário', User::class, 'name');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['grupo_id'], $dadosAtual['grupo_id'], 'Grupo', Grupo::class, 'name');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['situacao_id'], $dadosAtual['situacao_id'], 'Situação', Situacao::class, 'name');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['sistema_acesso_id'], $dadosAtual['sistema_acesso_id'], 'Sistema Acesso', SistemaAcesso::class, 'name');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['layout_mode'], $dadosAtual['layout_mode'], 'Layout Mode', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['layout_style'], $dadosAtual['layout_style'], 'Layout Style', '', '');
                 }
             }
             //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -592,7 +578,6 @@ class Transacoes
             if ($submodulo_id == 20) {
                 if ($op == 1) {
                     $dados .= '<b>:: Serviços</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
                     $dados .= $this->retornaDado(2, $dadosAnterior['servico_tipo_id'], $dadosAtual['servico_tipo_id'], 'Serviço Tipo', ServicoTipo::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['valor'], $dadosAtual['valor'], 'Valor', '', '');
@@ -936,7 +921,6 @@ class Transacoes
             if ($dados != '') {
                 $trasaction = Array();
 
-                $trasaction['empresa_id'] = $userLoggedEmpresaId;
                 $trasaction['date'] = date('Y-m-d');
                 $trasaction['time'] = date('H:i:s');
                 $trasaction['user_id'] = $userLoggedId;

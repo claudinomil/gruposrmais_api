@@ -7,7 +7,6 @@ use App\Models\Funcao;
 use App\Models\Funcionario;
 use App\Models\Grupo;
 use App\Models\GrupoPermissao;
-use App\Models\UserConfiguracao;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -344,16 +343,6 @@ class Z_RealSeeder extends Seeder
             'created_at' => now()
         ]);
 
-        UserConfiguracao::create([
-            'user_id' => 3,
-            'empresa_id' => 1,
-            'grupo_id' => 2,
-            'situacao_id' => 1,
-            'sistema_acesso_id' => 1,
-            'layout_mode' => 'layout_mode_light',
-            'layout_style' => 'layout_style_vertical_scrollable'
-        ]);
-
         $user = \App\Models\User::factory()->create([
             'id' => 4,
             'name' => 'SHEILA',
@@ -363,16 +352,6 @@ class Z_RealSeeder extends Seeder
             'user_confirmed_at' => now(),
             'avatar' => 'build/assets/images/users/avatar-0.png',
             'created_at' => now()
-        ]);
-
-        UserConfiguracao::create([
-            'user_id' => 4,
-            'empresa_id' => 1,
-            'grupo_id' => 3,
-            'situacao_id' => 1,
-            'sistema_acesso_id' => 1,
-            'layout_mode' => 'layout_mode_light',
-            'layout_style' => 'layout_style_vertical_scrollable'
         ]);
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -819,41 +798,6 @@ class Z_RealSeeder extends Seeder
         GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 120]);
         GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 123]);
         GrupoPermissao::create(['grupo_id' => 7, 'permissao_id' => 125]);
-        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-        //Cadastrando os Usuários que já estavam no Banco de Dados''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        //Usuário id=4 Sheila
-        UserConfiguracao::create([
-            'user_id' => 4,
-            'empresa_id' => 2,
-            'grupo_id' => 7,
-            'situacao_id' => 1,
-            'sistema_acesso_id' => 1,
-            'layout_mode' => 'layout_mode_light',
-            'layout_style' => 'layout_style_vertical_scrollable'
-        ]);
-
-        //Usuário id=1 Claudino
-        UserConfiguracao::create([
-            'user_id' => 1,
-            'empresa_id' => 2,
-            'grupo_id' => 6,
-            'situacao_id' => 1,
-            'sistema_acesso_id' => 1,
-            'layout_mode' => 'layout_mode_light',
-            'layout_style' => 'layout_style_vertical_scrollable'
-        ]);
-
-        //Usuário id=2 Marcus
-        UserConfiguracao::create([
-            'user_id' => 2,
-            'empresa_id' => 2,
-            'grupo_id' => 6,
-            'situacao_id' => 1,
-            'sistema_acesso_id' => 1,
-            'layout_mode' => 'layout_mode_light',
-            'layout_style' => 'layout_style_vertical_scrollable'
-        ]);
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
         //EMPRESA id:2 - FIM''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

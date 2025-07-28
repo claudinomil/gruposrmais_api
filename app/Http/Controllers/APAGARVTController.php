@@ -21,7 +21,7 @@ class APAGARVTController extends Controller
         $this->visita_tecnica = $visita_tecnica;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         //Registros para Grade
         $registros = $this->visita_tecnica
@@ -39,7 +39,6 @@ class APAGARVTController extends Controller
                 , 'servico_status.name as servicoStatusName'
                 , 'funcionarios.name as funcionarioName'
             ])
-            ->where('visitas_tecnicas.empresa_id', $empresa_id)
             ->where('servicos.servico_tipo_id', '=', 3)
             ->get();
 
@@ -92,7 +91,7 @@ class APAGARVTController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -107,7 +106,7 @@ class APAGARVTController extends Controller
         }
     }
 
-    public function update(Request $request, $id, $empresa_id)
+    public function update(Request $request, $id)
     {
         try {
             $registro = $this->visita_tecnica->find($id);
@@ -115,9 +114,6 @@ class APAGARVTController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -183,33 +179,7 @@ class APAGARVTController extends Controller
         }
     }
 
-//    public function search($field, $value, $empresa_id)
-//    {
-//        //Registros para Grade
-//        $registros = $this->visita_tecnica
-//            ::Join('clientes_servicos', 'clientes_servicos.id', '=', 'visitas_tecnicas.cliente_servico_id')
-//            ->leftJoin('servicos', 'clientes_servicos.servico_id', '=', 'servicos.id')
-//            ->leftJoin('clientes', 'clientes_servicos.cliente_id', '=', 'clientes.id')
-//            ->leftJoin('servico_status', 'clientes_servicos.servico_status_id', '=', 'servico_status.id')
-//            ->leftJoin('funcionarios', 'clientes_servicos.responsavel_funcionario_id', '=', 'funcionarios.id')
-//            ->select([
-//                'visitas_tecnicas.*'
-//                , DB::raw('DATE_FORMAT(clientes_servicos.data_inicio, "%d/%m/%Y") as data_inicio')
-//                , 'clientes_servicos.servico_status_id'
-//                , 'servicos.name as servicoName'
-//                , 'clientes.name as clienteName'
-//                , 'servico_status.name as servicoStatusName'
-//                , 'funcionarios.name as funcionarioName'
-//            ])
-//            ->where('visitas_tecnicas.empresa_id', $empresa_id)
-//            ->where('servicos.servico_tipo_id', '=', 3)
-//            ->where($field, 'like', '%' . $value . '%')
-//            ->get();
-//
-//        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
-//    }
-
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
@@ -234,7 +204,6 @@ class APAGARVTController extends Controller
                 , 'servico_status.name as servicoStatusName'
                 , 'funcionarios.name as funcionarioName'
             ])
-            ->where('visitas_tecnicas.empresa_id', $empresa_id)
             ->where('servicos.servico_tipo_id', '=', 3)
             ->where(function($query) use($filtros) {
                 //Variavel para controle

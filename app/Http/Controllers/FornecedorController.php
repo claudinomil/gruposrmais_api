@@ -22,7 +22,7 @@ class FornecedorController extends Controller
         $this->fornecedor = $fornecedor;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = DB::table('fornecedores')
             ->leftJoin('identidade_orgaos', 'fornecedores.identidade_orgao_id', '=', 'identidade_orgaos.id')
@@ -54,7 +54,7 @@ class FornecedorController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -81,12 +81,9 @@ class FornecedorController extends Controller
         }
     }
 
-    public function store(FornecedorStoreRequest $request, $empresa_id)
+    public function store(FornecedorStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
             //Incluindo registro
             $this->fornecedor->create($request->all());
 
@@ -100,7 +97,7 @@ class FornecedorController extends Controller
         }
     }
 
-    public function update(FornecedorUpdateRequest $request, $id, $empresa_id)
+    public function update(FornecedorUpdateRequest $request, $id)
     {
         try {
             $registro = $this->fornecedor->find($id);
@@ -108,9 +105,6 @@ class FornecedorController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -152,7 +146,7 @@ class FornecedorController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->fornecedor->find($id);
@@ -160,9 +154,6 @@ class FornecedorController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 

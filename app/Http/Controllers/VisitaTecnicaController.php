@@ -24,8 +24,10 @@ class VisitaTecnicaController extends Controller
         $this->visita_tecnica = $visita_tecnica;
     }
 
-    public function index($empresa_id)
+    public function index(Request $request)
     {
+        $empresa_id = $request->header('X-Empresa-Id');
+
         $registros = $this->visita_tecnica
             ->leftJoin('visita_tecnica_tipos', 'visitas_tecnicas.visita_tecnica_tipo_id', '=', 'visita_tecnica_tipos.id')
             ->leftJoin('clientes', 'visitas_tecnicas.cliente_id', '=', 'clientes.id')
@@ -64,7 +66,7 @@ class VisitaTecnicaController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -96,21 +98,18 @@ class VisitaTecnicaController extends Controller
         }
     }
 
-    public function store(VisitaTecnicaStoreRequest $request, $empresa_id)
+    public function store(VisitaTecnicaStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
+            //Empresa ID no $request
+            $request['empresa_id'] = $request->header('X-Empresa-Id');
 
             //Acertos campos''''''''''''''''''''''''''''''''''''''''''''''''
             //visita_tecnica_status_id
             $request['visita_tecnica_status_id'] = 1;
 
             //numero_visita_tecnica
-            $reg = VisitaTecnica::latest()->first();
+            $reg = VisitaTecnica::orderBy('numero_visita_tecnica', 'desc')->first();
             if ($reg) {
                 $request['numero_visita_tecnica'] = $reg['numero_visita_tecnica'] + 1;
             } else {
@@ -182,7 +181,7 @@ class VisitaTecnicaController extends Controller
         }
     }
 
-    public function update(VisitaTecnicaUpdateRequest $request, $id, $empresa_id)
+    public function update(VisitaTecnicaUpdateRequest $request, $id)
     {
         try {
             $registro = $this->visita_tecnica->find($id);
@@ -190,9 +189,6 @@ class VisitaTecnicaController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -208,7 +204,7 @@ class VisitaTecnicaController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->visita_tecnica->find($id);
@@ -216,9 +212,6 @@ class VisitaTecnicaController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -241,7 +234,7 @@ class VisitaTecnicaController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
@@ -254,7 +247,6 @@ class VisitaTecnicaController extends Controller
         $registros = $this->visita_tecnica
             ->leftJoin('clientes', 'visitas_tecnicas.cliente_id', '=', 'clientes.id')
             ->select(['visitas_tecnicas.*', 'clientes.name as clienteName'])
-            ->where('visitas_tecnicas.empresa_id', '=', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

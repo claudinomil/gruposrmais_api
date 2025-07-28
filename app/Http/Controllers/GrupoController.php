@@ -22,13 +22,13 @@ class GrupoController extends Controller
         $this->grupo = $grupo;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         //Registros
         $registros = array();
 
         //Varrendo Grupos para pegar Permissoes
-        $grupos = $this->grupo->where('empresa_id', '=', $empresa_id)->get();
+        $grupos = $this->grupo->all();
         foreach ($grupos as $key => $grupo) {
             $grupo_id = $grupo->id;
             $grupo_name = $grupo->name;
@@ -125,7 +125,7 @@ class GrupoController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -149,15 +149,9 @@ class GrupoController extends Controller
         }
     }
 
-    public function store(GrupoStoreRequest $request, $empresa_id)
+    public function store(GrupoStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
-
             //Incluindo registro na tabela grupos
             $grupo = $this->grupo->create($request->all());
             $grupo_id = $grupo['id'];
@@ -222,7 +216,7 @@ class GrupoController extends Controller
         }
     }
 
-    public function update(GrupoUpdateRequest $request, $id, $empresa_id)
+    public function update(GrupoUpdateRequest $request, $id)
     {
         try {
             $registro = $this->grupo->find($id);
@@ -230,9 +224,6 @@ class GrupoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, '', $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro na tabela grupos
                 $registro->update($request->all());
 
@@ -305,7 +296,7 @@ class GrupoController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->grupo->find($id);
@@ -313,13 +304,10 @@ class GrupoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                //Tabela users_configuracoes
-                if (SuporteFacade::verificarRelacionamento('users_configuracoes', 'grupo_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Usuários Configurações.', 2040, null, null);
+                //Tabela users
+                if (SuporteFacade::verificarRelacionamento('users', 'grupo_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Usuários.', 2040, null, null);
                 }
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -344,71 +332,7 @@ class GrupoController extends Controller
         }
     }
 
-//    public function search($field, $value, $empresa_id)
-//    {
-//        //Registros
-//        $registros = array();
-//
-//        //Varrendo Grupos para pegar Permissoes
-//        $grupos = $this->grupo->where('empresa_id', '=', $empresa_id)->where($field, 'like', '%'.$value.'%')->get();
-//        foreach ($grupos as $key => $grupo) {
-//            $grupo_id = $grupo->id;
-//            $grupo_name = $grupo->name;
-//
-//            $permissoes = "<div class='row'>";
-//
-//            //Varrendo Submodulos para pegar Permissoes por submodulos
-//            $submodulos = Submodulo::all();
-//            foreach ($submodulos as $key => $submodulo) {
-//                $submodulo_id = $submodulo->id;
-//                $submodulo_name = $submodulo->name;
-//
-//                //Buscando Permissoes
-//                $dados = DB::table('grupos_permissoes')
-//                    ->leftJoin('permissoes', 'permissoes.id', '=', 'grupos_permissoes.permissao_id')
-//                    ->select(['permissoes.name as permissaoName'])
-//                    ->where('grupos_permissoes.grupo_id', $grupo_id)
-//                    ->where('permissoes.submodulo_id', $submodulo_id)
-//                    ->get();
-//
-//                $permissoesSubmodulo = "<div class='col-12 col-md-3 pb-3'>";
-//                $permissoesSubmodulo .= "<b class='pb-3'>".$submodulo_name."</b>";
-//
-//                $ctrl = 0;
-//                foreach ($dados as $key => $dado) {
-//                    $ctrl++;
-//
-//                    $p = explode('_', $dado->permissaoName);
-//                    $p = $p[count($p)-1];
-//
-//                    if ($p == 'list') {$perm = "<div class='col-12'><label class='form-check-label'><i class='fa fa-check text-primary'></i> Listar</label></div>";}
-//                    if ($p == 'show') {$perm = "<div class='col-12'><label class='form-check-label'><i class='fa fa-check text-info'></i> Mostrar</label></div>";}
-//                    if ($p == 'create') {$perm = "<div class='col-12'><label class='form-check-label'><i class='fa fa-check text-success'></i> Criar</label></div>";}
-//                    if ($p == 'edit') {$perm = "<div class='col-12'><label class='form-check-label'><i class='fa fa-check text-warning'></i> Editar</label></div>";}
-//                    if ($p == 'destroy') {$perm = "<div class='col-12'><label class='form-check-label'><i class='fa fa-check text-danger'></i> Deletar</label></div>";}
-//
-//                    $permissoesSubmodulo .= $perm;
-//                }
-//
-//                $permissoesSubmodulo .= "</div>";
-//
-//                if ($ctrl > 0) {$permissoes .= $permissoesSubmodulo;}
-//            }
-//
-//            $permissoes .= "</div>";
-//
-//            //Montando registros de retorno
-//            $registros[] = [
-//                'id' => $grupo_id,
-//                'name' => $grupo_name,
-//                'permissoes' => $permissoes
-//            ];
-//        }
-//
-//        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
-//    }
-
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
@@ -420,7 +344,6 @@ class GrupoController extends Controller
         //Grupos
         $grupos = $this->grupo
             ->select(['grupos.*'])
-            ->where('empresa_id', '=', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

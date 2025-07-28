@@ -17,7 +17,7 @@ class NaturalidadeController extends Controller
         $this->naturalidade = $naturalidade;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = $this->naturalidade->get();
 
@@ -43,15 +43,9 @@ class NaturalidadeController extends Controller
         }
     }
 
-    public function store(NaturalidadeStoreRequest $request, $empresa_id)
+    public function store(NaturalidadeStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
-
             //Incluindo registro
             $this->naturalidade->create($request->all());
 
@@ -65,7 +59,7 @@ class NaturalidadeController extends Controller
         }
     }
 
-    public function update(NaturalidadeUpdateRequest $request, $id, $empresa_id)
+    public function update(NaturalidadeUpdateRequest $request, $id)
     {
         try {
             $registro = $this->naturalidade->find($id);
@@ -73,9 +67,6 @@ class NaturalidadeController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -90,7 +81,7 @@ class NaturalidadeController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->naturalidade->find($id);
@@ -98,9 +89,6 @@ class NaturalidadeController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //Tabela funcionarios
                 if (SuporteFacade::verificarRelacionamento('funcionarios', 'naturalidade_id', $id) > 0) {
@@ -123,7 +111,7 @@ class NaturalidadeController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);

@@ -34,7 +34,7 @@ class FuncionarioController extends Controller
         $this->funcionario = $funcionario;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = DB::table('funcionarios')
             ->leftJoin('identidade_orgaos', 'funcionarios.personal_identidade_orgao_id', '=', 'identidade_orgaos.id')
@@ -77,7 +77,7 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -138,15 +138,9 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function store(FuncionarioStoreRequest $request, $empresa_id)
+    public function store(FuncionarioStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
-
             //Incluindo registro
             $this->funcionario->create($request->all());
 
@@ -160,7 +154,7 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function update(FuncionarioUpdateRequest $request, $id, $empresa_id)
+    public function update(FuncionarioUpdateRequest $request, $id)
     {
         try {
             $registro = $this->funcionario->find($id);
@@ -168,9 +162,6 @@ class FuncionarioController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -185,7 +176,7 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->funcionario->find($id);
@@ -193,9 +184,6 @@ class FuncionarioController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //Tabela users
                 if (SuporteFacade::verificarRelacionamento('users', 'funcionario_id', $id) > 0) {
@@ -242,7 +230,7 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
@@ -264,6 +252,7 @@ class FuncionarioController extends Controller
             ->leftJoin('bancos', 'funcionarios.banco_id', '=', 'bancos.id')
             ->leftJoin('clientes as tomador_servico_clientes', 'funcionarios.tomador_servico_cliente_id', '=', 'tomador_servico_clientes.id')
             ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName', 'tomador_servico_clientes.name as tomadorServicoClienteName'])
+            ->orderby('funcionarios.name')
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;
@@ -349,9 +338,6 @@ class FuncionarioController extends Controller
     public function upload_foto(Request $request, $id)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($request['empresa_id']);
-
             $registro = $this->funcionario->find($id);
 
             if (!$registro) {
@@ -362,7 +348,6 @@ class FuncionarioController extends Controller
 
                 //Transação
                 $dadosAtual = array();
-                $dadosAtual['empresa_id'] = $request['empresa_id'];
                 $dadosAtual['name'] = $request['name'];
                 $dadosAtual['foto'] = 'Foto atualizada';
 
@@ -383,9 +368,6 @@ class FuncionarioController extends Controller
     public function upload_documento(Request $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($request['empresa_id']);
-
             //Incluir Registro
             if ($request['acao'] == 1) {
                 //Registro
@@ -433,11 +415,8 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function deletar_documento($funcionario_documento_id, $empresa_id)
+    public function deletar_documento($funcionario_documento_id)
     {
-        //Atualisar objeto Auth::user()
-        SuporteFacade::setUserLogged($empresa_id);
-
         $registro = FuncionarioDocumento::find($funcionario_documento_id);
 
         if (!$registro) {
@@ -454,7 +433,7 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function funcionario_acao_1_gerar_pdf_dados($funcionarios_ids, $empresa_id)
+    public function funcionario_acao_1_gerar_pdf_dados($funcionarios_ids)
     {
         try {
             //Limpar Querys executadas
@@ -491,7 +470,7 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function funcionario_acao_1_grade_funcionarios($empresa_id)
+    public function funcionario_acao_1_grade_funcionarios()
     {
         try {
             $registros = Funcionario
@@ -525,7 +504,7 @@ class FuncionarioController extends Controller
         return response()->json($registros, 200);
     }
 
-    public function cartoes_emergenciais_dados($empresa_id, $ids)
+    public function cartoes_emergenciais_dados($ids)
     {
         try {
             $ids = is_array($ids) ? $ids : explode(',', $ids);

@@ -17,7 +17,7 @@ class EmpresaController extends Controller
         $this->empresa = $empresa;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = $this->empresa->get();
 
@@ -43,15 +43,9 @@ class EmpresaController extends Controller
         }
     }
 
-    public function store(EmpresaStoreRequest $request, $empresa_id)
+    public function store(EmpresaStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
-
             //Incluindo registro
             $this->empresa->create($request->all());
 
@@ -65,7 +59,7 @@ class EmpresaController extends Controller
         }
     }
 
-    public function update(EmpresaUpdateRequest $request, $id, $empresa_id)
+    public function update(EmpresaUpdateRequest $request, $id)
     {
         try {
             $registro = $this->empresa->find($id);
@@ -73,9 +67,6 @@ class EmpresaController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -90,7 +81,7 @@ class EmpresaController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->empresa->find($id);
@@ -98,9 +89,6 @@ class EmpresaController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //Tabela ordens_servicos
                 if (SuporteFacade::verificarRelacionamento('ordens_servicos', 'empresa_id', $id) > 0) {
@@ -128,14 +116,7 @@ class EmpresaController extends Controller
         }
     }
 
-//    public function search($field, $value, $empresa_id)
-//    {
-//        $registros = $this->empresa->where($field, 'like', '%'.$value.'%')->get();
-//
-//        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
-//    }
-
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);

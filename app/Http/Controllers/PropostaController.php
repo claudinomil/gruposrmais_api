@@ -9,6 +9,7 @@ use App\Models\Cliente;
 use App\Models\PropostaServico;
 use App\Models\Servico;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Proposta;
 
@@ -21,8 +22,10 @@ class PropostaController extends Controller
         $this->proposta = $proposta;
     }
 
-    public function index($empresa_id)
+    public function index(Request $request)
     {
+        $empresa_id = $request->header('X-Empresa-Id');
+
         $registros = DB::table('propostas')
             ->leftJoin('clientes', 'propostas.cliente_id', '=', 'clientes.id')
             ->select(['propostas.*', 'clientes.name as clienteName'])
@@ -54,7 +57,7 @@ class PropostaController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -63,7 +66,7 @@ class PropostaController extends Controller
             $registros['clientes'] = Cliente::all();
 
             //Servicos
-            $registros['servicos'] = Servico::where('empresa_id', '=', $empresa_id)->get();
+            $registros['servicos'] = Servico::all();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -75,14 +78,25 @@ class PropostaController extends Controller
         }
     }
 
-    public function store(PropostaStoreRequest $request, $empresa_id)
+    public function store(PropostaStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
+            //Empresa ID no $request
+            $request['empresa_id'] = $request->header('X-Empresa-Id');
 
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
+            //Acertos campos''''''''''''''''''''''''''''''''''''''''''''''''
+            //numero_proposta
+            $reg = Proposta::orderBy('numero_proposta', 'desc')->first();
+
+            if ($reg) {
+                $request['numero_proposta'] = $reg['numero_proposta'] + 1;
+            } else {
+                $request['numero_proposta'] = 1;
+            }
+
+            //ano_proposta
+            $request['data_proposta'] = substr($request['data_proposta'], 6, 4);
+            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
             //Incluindo registro
             $registro = $this->proposta->create($request->all());
@@ -101,7 +115,7 @@ class PropostaController extends Controller
         }
     }
 
-    public function update(PropostaUpdateRequest $request, $id, $empresa_id)
+    public function update(PropostaUpdateRequest $request, $id)
     {
         try {
             $registro = $this->proposta->find($id);
@@ -109,9 +123,6 @@ class PropostaController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -130,7 +141,7 @@ class PropostaController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->proposta->find($id);
@@ -138,9 +149,6 @@ class PropostaController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -162,7 +170,7 @@ class PropostaController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
@@ -175,7 +183,6 @@ class PropostaController extends Controller
         $registros = $this->proposta
             ->leftJoin('clientes', 'propostas.cliente_id', '=', 'clientes.id')
             ->select(['propostas.*', 'clientes.name as clienteName'])
-            ->where('propostas.empresa_id', '=', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

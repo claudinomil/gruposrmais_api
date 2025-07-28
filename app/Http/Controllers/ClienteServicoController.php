@@ -31,7 +31,7 @@ class ClienteServicoController extends Controller
         $this->cliente_servico = $cliente_servico;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = $this->cliente_servico
             ->leftJoin('clientes', 'clientes_servicos.cliente_id', '=', 'clientes.id')
@@ -39,7 +39,6 @@ class ClienteServicoController extends Controller
             ->leftJoin('servicos', 'clientes_servicos.servico_id', '=', 'servicos.id')
             ->leftJoin('servico_status', 'clientes_servicos.servico_status_id', '=', 'servico_status.id')
             ->select(['clientes_servicos.*', 'clientes.name as clienteName', 'funcionarios.name as funcionarioName', 'servicos.servico_tipo_id', 'servicos.name as servicoName', 'servico_status.name as servicoStatusName'])
-            ->where('servicos.empresa_id', $empresa_id)
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -68,7 +67,7 @@ class ClienteServicoController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -77,7 +76,7 @@ class ClienteServicoController extends Controller
             $registros['clientes'] = Cliente::all();
 
             //Servicos
-            $registros['servicos'] = Servico::where('empresa_id', '=', $empresa_id)->get();
+            $registros['servicos'] = Servico::all();
 
             //Servico Status
             $registros['servico_status'] = ServicoStatus::all();
@@ -98,12 +97,9 @@ class ClienteServicoController extends Controller
         }
     }
 
-    public function store(Request $request, $empresa_id)
+    public function store(Request $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
             //Datas formato americano'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
             if ($request['data_inicio'] != '') {$request['data_inicio'] = Carbon::createFromFormat('d/m/Y', $request['data_inicio'])->format('Y-m-d');}
             if ($request['data_fim'] != '') {$request['data_fim'] = Carbon::createFromFormat('d/m/Y', $request['data_fim'])->format('Y-m-d');}
@@ -238,14 +234,14 @@ class ClienteServicoController extends Controller
                 SuporteFacade::editClienteServicoBrigadistas(1, $cliente_servico_id, $request);
 
                 //Gravar Brigada
-                SuporteFacade::createBrigada($cliente_servico_id, $empresa_id);
+                SuporteFacade::createBrigada($cliente_servico_id);
             }
             //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
             //Tipo Serviço: VISITA TÉCNICA''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
             if ($servico_tipo_id == 3) {
                 //Gravar Visita Técnica
-                SuporteFacade::createVisitaTecnica($cliente_servico_id, $empresa_id);
+                SuporteFacade::createVisitaTecnica($cliente_servico_id);
             }
             //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -259,12 +255,9 @@ class ClienteServicoController extends Controller
         }
     }
 
-    public function update(Request $request, $id, $empresa_id)
+    public function update(Request $request, $id)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
             //Datas formato americano'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
             if ($request['data_inicio'] != '') {$request['data_inicio'] = Carbon::createFromFormat('d/m/Y', $request['data_inicio'])->format('Y-m-d');}
             if ($request['data_fim'] != '') {$request['data_fim'] = Carbon::createFromFormat('d/m/Y', $request['data_fim'])->format('Y-m-d');}
@@ -428,7 +421,7 @@ class ClienteServicoController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->cliente_servico->find($id);
@@ -439,9 +432,6 @@ class ClienteServicoController extends Controller
                 //Verificar se operação pode ser realizada
                 $validacao = SuporteFacade::validarClienteServico(2, $id);
                 if ($validacao) {return $this->sendResponse($validacao, 4060, null, null);}
-
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
 
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -484,22 +474,7 @@ class ClienteServicoController extends Controller
         }
     }
 
-//    public function search($field, $value, $empresa_id)
-//    {
-//        $registros = $this->cliente_servico
-//            ->leftJoin('clientes', 'clientes_servicos.cliente_id', '=', 'clientes.id')
-//            ->leftJoin('funcionarios', 'clientes_servicos.responsavel_funcionario_id', '=', 'funcionarios.id')
-//            ->leftJoin('servicos', 'clientes_servicos.servico_id', '=', 'servicos.id')
-//            ->leftJoin('servico_status', 'clientes_servicos.servico_status_id', '=', 'servico_status.id')
-//            ->select(['clientes_servicos.*', 'clientes.name as clienteName', 'funcionarios.name as funcionarioName', 'servicos.servico_tipo_id', 'servicos.name as servicoName', 'servico_status.name as servicoStatusName'])
-//            ->where('servicos.empresa_id', $empresa_id)
-//            ->where($field, 'like', '%' . $value . '%')
-//            ->get();
-//
-//        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
-//    }
-
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
@@ -515,7 +490,6 @@ class ClienteServicoController extends Controller
             ->leftJoin('servicos', 'clientes_servicos.servico_id', '=', 'servicos.id')
             ->leftJoin('servico_status', 'clientes_servicos.servico_status_id', '=', 'servico_status.id')
             ->select(['clientes_servicos.*', 'clientes.name as clienteName', 'funcionarios.name as funcionarioName', 'servicos.servico_tipo_id', 'servicos.name as servicoName', 'servico_status.name as servicoStatusName'])
-            ->where('servicos.empresa_id', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;
@@ -707,10 +681,7 @@ class ClienteServicoController extends Controller
             if (Hash::check($request['password'], $user[0]->password)) {
                 $brigada_escala = BrigadaEscala::find($brigada_escala_id);
 
-                //Pegar user_id e empresa_id para usar nas transações'''''''''''''''''
                 $user_id = $user[0]->id;
-                $empresa_id = SuporteFacade::retornaEmpresaId(1, $brigada_escala_id);
-                //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 if (!$brigada_escala) {
                     return $this->sendResponse('Escala não encontrada.', 4060, null, null);
@@ -746,7 +717,7 @@ class ClienteServicoController extends Controller
                         $brigada_escala->update($request->all());
 
                         //Log de Transações: Gravar Transação
-                        Transacoes::transacaoRecord(5, 2, 'brigadas', $dadosAnterior, $dadosAtual, $empresa_id, $user_id);
+                        Transacoes::transacaoRecord(5, 2, 'brigadas', $dadosAnterior, $dadosAtual, $user_id);
                     }
 
                     //OPERAÇÃO: Iniciar Ronda
@@ -761,55 +732,13 @@ class ClienteServicoController extends Controller
 
                         //Log de Transações'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                         //gravar transacao
-                        Transacoes::transacaoRecord(3, 1, 'brigadas', $request, $request, $empresa_id, $user_id);
+                        Transacoes::transacaoRecord(3, 1, 'brigadas', $request, $request, $user_id);
                         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                         //Gravar dados na tabela brigadas_rondas_seguranca_medidas''''''''''''''''''''''''''''''''''''''
                         $brigada_ronda_id = $registro['id'];
 
                         SuporteFacade::createRondaSegurancaMedidas($brigada_ronda_id, $request->all());
-
-
-
-//                        $numero_pavimentos = 50;
-//                        $ids_seguranca_medidas = array_unique($request['ids_seguranca_medidas']); //Retirando ids repetidos
-//
-//                        for($i=1; $i<=$numero_pavimentos; $i++) {
-//                            foreach ($ids_seguranca_medidas as $seguranca_medida_id) {
-//                                if (isset($request['seguranca_medida_id_' . $i . '_' . $seguranca_medida_id])) {
-//                                    //Dados Atual
-//                                    $dadosAtual = array();
-//                                    $dadosAtual['brigada_ronda_id'] = $brigada_ronda_id;
-//                                    $dadosAtual['pavimento'] = $i;
-//                                    $dadosAtual['seguranca_medida_id'] = $seguranca_medida_id;
-//                                    $dadosAtual['seguranca_medida_nome'] = $request['seguranca_medida_nome_' . $i . '_' . $seguranca_medida_id];
-//                                    $dadosAtual['seguranca_medida_quantidade'] = $request['seguranca_medida_quantidade_' . $i . '_' . $seguranca_medida_id];
-//                                    $dadosAtual['seguranca_medida_tipo'] = $request['seguranca_medida_tipo_' . $i . '_' . $seguranca_medida_id];
-//                                    $dadosAtual['seguranca_medida_observacao'] = $request['seguranca_medida_observacao_' . $i . '_' . $seguranca_medida_id];
-//                                    $dadosAtual['status'] = $request['status_' . $i . '_' . $seguranca_medida_id];
-//                                    $dadosAtual['observacao'] = $request['observacao_' . $i . '_' . $seguranca_medida_id];
-//
-//                                    $brigada_ronda_seguranca_medida = BrigadaRondaSegurancaMedida::where('brigada_ronda_id', $brigada_ronda_id)->where('pavimento', $i)->where('seguranca_medida_id', $seguranca_medida_id)->get();
-//
-//                                    if ($brigada_ronda_seguranca_medida->count() == 1) {
-//                                        BrigadaRondaSegurancaMedida::where('brigada_ronda_id', $brigada_ronda_id)->where('pavimento', $i)->where('seguranca_medida_id', $seguranca_medida_id)->update($dadosAtual);
-//
-//                                        //gravar transacao
-//                                        Transacoes::transacaoRecord(4, 2, 'brigadas', $brigada_ronda_seguranca_medida[0], $dadosAtual);
-//                                    } else {
-//                                        BrigadaRondaSegurancaMedida::create($dadosAtual);
-//
-//                                        //gravar transacao
-//                                        Transacoes::transacaoRecord(4, 1, 'brigadas', $dadosAtual, $dadosAtual);
-//                                    }
-//                                }
-//                            }
-//                        }
-
-
-
-
-
                         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                     }
 
@@ -843,7 +772,7 @@ class ClienteServicoController extends Controller
                         $brigada_escala->update($request->all());
 
                         //Log de Transações: Gravar Transação
-                        Transacoes::transacaoRecord(5, 2, 'brigadas', $dadosAnterior, $dadosAtual, $empresa_id, $user_id);
+                        Transacoes::transacaoRecord(5, 2, 'brigadas', $dadosAnterior, $dadosAtual, $user_id);
                     }
 
                     return $this->sendResponse('Escala atualizada com sucesso.', 2000, null, $brigada_escala);

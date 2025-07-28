@@ -93,28 +93,6 @@ class Proposta extends Model
         }
     }
 
-    public function setNumeroPropostaAttribute($value)
-    {
-        if ($value == '') {
-            $reg = Proposta::latest()->first();
-
-            if ($reg) {
-                $value = $reg['numero_proposta'] + 1;
-            } else {
-                $value = 3000;
-            }
-
-            $this->attributes['numero_proposta'] = $value;
-        }
-    }
-
-    public function setAnoPropostaAttribute($value)
-    {
-        if ($value == '') {
-            $this->attributes['ano_proposta'] = date('Y');
-        }
-    }
-
 
 
 

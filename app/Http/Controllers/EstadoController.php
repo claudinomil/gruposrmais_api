@@ -17,7 +17,7 @@ class EstadoController extends Controller
         $this->estado = $estado;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = $this->estado->all();
 
@@ -43,15 +43,9 @@ class EstadoController extends Controller
         }
     }
 
-    public function store(EstadoStoreRequest $request, $empresa_id)
+    public function store(EstadoStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
-
             //Incluindo registro
             $this->estado->create($request->all());
 
@@ -65,7 +59,7 @@ class EstadoController extends Controller
         }
     }
 
-    public function update(EstadoUpdateRequest $request, $id, $empresa_id)
+    public function update(EstadoUpdateRequest $request, $id)
     {
         try {
             $registro = $this->estado->find($id);
@@ -73,9 +67,6 @@ class EstadoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -90,7 +81,7 @@ class EstadoController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->estado->find($id);
@@ -98,9 +89,6 @@ class EstadoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //Tabela fornecedores
                 if (SuporteFacade::verificarRelacionamento('fornecedores', 'identidade_estado_id', $id) > 0) {
@@ -138,7 +126,7 @@ class EstadoController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);

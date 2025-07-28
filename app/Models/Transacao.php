@@ -12,7 +12,6 @@ class Transacao extends Model
     protected $table = 'transacoes';
 
     protected $fillable = [
-        'empresa_id',
         'date',
         'time',
         'user_id',

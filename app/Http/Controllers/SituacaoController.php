@@ -16,7 +16,7 @@ class SituacaoController extends Controller
         $this->situacao = $situacao;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = $this->situacao->get();
 
@@ -42,15 +42,9 @@ class SituacaoController extends Controller
         }
     }
 
-    public function store(SituacaoStoreRequest $request, $empresa_id)
+    public function store(SituacaoStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
-
             //Incluindo registro
             $this->situacao->create($request->all());
 
@@ -64,7 +58,7 @@ class SituacaoController extends Controller
         }
     }
 
-    public function update(SituacaoUpdateRequest $request, $id, $empresa_id)
+    public function update(SituacaoUpdateRequest $request, $id)
     {
         try {
             $registro = $this->situacao->find($id);
@@ -72,9 +66,6 @@ class SituacaoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -89,7 +80,7 @@ class SituacaoController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->situacao->find($id);
@@ -97,13 +88,10 @@ class SituacaoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                //Tabela users_configuracoes
-                if (SuporteFacade::verificarRelacionamento('users_configuracoes', 'situacao_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Usuários Configurações.', 2040, null, null);
+                //Tabela users
+                if (SuporteFacade::verificarRelacionamento('users', 'situacao_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Usuários.', 2040, null, null);
                 }
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -122,7 +110,7 @@ class SituacaoController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);

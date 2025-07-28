@@ -18,12 +18,11 @@ class ServicoController extends Controller
         $this->servico = $servico;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = $this->servico
             ::leftJoin('servico_tipos', 'servicos.servico_tipo_id', '=', 'servico_tipos.id')
             ->select(['servicos.*', 'servico_tipos.name as servicoTipoName'])
-            ->where('servicos.empresa_id', $empresa_id)
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -58,7 +57,7 @@ class ServicoController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -76,15 +75,9 @@ class ServicoController extends Controller
         }
     }
 
-    public function store(ServicoStoreRequest $request, $empresa_id)
+    public function store(ServicoStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
-
             //Incluindo registro
             $this->servico->create($request->all());
 
@@ -98,7 +91,7 @@ class ServicoController extends Controller
         }
     }
 
-    public function update(ServicoUpdateRequest $request, $id, $empresa_id)
+    public function update(ServicoUpdateRequest $request, $id)
     {
         try {
             $registro = $this->servico->find($id);
@@ -106,9 +99,6 @@ class ServicoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -123,7 +113,7 @@ class ServicoController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->servico->find($id);
@@ -131,9 +121,6 @@ class ServicoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //Tabela propostas_servicos
                 if (SuporteFacade::verificarRelacionamento('propostas_servicos', 'servico_id', $id) > 0) {
@@ -161,7 +148,7 @@ class ServicoController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
@@ -174,7 +161,6 @@ class ServicoController extends Controller
         $registros = $this->servico
             ::leftJoin('servico_tipos', 'servicos.servico_tipo_id', '=', 'servico_tipos.id')
             ->select(['servicos.*', 'servico_tipos.name as servicoTipoName'])
-            ->where('servicos.empresa_id', '=', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

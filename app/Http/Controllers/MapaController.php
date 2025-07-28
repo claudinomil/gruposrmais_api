@@ -21,7 +21,7 @@ class MapaController extends Controller
         $this->mapa = $mapa;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = $this->mapa->all();
 
@@ -49,7 +49,7 @@ class MapaController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -58,7 +58,7 @@ class MapaController extends Controller
             $registros['mapas_pontos_tipos'] = MapaPontoTipo::all();
 
             //Ordens de Serviços
-            $registros['ordens_servicos'] = OrdemServico::where('empresa_id', $empresa_id)->where('ordem_servico_tipo_id', 3)->orderby('id', 'DESC')->get();
+            $registros['ordens_servicos'] = OrdemServico::where('ordem_servico_tipo_id', 3)->orderby('id', 'DESC')->get();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -70,15 +70,9 @@ class MapaController extends Controller
         }
     }
 
-    public function store(MapaStoreRequest $request, $empresa_id)
+    public function store(MapaStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
-
             //Incluindo registro
             $this->mapa->create($request->all());
 
@@ -92,7 +86,7 @@ class MapaController extends Controller
         }
     }
 
-    public function update(MapaUpdateRequest $request, $id, $empresa_id)
+    public function update(MapaUpdateRequest $request, $id)
     {
         try {
             $registro = $this->mapa->find($id);
@@ -100,9 +94,6 @@ class MapaController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -117,7 +108,7 @@ class MapaController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->mapa->find($id);
@@ -125,9 +116,6 @@ class MapaController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -146,7 +134,7 @@ class MapaController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);

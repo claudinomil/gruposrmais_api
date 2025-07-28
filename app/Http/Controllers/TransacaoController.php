@@ -16,21 +16,20 @@ class TransacaoController extends Controller
         $this->transacao = $transacao;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = DB::table('transacoes')
             ->join('users', 'transacoes.user_id', '=', 'users.id')
             ->join('operacoes', 'transacoes.operacao_id', '=', 'operacoes.id')
             ->join('submodulos', 'transacoes.submodulo_id', '=', 'submodulos.id')
             ->select(['transacoes.*', 'users.name as userName', 'operacoes.name as operacaoName', 'submodulos.name as submoduloName'])
-            ->where('transacoes.empresa_id', $empresa_id)
             ->orderby('transacoes.date', 'DESC')
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
@@ -45,7 +44,6 @@ class TransacaoController extends Controller
             ->join('operacoes', 'transacoes.operacao_id', '=', 'operacoes.id')
             ->join('submodulos', 'transacoes.submodulo_id', '=', 'submodulos.id')
             ->select(['transacoes.*', 'users.name as userName', 'operacoes.name as operacaoName', 'submodulos.name as submoduloName'])
-            ->where('transacoes.empresa_id', '=', $empresa_id)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

@@ -59,7 +59,8 @@ class DatabaseSeeder extends Seeder
 
             Z_FakerSeeder::class,
 
-            ZZZ_20250706_Seeder::class
+            ZZZ_20250706_Seeder::class,
+            ZZZ_20250721_Seeder::class
         ]);
     }
 }

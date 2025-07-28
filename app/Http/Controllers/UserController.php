@@ -14,7 +14,6 @@ use App\Models\Modulo;
 use App\Models\SistemaAcesso;
 use App\Models\Situacao;
 use App\Models\Submodulo;
-use App\Models\UserConfiguracao;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +31,7 @@ class UserController extends Controller
         $this->user = $user;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = $this->user->get();
 
@@ -47,9 +46,6 @@ class UserController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, []);
             } else {
-                //buscar dados na tabela users_configuracoes
-                $registro['users_configuracoes'] = UserConfiguracao::where('user_id', '=', $id)->get();
-
                 //Verificar qtd de operações do usuário (para verificar se pode alterar alguns campos)
                 $registro['user_operacoes_qtd'] = SuporteFacade::verificarRelacionamento('transacoes', 'user_id', $id);
 
@@ -64,16 +60,13 @@ class UserController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
 
             //Empresas
             $registros['empresas'] = Empresa::all();
-
-            //User Configurações
-            $registros['users_configuracoes'] = UserConfiguracao::where('empresa_id', '=', $empresa_id)->get();
 
             //Grupos
             $registros['grupos'] = Grupo::all();
@@ -97,15 +90,9 @@ class UserController extends Controller
         }
     }
 
-    public function store(UserStoreRequest $request, $empresa_id)
+    public function store(UserStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
-
             //Campo avatar
             $request['avatar'] = 'build/assets/images/users/avatar-0.png';
 
@@ -115,9 +102,6 @@ class UserController extends Controller
 
             //Incluindo registro
             $registro = $this->user->create($request->all());
-
-            //Editar dados na tabela users_configuracoes
-            SuporteFacade::editUserConfiguracoes($registro['id'], $request);
 
             //Enviar $password (Disfarçada) para Client enviar E-mail do Primeiro Acesso
             $password = 'a2@-'.$password.'-_3l';
@@ -132,7 +116,7 @@ class UserController extends Controller
         }
     }
 
-    public function update(UserUpdateRequest $request, $id, $empresa_id)
+    public function update(UserUpdateRequest $request, $id)
     {
         try {
             $registro = $this->user->find($id);
@@ -140,14 +124,8 @@ class UserController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
-
-                //Editar dados na tabela users_configuracoes
-                SuporteFacade::editUserConfiguracoes($id, $request);
 
                 //retorno
                 return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
@@ -168,9 +146,8 @@ class UserController extends Controller
 
             //User
             $user = DB::table('users')
-                ->leftJoin('users_configuracoes', 'users_configuracoes.user_id', '=', 'users.id')
-                ->leftJoin('grupos', 'grupos.id', '=', 'users_configuracoes.grupo_id')
-                ->leftJoin('situacoes', 'situacoes.id', '=', 'users_configuracoes.situacao_id')
+                ->leftJoin('grupos', 'grupos.id', '=', 'users.grupo_id')
+                ->leftJoin('situacoes', 'situacoes.id', '=', 'users.situacao_id')
                 ->select(['users.*', 'grupos.name as grupoName', 'situacoes.name as situacaoName'])
                 ->where('users.id', '=', $id)
                 ->get();
@@ -285,11 +262,11 @@ class UserController extends Controller
         }
     }
 
-    public function editmodestyle(Request $request, $id, $empresa_id)
+    public function editmodestyle(Request $request, $id)
     {
         try {
             //Alterando registro
-            UserConfiguracao::where('user_id', $id)->where('empresa_id', $empresa_id)->update($request->all());
+            User::where('id', $id)->update($request->all());
 
             return $this->sendResponse('Modo/Style atualizado com sucesso.', 2000, null, null);
         } catch (\Exception $e) {
@@ -301,7 +278,7 @@ class UserController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->user->find($id);
@@ -309,9 +286,6 @@ class UserController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //Tabela visitas_tecnicas
                 if (SuporteFacade::verificarRelacionamento('visitas_tecnicas', 'executado_user_id', $id) > 0) {
@@ -325,9 +299,6 @@ class UserController extends Controller
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                //Apagarr dados na tabela users_configuracoes
-                UserConfiguracao::where('user_id', '=', $id)->delete();
-
                 $registro->delete();
 
                 return $this->sendResponse('Registro excluído com sucesso.', 2000, null, null);
@@ -342,7 +313,7 @@ class UserController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
@@ -404,15 +375,12 @@ class UserController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
 
-    public function userPermissoesSettings($searchSubmodulo, $empresa_id)
+    public function userPermissoesSettings($searchSubmodulo)
     {
         try {
             if (!Auth::check()) {
                 return $this->sendResponse('Usuário não está logado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Cria array
                 $registros = array();
 
@@ -420,11 +388,7 @@ class UserController extends Controller
                 $registros['userData'] = Auth::user();
 
                 //Empresas Usuário Logado
-                $registros['userEmpresas'] = UserConfiguracao
-                    ::join('empresas', 'users_configuracoes.empresa_id', 'empresas.id')
-                    ->select('empresas.*')
-                    ->where('users_configuracoes.user_id', Auth::user()->id)
-                    ->get();
+                $registros['userEmpresas'] = Empresa::all();
 
                 //Permissões Usuário Logado
                 $registros['userPermissoes'] = DB::table('grupos_permissoes')
@@ -467,53 +431,6 @@ class UserController extends Controller
             return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
         }
     }
-
-    public function userLoggedData($empresa_id)
-    {
-        try {
-            if (!Auth::check()) {
-                return $this->sendResponse('Usuário não está logado.', 4040, null, null);
-            } else {
-                //Cria array
-                $registro = array();
-
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
-                //Dados Usuário Logado
-                $registro['userData'] = Auth::user();
-
-                return $this->sendResponse('Registro enviada com sucesso.', 2000, null, $registro);
-            }
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return $this->sendResponse($e->getMessage(), 5000, null, null);
-            }
-
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-        }
-    }
-
-//    public function logout()
-//    {
-//        auth()->logout();
-//
-//        return $this->sendResponse('Logout realizado com sucesso e o token foi excluído.', 4001, null, null);
-//    }
-
-//    public function logout()
-//    {
-//        if (Auth::check()) {
-//            //Removendo Token
-//            $user = Auth::user()->token();
-//            $user->revoke();
-//
-//            return $this->sendResponse('Logout realizado com sucesso e o token foi excluído.', 4001, null, null);
-//
-//        }
-//
-//        return $this->sendResponse('Logout não realizado.', 5000, null, null);
-//    }
 
     public function exist($email)
     {

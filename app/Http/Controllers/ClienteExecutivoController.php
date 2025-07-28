@@ -24,7 +24,7 @@ class ClienteExecutivoController extends Controller
         $this->cliente_executivo = $cliente_executivo;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = $this->cliente_executivo
             ->leftJoin('clientes', 'clientes_executivos.cliente_id', '=', 'clientes.id')
@@ -53,7 +53,7 @@ class ClienteExecutivoController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -83,15 +83,9 @@ class ClienteExecutivoController extends Controller
         }
     }
 
-    public function store(ClienteExecutivoStoreRequest $request, $empresa_id)
+    public function store(ClienteExecutivoStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
-
             //Incluindo registro
             $registro = $this->cliente_executivo->create($request->all());
 
@@ -106,7 +100,7 @@ class ClienteExecutivoController extends Controller
         }
     }
 
-    public function update(ClienteExecutivoUpdateRequest $request, $id, $empresa_id)
+    public function update(ClienteExecutivoUpdateRequest $request, $id)
     {
         try {
             $registro = $this->cliente_executivo->find($id);
@@ -114,9 +108,6 @@ class ClienteExecutivoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -131,7 +122,7 @@ class ClienteExecutivoController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->cliente_executivo->find($id);
@@ -139,9 +130,6 @@ class ClienteExecutivoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //Tabela ordens_servicos_executivos
                 if (SuporteFacade::verificarRelacionamento('ordens_servicos_executivos', 'cliente_executivo_id', $id) > 0) {
@@ -173,7 +161,7 @@ class ClienteExecutivoController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
@@ -263,9 +251,6 @@ class ClienteExecutivoController extends Controller
     public function upload_foto(Request $request, $id)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($request['empresa_id']);
-
             $registro = $this->cliente_executivo->find($id);
 
             if (!$registro) {
@@ -276,7 +261,6 @@ class ClienteExecutivoController extends Controller
 
                 //Transação
                 $dadosAtual = array();
-                $dadosAtual['empresa_id'] = $request['empresa_id'];
                 $dadosAtual['name'] = $request['name'];
                 $dadosAtual['foto'] = 'Foto atualizada';
 
@@ -297,9 +281,6 @@ class ClienteExecutivoController extends Controller
     public function upload_documento(Request $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($request['empresa_id']);
-
             //Incluir Registro
             if ($request['acao'] == 1) {
                 //Registro
@@ -337,11 +318,8 @@ class ClienteExecutivoController extends Controller
         }
     }
 
-    public function deletar_documento($cliente_executivo_documento_id, $empresa_id)
+    public function deletar_documento($cliente_executivo_documento_id)
     {
-        //Atualisar objeto Auth::user()
-        SuporteFacade::setUserLogged($empresa_id);
-
         $registro = ClienteExecutivoDocumento::find($cliente_executivo_documento_id);
 
         if (!$registro) {
@@ -365,7 +343,7 @@ class ClienteExecutivoController extends Controller
         return response()->json($registros, 200);
     }
 
-    public function cartoes_emergenciais_dados($empresa_id, $ids)
+    public function cartoes_emergenciais_dados($ids)
     {
         try {
             $ids = is_array($ids) ? $ids : explode(',', $ids);

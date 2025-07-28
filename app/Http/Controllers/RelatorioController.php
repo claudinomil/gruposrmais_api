@@ -20,14 +20,14 @@ use Illuminate\Support\Facades\DB;
 
 class RelatorioController extends Controller
 {
-    public function index($empresa_id)
+    public function index()
     {
         //Retorno
         $content = array();
 
-        $content['grupos'] = Grupo::where('empresa_id', $empresa_id)->orderby('name')->get();
+        $content['grupos'] = Grupo::orderby('name')->get();
         $content['situacoes'] = Situacao::orderby('name')->get();
-        $content['users'] = User::join('users_configuracoes', 'users_configuracoes.user_id', 'users.id')->where('empresa_id', $empresa_id)->orderby('name')->get();
+        $content['users'] = User::orderby('name')->get();
         $content['submodulos'] = Submodulo::orderby('name')->get();
         $content['operacoes'] = Operacao::orderby('name')->get();
         $content['clientes_executivos'] = ClienteExecutivo::join('clientes', 'clientes.id', 'clientes_executivos.cliente_id')->select('clientes_executivos.*')->orderby('clientes_executivos.executivo_nome')->get();
@@ -36,11 +36,8 @@ class RelatorioController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
     }
 
-    public function relatorios($empresa_id)
+    public function relatorios()
     {
-        //Atualisar objeto Auth::user()
-        SuporteFacade::setUserLogged($empresa_id);
-
         //Retorno
         $content = array();
 
@@ -65,7 +62,7 @@ class RelatorioController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
     }
 
-    public function relatorio1($empresa_id, $grupo_id, $idioma)
+    public function relatorio1($grupo_id, $idioma)
     {
         //Relatório Data
         $relatorio_data = date('d/m/Y');
@@ -82,7 +79,7 @@ class RelatorioController extends Controller
         if ($grupo_id == 0) {
             $relatorio_parametros .= 'Todos os Grupos';
         } else {
-            $grupo = Grupo::where('empresa_id', $empresa_id)->where('id', $grupo_id)->get();
+            $grupo = Grupo::where('id', $grupo_id)->get();
             $relatorio_parametros .= $grupo[0]['name'];
         }
         if ($idioma == 2) {$relatorio_parametros .= ' / '.'Inglês';}
@@ -90,7 +87,6 @@ class RelatorioController extends Controller
         //Registros
         $relatorio_registros = Grupo
             ::select('grupos.*')
-            ->where('empresa_id', $empresa_id)
             ->where(function($query) use($grupo_id) {
                 if ($grupo_id != 0) {$query->where('grupos.id', $grupo_id);}
             })
@@ -108,7 +104,7 @@ class RelatorioController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
     }
 
-    public function relatorio2($empresa_id, $grupo_id, $situacao_id, $idioma)
+    public function relatorio2($grupo_id, $situacao_id, $idioma)
     {
         //Relatório Data
         $relatorio_data = date('d/m/Y');
@@ -125,7 +121,7 @@ class RelatorioController extends Controller
         if ($grupo_id == 0) {
             $relatorio_parametros .= 'Todos os Grupos';
         } else {
-            $grupo = Grupo::where('empresa_id', $empresa_id)->where('id', $grupo_id)->get();
+            $grupo = Grupo::where('id', $grupo_id)->get();
             $relatorio_parametros .= $grupo[0]['name'];
         }
         if ($situacao_id == 0) {
@@ -138,11 +134,9 @@ class RelatorioController extends Controller
 
         //Registros
         $relatorio_registros = User
-            ::join('users_configuracoes', 'users_configuracoes.user_id', 'users.id')
-            ->join('grupos', 'grupos.id', 'users_configuracoes.grupo_id')
-            ->join('situacoes', 'situacoes.id', 'users_configuracoes.situacao_id')
-            ->select('users.*', 'users_configuracoes.*', 'grupos.name as grupo', 'situacoes.name as situacao')
-            ->where('users_configuracoes.empresa_id', $empresa_id)
+            ::join('grupos', 'grupos.id', 'users.grupo_id')
+            ->join('situacoes', 'situacoes.id', 'users_.situacao_id')
+            ->select('users.*', 'grupos.name as grupo', 'situacoes.name as situacao')
             ->where(function($query) use($grupo_id, $situacao_id) {
                 if ($grupo_id != 0) {$query->where('grupos.id', $grupo_id);}
                 if ($situacao_id != 0) {$query->where('situacoes.id', $situacao_id);}
@@ -161,7 +155,7 @@ class RelatorioController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
     }
 
-    public function relatorio3($empresa_id, $data, $user_id, $submodulo_id, $operacao_id, $dado, $idioma)
+    public function relatorio3($data, $user_id, $submodulo_id, $operacao_id, $dado, $idioma)
     {
         //Relatório Data
         $relatorio_data = date('d/m/Y');
@@ -237,7 +231,7 @@ class RelatorioController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
     }
 
-    public function relatorio6($empresa_id, $data_inicio, $data_fim, $cidade_id, $cidade, $idioma)
+    public function relatorio6($data_inicio, $data_fim, $cidade_id, $cidade, $idioma)
     {
         //Relatório Data
         $relatorio_data = date('d/m/Y');

@@ -21,7 +21,7 @@ class VeiculoController extends Controller
         $this->veiculo = $veiculo;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         $registros = DB::table('veiculos')
             ->leftJoin('veiculo_categorias', 'veiculos.veiculo_categoria_id', '=', 'veiculo_categorias.id')
@@ -60,7 +60,7 @@ class VeiculoController extends Controller
         }
     }
 
-    public function auxiliary($empresa_id)
+    public function auxiliary()
     {
         try {
             $registros = array();
@@ -87,15 +87,9 @@ class VeiculoController extends Controller
         }
     }
 
-    public function store(VeiculoStoreRequest $request, $empresa_id)
+    public function store(VeiculoStoreRequest $request)
     {
         try {
-            //Atualisar objeto Auth::user()
-            SuporteFacade::setUserLogged($empresa_id);
-
-            //Colocar empresa_id no Request
-            $request['empresa_id'] = $empresa_id;
-
             //Incluindo registro
             $this->veiculo->create($request->all());
 
@@ -109,7 +103,7 @@ class VeiculoController extends Controller
         }
     }
 
-    public function update(VeiculoUpdateRequest $request, $id, $empresa_id)
+    public function update(VeiculoUpdateRequest $request, $id)
     {
         try {
             $registro = $this->veiculo->find($id);
@@ -117,9 +111,6 @@ class VeiculoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -134,7 +125,7 @@ class VeiculoController extends Controller
         }
     }
 
-    public function destroy($id, $empresa_id)
+    public function destroy($id)
     {
         try {
             $registro = $this->veiculo->find($id);
@@ -142,9 +133,6 @@ class VeiculoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Atualisar objeto Auth::user()
-                SuporteFacade::setUserLogged($empresa_id);
-
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //Tabela ordens_servicos_veiculos
                 if (SuporteFacade::verificarRelacionamento('ordens_servicos_veiculos', 'veiculo_id', $id) > 0) {
@@ -167,7 +155,7 @@ class VeiculoController extends Controller
         }
     }
 
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);

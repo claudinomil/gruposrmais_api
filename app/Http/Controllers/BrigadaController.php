@@ -21,7 +21,7 @@ class BrigadaController extends Controller
         $this->brigada = $brigada;
     }
 
-    public function index($empresa_id)
+    public function index()
     {
         //Registros para Grade
         $registros = ClienteServico
@@ -66,32 +66,13 @@ class BrigadaController extends Controller
         }
     }
 
-//    public function search($field, $value, $empresa_id)
-//    {
-//        //Registros para Grade
-//        $registros = ClienteServico
-//            ::Join('brigadas', 'clientes_servicos.id', '=', 'brigadas.cliente_servico_id')
-//            ->leftJoin('servicos', 'clientes_servicos.servico_id', '=', 'servicos.id')
-//            ->leftJoin('clientes', 'clientes_servicos.cliente_id', '=', 'clientes.id')
-//            ->leftJoin('servico_status', 'clientes_servicos.servico_status_id', '=', 'servico_status.id')
-//            ->leftJoin('funcionarios', 'clientes_servicos.responsavel_funcionario_id', '=', 'funcionarios.id')
-//            ->select(['brigadas.id', 'clientes_servicos.data_inicio', 'servicos.name as servicoName', 'clientes.name as clienteName', 'servico_status.name as servicoStatusName', 'funcionarios.name as funcionarioName'])
-//            ->where('brigadas.empresa_id', '=', $empresa_id)
-//            ->where('servicos.servico_tipo_id', '=', 1)
-//            ->where($field, 'like', '%' . $value . '%')
-//            ->get();
-//
-//        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
-//    }
-
-    public function filter($array_dados, $empresa_id)
+    public function filter($array_dados)
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
 
         //Limpar Querys executadas
         //DB::enableQueryLog();
-
 
         //Registros
         $registros = ClienteServico
@@ -101,7 +82,6 @@ class BrigadaController extends Controller
             ->leftJoin('servico_status', 'clientes_servicos.servico_status_id', '=', 'servico_status.id')
             ->leftJoin('funcionarios', 'clientes_servicos.responsavel_funcionario_id', '=', 'funcionarios.id')
             ->select(['brigadas.id', 'clientes_servicos.data_inicio', 'servicos.name as servicoName', 'clientes.name as clienteName', 'servico_status.name as servicoStatusName', 'funcionarios.name as funcionarioName'])
-            ->where('brigadas.empresa_id', '=', $empresa_id)
             ->where('servicos.servico_tipo_id', '=', 1)
             ->where(function($query) use($filtros) {
                 //Variavel para controle
