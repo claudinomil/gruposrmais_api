@@ -13,6 +13,7 @@ class Funcionario extends Model
     protected $table = 'funcionarios';
 
     protected $fillable = [
+        'empresa_id',
         'tomador_servico_cliente_id',
         'name',
         'nome_profissional',
@@ -33,6 +34,10 @@ class Funcionario extends Model
         'telefone_2',
         'celular_1',
         'celular_2',
+        'carteira_nacional_estado_id',
+        'carteira_nacional_orgao_id',
+        'carteira_nacional_numero',
+        'carteira_nacional_data_emissao',
         'personal_identidade_estado_id',
         'personal_identidade_orgao_id',
         'personal_identidade_numero',
@@ -41,6 +46,11 @@ class Funcionario extends Model
         'professional_identidade_orgao_id',
         'professional_identidade_numero',
         'professional_identidade_data_emissao',
+        'titulo_eleitor_numero',
+        'titulo_eleitor_zona',
+        'titulo_eleitor_secao',
+        'atestado_saude_ocupacional_tipo_id',
+        'atestado_saude_ocupacional_data_emissao',
         'cpf',
         'pis',
         'pasep',
@@ -60,7 +70,8 @@ class Funcionario extends Model
         'data_afastamento',
         'pix_tipo_id',
         'pix_chave',
-        'foto',
+        'fotografia_documento',
+        'fotografia_cartao_emergencial',
         'fumante',
         'quantidade_cigarros_dia',
         'bebida_alcoolica',
@@ -126,8 +137,10 @@ class Funcionario extends Model
         'data_demissao',
         'data_cadastro',
         'data_afastamento',
+        'carteira_nacional_data_emissao',
         'personal_identidade_data_emissao',
-        'professional_identidade_data_emissao'
+        'professional_identidade_data_emissao',
+        'atestado_saude_ocupacional_data_emissao'
     ];
 
     public function setNameAttribute($value) {$this->attributes['name'] = mb_strtoupper($value);}
@@ -149,10 +162,13 @@ class Funcionario extends Model
     public function setBairroAttribute($value) {$this->attributes['bairro'] = mb_strtoupper($value);}
     public function setLocalidadeAttribute($value) {$this->attributes['localidade'] = mb_strtoupper($value);}
     public function setUfAttribute($value) {$this->attributes['uf'] = mb_strtoupper($value);}
-    public function setFotoAttribute($value) {$this->attributes['foto'] = mb_strtolower($value);}
+    public function setFotografiaDocumentoAttribute($value) {$this->attributes['fotografia_documento'] = mb_strtolower($value);}
+    public function setFotografiaCartaoEmergencialAttribute($value) {$this->attributes['fotografia_cartao_emergencial'] = mb_strtolower($value);}
 
+    public function setCarteiraNacionalDataEmissaoAttribute($value) {if ($value != '') {$this->attributes['carteira_nacional_data_emissao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
     public function setPersonalIdentidadeDataEmissaoAttribute($value) {if ($value != '') {$this->attributes['personal_identidade_data_emissao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
     public function setProfessionalIdentidadeDataEmissaoAttribute($value) {if ($value != '') {$this->attributes['professional_identidade_data_emissao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
+    public function setAtestadoSaudeOcupacionalDataEmissaoAttribute($value) {if ($value != '') {$this->attributes['atestado_saude_ocupacional_data_emissao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
     public function setDataNascimentoAttribute($value) {if ($value != '') {$this->attributes['data_nascimento'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
     public function setDataAdmissaoAttribute($value) {if ($value != '') {$this->attributes['data_admissao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
     public function setDataDemissaoAttribute($value) {if ($value != '') {$this->attributes['data_demissao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}

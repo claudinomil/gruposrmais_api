@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class EscalaTipo extends Model
+class AtestadoSaudeOcupacionalTipo extends Model
 {
     use HasFactory;
 
-    protected $table = 'escala_tipos';
+    protected $table = 'atestado_saude_ocupacional_tipos';
 
     protected $fillable = [
         'name'

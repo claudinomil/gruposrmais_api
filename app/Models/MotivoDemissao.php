@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class EscalaTipo extends Model
+class MotivoDemissao extends Model
 {
     use HasFactory;
 
-    protected $table = 'escala_tipos';
+    protected $table = 'motivos_demissoes';
 
     protected $fillable = [
         'name'

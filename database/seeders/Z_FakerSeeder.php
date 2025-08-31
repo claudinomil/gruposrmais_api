@@ -147,6 +147,7 @@ class Z_FakerSeeder extends Seeder
                 'cnpj' => $cnpj,
                 'cpf' => $cpf,
                 'email' => $faker->email,
+                'rede_cliente_id' => $faker->numberBetween(1, 2),
                 'principal_cliente_id' => $faker->numberBetween(3, 4),
                 'telefone_1' => '21'.$faker->numerify('########'),
                 'telefone_2' => '21'.$faker->numerify('########'),
@@ -262,7 +263,8 @@ class Z_FakerSeeder extends Seeder
                 'data_prevista' => '24/07/2025',
                 'hora_prevista' => '18:09',
                 'visita_tecnica_status_id' => $faker->numberBetween(1, 2),
-                'cliente_id' => $faker->numberBetween(1, 3)
+                'cliente_id' => $faker->numberBetween(1, 3),
+                'vt_cs' => $faker->numberBetween(1, 2)
             ]);
         }
 

@@ -54,7 +54,7 @@ class FuncionariosSeeder extends Seeder
             'data_demissao' => NULL,
             'data_cadastro' => NULL,
             'data_afastamento' => NULL,
-            'foto' => 'build/assets/images/funcionarios/funcionario-0.png',
+            'fotografia_documento' => 'build/assets/images/funcionarios/funcionario-0.png',
             'created_at' => now()
         ]);
     }

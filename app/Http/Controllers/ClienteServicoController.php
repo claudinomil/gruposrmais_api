@@ -10,7 +10,7 @@ use App\Models\BrigadaRondaSegurancaMedida;
 use App\Models\Cliente;
 use App\Models\ClienteServico;
 use App\Models\ClienteServicoBrigadista;
-use App\Models\EscalaTipo;
+use App\Models\EscalaJornada;
 use App\Models\Funcionario;
 use App\Models\Servico;
 use App\Models\ServicoStatus;
@@ -85,7 +85,7 @@ class ClienteServicoController extends Controller
             $registros['funcionarios'] = Funcionario::all();
 
             //Escala Tipos
-            $registros['escala_tipos'] = EscalaTipo::all();
+            $registros['escala_tipos'] = EscalaJornada::all();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {

@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
             BancosSeeder::class,
             DepartamentosSeeder::class,
             FuncoesSeeder::class,
-            EscalaTiposSeeder::class,
+            //EscalaTiposSeeder::class,
             ServicoStatusSeeder::class,
             EscalaFrequenciasSeeder::class,
             LayoutsModesSeeder::class,

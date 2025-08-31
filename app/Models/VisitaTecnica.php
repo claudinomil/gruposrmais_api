@@ -28,12 +28,23 @@ class VisitaTecnica extends Model
         'visita_tecnica_status_id',
         'cliente_id',
         'cliente_nome',
+        'cliente_cnpj',
         'cliente_telefone',
         'cliente_celular',
         'cliente_email',
         'cliente_logradouro',
+        'cliente_logradouro_numero',
+        'cliente_logradouro_complemento',
         'cliente_bairro',
-        'cliente_cidade'
+        'cliente_cidade',
+        'cliente_uf',
+        'responsavel_funcionario_id',
+        'responsavel_funcionario_nome',
+        'responsavel_funcionario_email',
+        'nivel',
+        'classificacao',
+        'comentarios',
+        'vt_cs'
     ];
 
     protected $dates = [

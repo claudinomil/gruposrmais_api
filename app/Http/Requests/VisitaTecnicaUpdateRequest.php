@@ -15,28 +15,28 @@ class VisitaTecnicaUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'visita_tecnica_tipo_id' => ['required'],
+            //'visita_tecnica_tipo_id' => ['required'],
             'data_prevista' => ['nullable', 'date_format:d/m/Y'],
             'hora_prevista' => ['nullable', 'date_format:H:i:s'],
             'data_conclusao' => ['nullable', 'date_format:d/m/Y'],
             'hora_conclusao' => ['nullable', 'date_format:H:i:s'],
             'data_finalizacao' => ['nullable', 'date_format:d/m/Y'],
             'hora_finalizacao' => ['nullable', 'date_format:H:i:s'],
-            'cliente_id' => ['required_if:visita_tecnica_tipo_id,1,2'],
+            //'cliente_id' => ['required'],
         ];
     }
 
     public function messages()
     {
         return [
-            'visita_tecnica_tipo_id.required' => 'O Tipo é requerido.',
+            //'visita_tecnica_tipo_id.required' => 'O Tipo é requerido.',
             'data_prevista.date_format' => 'A Data prevista não é uma data válida.',
             'hora_prevista.date_format' => 'A Hora prevista não é uma hora válida.',
             'data_conclusao.date_format' => 'A Data conclusão não é uma data válida.',
             'hora_conclusao.date_format' => 'A Hora conclusão não é uma hora válida.',
             'data_finalizacao.date_format' => 'A Data finalização não é uma data válida.',
             'hora_finalizacao.date_format' => 'A Hora finalização não é uma hora válida.',
-            'cliente_id.required_if' => 'O Cliente é requerido.',
+            //'cliente_id.required' => 'O Cliente é requerido.',
         ];
     }
 

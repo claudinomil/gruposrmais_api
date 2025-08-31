@@ -3,34 +3,65 @@
 namespace App\Http\Controllers;
 
 use App\Facades\SuporteFacade;
-use App\Http\Requests\EstadoStoreRequest;
-use App\Http\Requests\EstadoUpdateRequest;
+use App\Http\Requests\EscalaStoreRequest;
+use App\Http\Requests\EscalaUpdateRequest;
+use App\Models\AtestadoSaudeOcupacionalTipo;
+use App\Models\Cliente;
+use App\Models\Departamento;
+use App\Models\Empresa;
+use App\Models\EscalaJornada;
+use App\Models\EscalaTipo;
+use App\Models\Genero;
+use App\Models\ContratacaoTipo;
+use App\Models\IdentidadeOrgao;
+use App\Models\EstadoCivil;
+use App\Models\MotivoAfastamento;
+use App\Models\MotivoDemissao;
+use App\Models\Nacionalidade;
+use App\Models\Naturalidade;
+use App\Models\Funcao;
+use App\Models\Banco;
+use App\Models\Escolaridade;
 use App\Models\Estado;
+use App\Models\PixTipo;
 use Illuminate\Support\Facades\DB;
+use App\Models\Escala;
 
-class EstadoController extends Controller
+class EscalaController extends Controller
 {
-    private $estado;
+    private $escala;
 
-    public function __construct(Estado $estado)
+    public function __construct(Escala $escala)
     {
-        $this->estado = $estado;
+        $this->escala = $escala;
     }
 
     public function index()
     {
-        $registros = $this->estado->all();
+        $registros = $this->escala
+            ->join('clientes', 'clientes.id', '=', 'escalas.cliente_id')
+            ->join('escala_tipos', 'escala_tipos.id', '=', 'escalas.escala_tipo_id')
+            ->join('escala_jornadas', 'escala_jornadas.id', '=', 'escalas.escala_jornada_id')
+            ->select(['escalas.*', 'clientes.name as clienteName', 'escala_tipos.name as escalaTipoName', 'escala_jornadas.name as escalaJornadaName'])
+            ->orderby('escalas.id')
+            ->get();
 
-        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
+        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
 
     public function show($id)
     {
         try {
-            $registro = $this->estado->find($id);
+            $registro = $this->escala
+                ->join('clientes', 'clientes.id', '=', 'escalas.cliente_id')
+                ->join('escala_tipos', 'escala_tipos.id', '=', 'escalas.escala_tipo_id')
+                ->join('escala_jornadas', 'escala_jornadas.id', '=', 'escalas.escala_jornada_id')
+                ->select(['escalas.*', 'clientes.name as clienteName', 'escala_tipos.name as escalaTipoName', 'escala_jornadas.name as escalaJornadaName'])
+                ->where('escalas.id', '=', $id)
+                ->get()[0];
 
             if (!$registro) {
-                return $this->sendResponse('Registro não encontrado.', 4040, null, []);
+                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
                 return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
             }
@@ -43,11 +74,35 @@ class EstadoController extends Controller
         }
     }
 
-    public function store(EstadoStoreRequest $request)
+    public function auxiliary()
+    {
+        try {
+            $registros = array();
+
+            //Clientes
+            $registros['clientes'] = Cliente::all();
+
+            //Escala Tipos
+            $registros['escala_tipos'] = EscalaTipo::all();
+
+            //Escala Jornadas
+            $registros['escala_jornadas'] = EscalaJornada::all();
+
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function store(EscalaStoreRequest $request)
     {
         try {
             //Incluindo registro
-            $this->estado->create($request->all());
+            $this->escala->create($request->all());
 
             return $this->sendResponse('Registro criado com sucesso.', 2010, null, null);
         } catch (\Exception $e) {
@@ -59,10 +114,10 @@ class EstadoController extends Controller
         }
     }
 
-    public function update(EstadoUpdateRequest $request, $id)
+    public function update(EscalaUpdateRequest $request, $id)
     {
         try {
-            $registro = $this->estado->find($id);
+            $registro = $this->escala->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
@@ -84,36 +139,12 @@ class EstadoController extends Controller
     public function destroy($id)
     {
         try {
-            $registro = $this->estado->find($id);
+            $registro = $this->escala->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                //Tabela fornecedores
-                if (SuporteFacade::verificarRelacionamento('fornecedores', 'identidade_estado_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Fornecedores.', 2040, null, null);
-                }
-
-                //Tabela clientes
-                if (SuporteFacade::verificarRelacionamento('clientes', 'identidade_estado_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes.', 2040, null, null);
-                }
-
-                //Tabela funcionarios
-                if (SuporteFacade::verificarRelacionamento('funcionarios', 'carteira_nacional_estado_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Funcionários.', 2040, null, null);
-                }
-
-                //Tabela funcionarios
-                if (SuporteFacade::verificarRelacionamento('funcionarios', 'personal_identidade_estado_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Funcionários.', 2040, null, null);
-                }
-
-                //Tabela funcionarios
-                if (SuporteFacade::verificarRelacionamento('funcionarios', 'professional_identidade_estado_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Funcionários.', 2040, null, null);
-                }
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -139,10 +170,13 @@ class EstadoController extends Controller
         //Limpar Querys executadas
         //DB::enableQueryLog();
 
-
         //Registros
-        $registros = $this->estado
-            ->select(['estados.*'])
+        $registros = $this->escala
+            ->join('clientes', 'clientes.id', '=', 'escalas.cliente_id')
+            ->join('escala_tipos', 'escala_tipos.id', '=', 'escalas.escala_tipo_id')
+            ->join('escala_jornadas', 'escala_jornadas.id', '=', 'escalas.escala_jornada_id')
+            ->select(['escalas.*', 'clientes.name as clienteName', 'escala_tipos.name as escalaTipoName', 'escala_jornadas.name as escalaJornadaName'])
+            ->orderby('escalas.id')
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

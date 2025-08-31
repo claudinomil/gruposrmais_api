@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class VisitaTecnicaStoreRequest extends FormRequest
+class EscalaUpdateRequest extends FormRequest
 {
     public function authorize()
     {
@@ -14,16 +15,18 @@ class VisitaTecnicaStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            //'visita_tecnica_tipo_id' => ['required'],
-            //'cliente_id' => ['required'],
+            'cliente_id' => ['required'],
+            'escala_tipo_id' => ['required'],
+            'escala_jornada_id' => ['required']
         ];
     }
 
     public function messages()
     {
         return [
-            //'visita_tecnica_tipo_id.required' => 'O Tipo é requerido.',
-            //'cliente_id.required' => 'O Cliente é requerido.',
+            'cliente_id.required' => 'Cliente é requerido.',
+            'escala_tipo_id.required' => 'Escala Tipo é requerida.',
+            'escala_jornada_id.required' => 'Escala Jornada é requerida.'
         ];
     }
 

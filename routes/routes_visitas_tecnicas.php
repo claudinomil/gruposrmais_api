@@ -14,4 +14,10 @@ Route::prefix('visitas_tecnicas')->group(function () {
 
     //Rotas Perguntas individuais
     Route::put('/pergunta/updatePergunta/{visita_tecnica_dado_id}', [VisitaTecnicaController::class, 'updatePergunta'])->middleware(['auth:api']);
+
+    //Visitas Técnicas Perguntas
+    Route::put('/visitas_tecnicas_perguntas/atualizar_pergunta/{id}', [VisitaTecnicaController::class, 'atualizar_pergunta'])->middleware(['auth:api']);
+
+    //Visitas Técnicas Perguntas Completa / Sintética)
+    Route::get('/visitas_tecnicas_perguntas/perguntas_completa_sintetica/{vt_cs}', [VisitaTecnicaController::class, 'perguntas_completa_sintetica'])->middleware(['auth:api']);
 });

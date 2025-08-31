@@ -41,6 +41,8 @@ class OrdemServicoController extends Controller
             ->leftJoin('ordem_servico_tipos', 'ordens_servicos.ordem_servico_tipo_id', '=', 'ordem_servico_tipos.id')
             ->leftJoin('clientes', 'ordens_servicos.cliente_id', '=', 'clientes.id')
             ->select(['ordens_servicos.*', 'ordem_servico_tipos.name as ordemServicoTipoName', 'clientes.name as clienteName'])
+            ->orderby('ordens_servicos.ano_ordem_servico', 'DESC')
+            ->orderby('ordens_servicos.numero_ordem_servico', 'DESC')
             ->where('ordens_servicos.empresa_id', $empresa_id)
             ->get();
 
@@ -303,6 +305,8 @@ class OrdemServicoController extends Controller
         $registros = $this->ordem_servico
             ->leftJoin('clientes', 'ordens_servicos.cliente_id', '=', 'clientes.id')
             ->select(['ordens_servicos.*', 'clientes.name as clienteName'])
+            ->orderby('ordens_servicos.ano_ordem_servico', 'DESC')
+            ->orderby('ordens_servicos.numero_ordem_servico', 'DESC')
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

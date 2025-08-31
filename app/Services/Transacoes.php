@@ -13,8 +13,9 @@ use App\Models\ContratacaoTipo;
 use App\Models\Departamento;
 use App\Models\EdificacaoClassificacao;
 use App\Models\Empresa;
-use App\Models\EscalaFrequencia;
 use App\Models\EscalaTipo;
+use App\Models\EscalaFrequencia;
+use App\Models\EscalaJornada;
 use App\Models\FormaPagamento;
 use App\Models\FormaPagamentoStatus;
 use App\Models\Funcionario;
@@ -31,6 +32,7 @@ use App\Models\OrdemServico;
 use App\Models\OrdemServicoPrioridade;
 use App\Models\OrdemServicoStatus;
 use App\Models\OrdemServicoTipo;
+use App\Models\PixTipo;
 use App\Models\Proposta;
 use App\Models\PropostaServico;
 use App\Models\SegurancaMedida;
@@ -48,7 +50,9 @@ use App\Models\VeiculoCategoria;
 use App\Models\VeiculoCombustivel;
 use App\Models\VeiculoMarca;
 use App\Models\VeiculoModelo;
-use App\Models\APAGARVT;
+use App\Models\VisitaTecnica;
+use App\Models\VisitaTecnicaStatus;
+use App\Models\VisitaTecnicaTipo;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -205,7 +209,7 @@ class Transacoes
         //Opção para o campo visita_tecnica_id
         if ($op == 8) {
             if (($dadoAtual != "") and ($dadoAtual != 0)) {
-                $visita_tecnica = APAGARVT::where('id', $dadoAtual)->get()[0];
+                $visita_tecnica = VisitaTecnica::where('id', $dadoAtual)->get()[0];
                 $search_cliente_servico_id = $visita_tecnica['cliente_servico_id'];
 
                 $cliente_servico = ClienteServico::where('id', $search_cliente_servico_id)->get()[0];
@@ -395,6 +399,8 @@ class Transacoes
                     $dados .= $this->retornaDado(2, $dadosAnterior['banco_id'], $dadosAtual['banco_id'], 'Banco', Banco::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['agencia'], $dadosAtual['agencia'], 'Agência', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['conta'], $dadosAtual['conta'], 'Conta', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['pix_tipo_id'], $dadosAtual['pix_tipo_id'], 'PIX Tipo', PixTipo::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['pix_chave'], $dadosAtual['pix_chave'], 'PIX Chave', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['email'], $dadosAtual['email'], 'E-mail', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['telefone_1'], $dadosAtual['telefone_1'], 'Telefone 1', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['telefone_2'], $dadosAtual['telefone_2'], 'Telefone 2', '', '');
@@ -406,6 +412,10 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['data_demissao'], $dadosAtual['data_demissao'], 'Data Demissão', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['data_cadastro'], $dadosAtual['data_cadastro'], 'Data Cadastro', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['data_afastamento'], $dadosAtual['data_afastamento'], 'Data Afastamento', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['carteira_nacional_orgao_id'], $dadosAtual['carteira_nacional_orgao_id'], 'Carteira Nacional (Órgão)', IdentidadeOrgao::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['carteira_nacional_estado_id'], $dadosAtual['carteira_nacional_estado_id'], 'Carteira Nacional (Estado)', Estado::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['carteira_nacional_numero'], $dadosAtual['carteira_nacional_numero'], 'Carteira Nacional (Número)', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['carteira_nacional_data_emissao'], $dadosAtual['carteira_nacional_data_emissao'], 'Carteira Nacional (Emissão)', '', '');
                     $dados .= $this->retornaDado(2, $dadosAnterior['personal_identidade_orgao_id'], $dadosAtual['personal_identidade_orgao_id'], 'Identidade Pessoal (Órgão)', IdentidadeOrgao::class, 'name');
                     $dados .= $this->retornaDado(2, $dadosAnterior['personal_identidade_estado_id'], $dadosAtual['personal_identidade_estado_id'], 'Identidade Pessoal (Estado)', Estado::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['personal_identidade_numero'], $dadosAtual['personal_identidade_numero'], 'Identidade Pessoal (Número)', '', '');
@@ -425,7 +435,6 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['bairro'], $dadosAtual['bairro'], 'Bairro', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['localidade'], $dadosAtual['localidade'], 'Localidade', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['uf'], $dadosAtual['uf'], 'UF', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['foto'], $dadosAtual['foto'], 'Foto', '', '');
                 }
 
                 //Tabela funcionarios_documentos
@@ -443,7 +452,8 @@ class Transacoes
                 if ($op == 3) {
                     $dados .= '<b>:: Funcionários</b>'.'<br><br>';
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['foto'], $dadosAtual['foto'], 'Foto', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fotografia_documento'], $dadosAtual['fotografia_documento'], 'Fotografia Documento', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fotografia_cartao_emergencial'], $dadosAtual['fotografia_cartao_emergencial'], 'Fotografia Cartão Emergencial', '', '');
                 }
             }
 
@@ -630,46 +640,48 @@ class Transacoes
                 if ($op == 1) {
                     $dados .= '<b>:: Visitas Técnicas</b>'.'<br><br>';
                     $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
-                    $dados .= $this->retornaDado(3, $dadosAnterior['cliente_servico_id'], $dadosAtual['cliente_servico_id'], 'Cliente/Serviço', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['numero_pavimentos'], $dadosAtual['numero_pavimentos'], 'Número Pavimentos', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['altura'], $dadosAtual['altura'], 'Altura', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['area_total_construida'], $dadosAtual['area_total_construida'], 'Área Total Construida', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['lotacao'], $dadosAtual['lotacao'], 'Lotação', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['carga_incendio'], $dadosAtual['carga_incendio'], 'Carga Incêndio', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['incendio_risco'], $dadosAtual['incendio_risco'], 'Incêndio Risco', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['grupo'], $dadosAtual['grupo'], 'Grupo', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['ocupacao_uso'], $dadosAtual['ocupacao_uso'], 'Ocupação Uso', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['divisao'], $dadosAtual['divisao'], 'Divisão', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['definicao'], $dadosAtual['definicao'], 'Definição', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['projeto_scip'], $dadosAtual['projeto_scip'], 'Projeto SCIP', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['projeto_scip_numero'], $dadosAtual['projeto_scip_numero'], 'Projeto SCIP Número', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['laudo_exigencias'], $dadosAtual['laudo_exigencias'], 'Laudo Exigências', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['laudo_exigencias_numero'], $dadosAtual['laudo_exigencias_numero'], 'Laudo Exigências Número', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['laudo_exigencias_data_emissao'], $dadosAtual['laudo_exigencias_data_emissao'], 'Laudo Exig~encias Data Emissão', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['laudo_exigencias_data_vencimento'], $dadosAtual['laudo_exigencias_data_vencimento'], 'Laudo Exigências Data Vencimento', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['certificado_aprovacao'], $dadosAtual['certificado_aprovacao'], 'Certificado Aprovação', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['certificado_aprovacao_numero'], $dadosAtual['certificado_aprovacao_numero'], 'Certificado Aprovação Número', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['certificado_aprovacao_simplificado'], $dadosAtual['certificado_aprovacao_simplificado'], 'Certificado Aprovação Simplificado', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['certificado_aprovacao_simplificado_numero'], $dadosAtual['certificado_aprovacao_simplificado_numero'], 'Certificado Aprovação Simplificado Número', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['certificado_aprovacao_assistido'], $dadosAtual['certificado_aprovacao_assistido'], 'Certificado Aprovação Assistido', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['certificado_aprovacao_assistido_numero'], $dadosAtual['certificado_aprovacao_assistido_numero'], 'Certificado Aprovação Assistido Número', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['executado_data'], $dadosAtual['executado_data'], 'Executado Data', '', '');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['executado_user_id'], $dadosAtual['executado_user_id'], 'Usuário', User::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['visita_tecnica_tipo_id'], $dadosAtual['visita_tecnica_tipo_id'], 'Tipo', VisitaTecnicaTipo::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['numero_visita_tecnica'], $dadosAtual['numero_visita_tecnica'], 'Número', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['ano_visita_tecnica'], $dadosAtual['ano_visita_tecnica'], 'Ano', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_abertura'], $dadosAtual['data_abertura'], 'Data Abertura', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['hora_abertura'], $dadosAtual['hora_abertura'], 'Hora Abertura', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_prevista'], $dadosAtual['data_prevista'], 'Data Prevista', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['hora_prevista'], $dadosAtual['hora_prevista'], 'Hora Prevista', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_conclusao'], $dadosAtual['data_conclusao'], 'Data Conclusão', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['hora_conclusao'], $dadosAtual['hora_conclusao'], 'Hora Conclusão', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_finalizacao'], $dadosAtual['data_finalizacao'], 'Data Finalização', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['hora_finalizacao'], $dadosAtual['hora_finalizacao'], 'Hora Finalização', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['visita_tecnica_status_id'], $dadosAtual['visita_tecnica_status_id'], 'Status', VisitaTecnicaStatus::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Cliente', Cliente::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_nome'], $dadosAtual['cliente_nome'], 'Cliente Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_cnpj'], $dadosAtual['cliente_cnpj'], 'Cliente CNPJ', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_telefone'], $dadosAtual['cliente_telefone'], 'Cliente Telefone', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_celular'], $dadosAtual['cliente_celular'], 'Cliente Celular', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_email'], $dadosAtual['cliente_email'], 'Cliente E-mail', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_logradouro'], $dadosAtual['cliente_logradouro'], 'Cliente Logradouro', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_logradouro_numero'], $dadosAtual['cliente_logradouro_numero'], 'Cliente Logradouro Número', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_logradouro_complemento'], $dadosAtual['cliente_logradouro_complemento'], 'Cliente Logradouro Complemento', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_bairro'], $dadosAtual['cliente_bairro'], 'Cliente Bairro', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_cidade'], $dadosAtual['cliente_cidade'], 'Cliente Cidade', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_uf'], $dadosAtual['cliente_uf'], 'Cliente UF', '', '');
                 }
 
-                //Tabela visitas_tecnicas_seguranca_medidas
+                //Tabela visitas_tecnicas_dados
                 if ($op == 2) {
-                    $dados .= '<b>:: Visitas Técnicas Segurança Medidas</b>' . '<br><br>';
+                    $dados .= '<b>:: Visitas Técnicas Dados</b>' . '<br><br>';
                     $dados .= $this->retornaDado(8, $dadosAnterior['visita_tecnica_id'], $dadosAtual['visita_tecnica_id'], 'Visita Técnica', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['pavimento'], $dadosAtual['pavimento'], 'Pavimento', '', '');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['seguranca_medida_id'], $dadosAtual['seguranca_medida_id'], 'Segurança Medida', SegurancaMedida::class, 'name');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['seguranca_medida_nome'], $dadosAtual['seguranca_medida_nome'], 'Segurança Medida Nome', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['seguranca_medida_quantidade'], $dadosAtual['seguranca_medida_quantidade'], 'Segurança Medida Quantidade', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['seguranca_medida_tipo'], $dadosAtual['seguranca_medida_tipo'], 'Segurança Medida Tipo', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['seguranca_medida_observacao'], $dadosAtual['seguranca_medida_observacao'], 'Segurança Medida Observação', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['status'], $dadosAtual['status'], 'Status', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['titulo'], $dadosAtual['titulo'], 'Título', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['subtitulo'], $dadosAtual['subtitulo'], 'Subtítulo', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['pergunta'], $dadosAtual['pergunta'], 'Pergunta', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['resposta'], $dadosAtual['resposta'], 'Resposta', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['observacao'], $dadosAtual['observacao'], 'Observação', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['quantidade'], $dadosAtual['quantidade'], 'Quantidade', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fotografia_1'], $dadosAtual['fotografia_1'], 'Fotografia 1', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fotografia_2'], $dadosAtual['fotografia_2'], 'Fotografia 2', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fotografia_3'], $dadosAtual['fotografia_3'], 'Fotografia 3', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['pdf_1'], $dadosAtual['pdf_1'], 'PDF 1', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['pdf_2'], $dadosAtual['pdf_2'], 'PDF 2', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['pdf_3'], $dadosAtual['pdf_3'], 'PDF 3', '', '');
                 }
             }
 
@@ -687,7 +699,7 @@ class Transacoes
                     $dados .= $this->retornaDado(5, $dadosAnterior['brigada_id'], $dadosAtual['brigada_id'], 'Brigada', Brigada::class, 'name');
                     $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Cliente', Cliente::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['cliente_nome'], $dadosAtual['cliente_nome'], 'Cliente Nome', '', '');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['escala_tipo_id'], $dadosAtual['escala_tipo_id'], 'Escala Tipo', EscalaTipo::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['escala_tipo_id'], $dadosAtual['escala_tipo_id'], 'Escala Tipo', EscalaJornada::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['escala_tipo_nome'], $dadosAtual['escala_tipo_nome'], 'Escala Tipo Nome', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['quantidade_alas'], $dadosAtual['quantidade_alas'], 'Quantidade Alas', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['quantidade_brigadistas_por_ala'], $dadosAtual['quantidade_brigadistas_por_ala'], 'Quantidade Brigadistas por Ala', '', '');
@@ -764,7 +776,7 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['data_fim'], $dadosAtual['data_fim'], 'Data Fim', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['data_vencimento'], $dadosAtual['data_vencimento'], 'Data Vencimento', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['valor'], $dadosAtual['valor'], 'Valor', '', '');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['bi_escala_tipo_id'], $dadosAtual['bi_escala_tipo_id'], 'Escala Tipo', EscalaTipo::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['bi_escala_tipo_id'], $dadosAtual['bi_escala_tipo_id'], 'Escala Tipo', EscalaJornada::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['bi_quantidade_alas_escala'], $dadosAtual['bi_quantidade_alas_escala'], 'Quantidade Alas Escala', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['bi_quantidade_brigadistas_por_ala'], $dadosAtual['bi_quantidade_brigadistas_por_ala'], 'Quantidade Brigadistas por Ala', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['bi_quantidade_brigadistas_total'], $dadosAtual['bi_quantidade_brigadistas_total'], 'Quantidade Brigadistas Total', '', '');
@@ -906,6 +918,23 @@ class Transacoes
                     $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Cliente', Cliente::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['executivo_nome'], $dadosAtual['executivo_nome'], 'Executivo Nome', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['executivo_funcao'], $dadosAtual['executivo_funcao'], 'Executivo Função', '', '');
+                }
+            }
+
+            //escalas
+            if ($submodulo_id == 32) {
+                if ($op == 1) {
+                    $dados .= '<b>:: Escalas</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Cliente', Cliente::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['escala_tipo_id'], $dadosAtual['escala_tipo_id'], 'Escala Tipo', EscalaTipo::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['escala_jornada_id'], $dadosAtual['escala_jornada_id'], 'Escala Jornada', EscalaJornada::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['tipo_name'], $dadosAtual['tipo_name'], 'Tipo Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['jornada_name'], $dadosAtual['jornada_name'], 'Jornada Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['quantidade_alas'], $dadosAtual['quantidade_alas'], 'Quantidade Alas', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['quantidade_horas'], $dadosAtual['quantidade_horas'], 'Quantidade Horas', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['quantidade_integrantes'], $dadosAtual['quantidade_integrantes'], 'Quantidade Integrantes', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['quantidade_integrantes_ala'], $dadosAtual['quantidade_integrantes_ala'], 'Quantidade Integrantes Ala', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['hora_inicio_ala'], $dadosAtual['hora_inicio_ala'], 'Hora Início Ala', '', '');
                 }
             }
 

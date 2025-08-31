@@ -105,5 +105,8 @@ require __DIR__ . '/routes_mapas_pontos_interesse.php';
 //Visitas Técnicas
 require __DIR__ . '/routes_visitas_tecnicas.php';
 
+//Escalas
+require __DIR__ . '/routes_escalas.php';
+
 //Guests
 require __DIR__ . '/routes_guests.php';

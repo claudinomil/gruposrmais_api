@@ -13,10 +13,13 @@ class VisitaTecnicaPergunta extends Model
 
     protected $fillable = [
         'visita_tecnica_tipo_id',
-        'ordem',
+        'completa',
+        'completa_ordem',
+        'sintetica',
+        'sintetica_ordem',
         'titulo',
         'subtitulo',
         'pergunta',
-        'respostas'
+        'opcoes'
     ];
 }
