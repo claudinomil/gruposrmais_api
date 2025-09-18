@@ -33,7 +33,7 @@ class UserController extends Controller
 
     public function index()
     {
-        $registros = $this->user->get();
+        $registros = $this->user->join('grupos', 'grupos.id', 'users.grupo_id')->select('users.*', 'grupos.name as grupoName')->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
     }
