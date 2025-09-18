@@ -10,15 +10,15 @@ class Update2VisitasTecnicasTable extends Migration
     {
         Schema::table('visitas_tecnicas', function (Blueprint $table) {
             $table->integer('vt_cs');
-            $table->string('cliente_cnpj')->nullable();
-            $table->string('cliente_logradouro_numero')->nullable();
-            $table->string('cliente_logradouro_complemento')->nullable();
-            $table->string('cliente_uf')->nullable();
+            $table->string('cliente_cnpj', 20)->nullable();
+            $table->string('cliente_logradouro_numero', 10)->nullable();
+            $table->string('cliente_logradouro_complemento', 30)->nullable();
+            $table->string('cliente_uf', 10)->nullable();
 
             //Informações do Funcionário Responsável pela Visita Técnica
             $table->foreignId('responsavel_funcionario_id')->nullable()->constrained('funcionarios');
-            $table->string('responsavel_funcionario_nome')->nullable();
-            $table->string('responsavel_funcionario_email')->nullable();
+            $table->string('responsavel_funcionario_nome', 100)->nullable();
+            $table->string('responsavel_funcionario_email', 100)->nullable();
 
             //Informações de Finalização da Visita Técnica
             $table->text('nivel')->nullable();
