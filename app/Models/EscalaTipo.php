@@ -14,7 +14,8 @@ class EscalaTipo extends Model
     protected $fillable = [
         'name',
         'quantidade_alas',
-        'quantidade_horas'
+        'quantidade_horas_trabalhadas',
+        'quantidade_horas_descanso'
     ];
 
     public function setNameAttribute($value) {$this->attributes['name'] = mb_strtoupper($value);}

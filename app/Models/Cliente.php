@@ -58,7 +58,18 @@ class Cliente extends Model
         'lotacao',
         'carga_incendio',
         'incendio_risco_id',
-        'edificacao_classificacao_id'
+        'edificacao_classificacao_id',
+        'logotipo_principal',
+        'logotipo_relatorios',
+        'logotipo_cartao_emergencial',
+        'contato_1_nome',
+        'contato_1_setor',
+        'contato_1_cargo',
+        'contato_1_email',
+        'contato_2_nome',
+        'contato_2_setor',
+        'contato_2_cargo',
+        'contato_2_email'
     ];
 
     protected $dates = [

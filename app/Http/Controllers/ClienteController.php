@@ -189,16 +189,7 @@ class ClienteController extends Controller
                 ->get();
 
             $registro['cliente'] = $cliente[0];
-
-//            //Serviços do Cliente
-//            $cliente_servicos = ClienteServico
-//                ::leftJoin('servicos', 'clientes_servicos.servico_id', '=', 'servicos.id')
-//                ->select(['clientes_servicos.*', 'servicos.name as servicoName'])
-//                ->where('clientes_servicos.cliente_id', '=', $id)
-//                ->get();
-//
-//            $registro['cliente_servicos'] = $cliente_servicos;
-
+            
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -547,12 +538,7 @@ class ClienteController extends Controller
                 if (SuporteFacade::verificarRelacionamento('propostas', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Propostas.', 2040, null, null);
                 }
-
-                //Tabela clientes_servicos
-                if (SuporteFacade::verificarRelacionamento('clientes_servicos', 'cliente_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Serviços.', 2040, null, null);
-                }
-
+                
                 //Tabela clientes_executivos
                 if (SuporteFacade::verificarRelacionamento('clientes_executivos', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Executivos.', 2040, null, null);

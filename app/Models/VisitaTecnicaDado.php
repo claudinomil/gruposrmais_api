@@ -13,15 +13,22 @@ class VisitaTecnicaDado extends Model
 
     protected $fillable = [
         'visita_tecnica_id',
-        'ordem',
         'titulo',
         'subtitulo',
         'pergunta',
-        'respostas',
         'resposta',
         'observacao',
+        'quantidade',
         'fotografia_1',
         'fotografia_2',
-        'fotografia_3'
+        'fotografia_3',
+        'pdf_1',
+        'pdf_2',
+        'pdf_3',
+        'completa',
+        'completa_ordem',
+        'sintetica',
+        'sintetica_ordem',
+        'opcoes'
     ];
 }

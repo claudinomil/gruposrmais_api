@@ -147,6 +147,7 @@ class Z_FakerSeeder extends Seeder
                 'cnpj' => $cnpj,
                 'cpf' => $cpf,
                 'email' => $faker->email,
+                'rede_cliente_id' => $faker->numberBetween(1, 2),
                 'principal_cliente_id' => $faker->numberBetween(3, 4),
                 'telefone_1' => '21'.$faker->numerify('########'),
                 'telefone_2' => '21'.$faker->numerify('########'),
@@ -262,7 +263,8 @@ class Z_FakerSeeder extends Seeder
                 'data_prevista' => '24/07/2025',
                 'hora_prevista' => '18:09',
                 'visita_tecnica_status_id' => $faker->numberBetween(1, 2),
-                'cliente_id' => $faker->numberBetween(1, 3)
+                'cliente_id' => $faker->numberBetween(1, 3),
+                'vt_cs' => $faker->numberBetween(1, 2)
             ]);
         }
 
@@ -293,77 +295,5 @@ class Z_FakerSeeder extends Seeder
                 'cliente_id' => $faker->numberBetween(1, 3)
             ]);
         }
-
-        /*
-
-        //Cliente Serviços
-        for($i=1; $i<=5; $i++) {
-            //Brigada Incêndio''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-            if ($i == 1) {
-                $bi_escala_tipo_id = 1;
-                $bi_quantidade_alas_escala = 4;
-                $bi_quantidade_brigadistas_por_ala = 1;
-                $bi_quantidade_brigadistas_total = 4;
-                $bi_hora_inicio_ala = '08:00:00';
-            } else if ($i == 2) {
-                $bi_escala_tipo_id = 2;
-                $bi_quantidade_alas_escala = 3;
-                $bi_quantidade_brigadistas_por_ala = 1;
-                $bi_quantidade_brigadistas_total = 3;
-                $bi_hora_inicio_ala = '08:00:00';
-            } else if ($i == 3) {
-                $bi_escala_tipo_id = 3;
-                $bi_quantidade_alas_escala = 4;
-                $bi_quantidade_brigadistas_por_ala = 1;
-                $bi_quantidade_brigadistas_total = 4;
-                $bi_hora_inicio_ala = '08:00:00';
-            } else if ($i == 4) {
-                $bi_escala_tipo_id = 1;
-                $bi_quantidade_alas_escala = 4;
-                $bi_quantidade_brigadistas_por_ala = 1;
-                $bi_quantidade_brigadistas_total = 4;
-                $bi_hora_inicio_ala = '08:00:00';
-            } else if ($i == 5) {
-                $bi_escala_tipo_id = 2;
-                $bi_quantidade_alas_escala = 3;
-                $bi_quantidade_brigadistas_por_ala = 1;
-                $bi_quantidade_brigadistas_total = 3;
-                $bi_hora_inicio_ala = '08:00:00';
-            }
-
-            $cliente_servico = ClienteServico::create([
-                'cliente_id' => $faker->numberBetween(1, 20),
-                'servico_id' => 5,
-                'servico_status_id' => 2,
-                'responsavel_funcionario_id' => $faker->numberBetween(1, 10),
-                'data_inicio' => '2023-08-01',
-                'data_fim' => '2023-08-15',
-                'data_vencimento' => '2023-08-15',
-
-                'bi_escala_tipo_id' => $bi_escala_tipo_id,
-                'bi_quantidade_alas_escala' => $bi_quantidade_alas_escala,
-                'bi_quantidade_brigadistas_por_ala' => $bi_quantidade_brigadistas_por_ala,
-                'bi_quantidade_brigadistas_total' => $bi_quantidade_brigadistas_total,
-                'bi_hora_inicio_ala' => $bi_hora_inicio_ala
-            ]);
-            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-            //Visita Técnica''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-            ClienteServico::create([
-                'cliente_id' => $faker->numberBetween(1, 20),
-                'servico_id' => 6,
-                'servico_status_id' => 2,
-                'responsavel_funcionario_id' => $faker->numberBetween(1, 10),
-                'data_inicio' => $faker->date('d/m/Y'),
-                'data_fim' => $faker->date('d/m/Y'),
-                'data_vencimento' => $faker->date('d/m/Y')
-            ]);
-            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        }
-
-        */
-
-
     }
 }

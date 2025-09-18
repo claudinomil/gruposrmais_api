@@ -6,20 +6,25 @@ use App\Facades\SuporteFacade;
 use App\Facades\Transacoes;
 use App\Http\Requests\FuncionarioStoreRequest;
 use App\Http\Requests\FuncionarioUpdateRequest;
+use App\Models\AtestadoSaudeOcupacionalTipo;
 use App\Models\Cliente;
 use App\Models\Departamento;
 use App\Models\Documento;
 use App\Models\DocumentoFonte;
+use App\Models\Empresa;
 use App\Models\Genero;
 use App\Models\ContratacaoTipo;
 use App\Models\IdentidadeOrgao;
 use App\Models\EstadoCivil;
+use App\Models\MotivoAfastamento;
+use App\Models\MotivoDemissao;
 use App\Models\Nacionalidade;
 use App\Models\Naturalidade;
 use App\Models\Funcao;
 use App\Models\Banco;
 use App\Models\Escolaridade;
 use App\Models\Estado;
+use App\Models\PixTipo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Funcionario;
@@ -118,6 +123,15 @@ class FuncionarioController extends Controller
             //Clientes
             $registros['clientes'] = Cliente::all();
 
+            //PIX Tipos
+            $registros['pix_tipos'] = PixTipo::all();
+
+            //aTESTADO sAÚDE oCUPACIONAL tIPOS
+            $registros['atestado_saude_ocupacional_tipos'] = AtestadoSaudeOcupacionalTipo::all();
+
+            //Empresas
+            $registros['empresas'] = Empresa::all();
+
             //Documentos
             $registros['documentos'] = Documento
                 ::join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
@@ -127,6 +141,12 @@ class FuncionarioController extends Controller
                 ->orderby('documento_fontes.ordem', 'ASC')
                 ->orderby('documentos.ordem', 'ASC')
                 ->get();
+
+            //Motivos Demissoes
+            $registros['motivos_demissoes'] = MotivoDemissao::all();
+
+            //Motivos Afastamentos
+            $registros['motivos_afastamentos'] = MotivoAfastamento::all();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -193,21 +213,6 @@ class FuncionarioController extends Controller
                 //Tabela funcionarios_documentos
                 if (SuporteFacade::verificarRelacionamento('funcionarios_documentos', 'funcionario_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Funcionários Documentos.', 2040, null, null);
-                }
-
-                //Tabela clientes_servicos
-                if (SuporteFacade::verificarRelacionamento('clientes_servicos', 'responsavel_funcionario_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Serviços.', 2040, null, null);
-                }
-
-                //Tabela brigadas_escalas
-                if (SuporteFacade::verificarRelacionamento('brigadas_escalas', 'funcionario_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Brigadas Escalas.', 2040, null, null);
-                }
-
-                //Tabela cliente_servicos_brigadistas
-                if (SuporteFacade::verificarRelacionamento('cliente_servicos_brigadistas', 'funcionario_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Cliente Serviços Brigadistas.', 2040, null, null);
                 }
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -303,136 +308,6 @@ class FuncionarioController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
 
-    public function modal_info($id)
-    {
-        try {
-            $registro = array();
-
-            //Funcionario
-            $funcionario = Funcionario
-                ::leftJoin('identidade_orgaos', 'funcionarios.personal_identidade_orgao_id', '=', 'identidade_orgaos.id')
-                ->leftJoin('estados', 'funcionarios.personal_identidade_estado_id', '=', 'estados.id')
-                ->leftJoin('generos', 'funcionarios.genero_id', '=', 'generos.id')
-                ->leftJoin('departamentos', 'funcionarios.departamento_id', '=', 'departamentos.id')
-                ->leftJoin('funcoes', 'funcionarios.funcao_id', '=', 'funcoes.id')
-                ->leftJoin('escolaridades', 'funcionarios.escolaridade_id', '=', 'escolaridades.id')
-                ->leftJoin('estados_civis', 'funcionarios.estado_civil_id', '=', 'estados_civis.id')
-                ->leftJoin('bancos', 'funcionarios.banco_id', '=', 'bancos.id')
-                ->leftJoin('clientes as tomador_servico_clientes', 'funcionarios.tomador_servico_cliente_id', '=', 'tomador_servico_clientes.id')
-                ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName', 'tomador_servico_clientes.name as tomadorServicoClienteName'])
-                ->where('funcionarios.id', '=', $id)
-                ->get();
-
-            $registro['funcionario'] = $funcionario[0];
-
-            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return $this->sendResponse($e->getMessage(), 5000, null, null);
-            }
-
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-        }
-    }
-
-    public function upload_foto(Request $request, $id)
-    {
-        try {
-            $registro = $this->funcionario->find($id);
-
-            if (!$registro) {
-                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
-            } else {
-                //Alterando registro
-                $registro->update($request->all());
-
-                //Transação
-                $dadosAtual = array();
-                $dadosAtual['name'] = $request['name'];
-                $dadosAtual['foto'] = 'Foto atualizada';
-
-                Transacoes::transacaoRecord(3, 2, 'funcionarios', $request, $dadosAtual);
-
-                //Return
-                return $this->sendResponse('Foto atualizada com sucesso.', 2000, null, $registro);
-            }
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return $this->sendResponse($e->getMessage(), 5000, null, null);
-            }
-
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-        }
-    }
-
-    public function upload_documento(Request $request)
-    {
-        try {
-            //Incluir Registro
-            if ($request['acao'] == 1) {
-                //Registro
-                FuncionarioDocumento::create($request->all());
-
-                //Transação
-                Transacoes::transacaoRecord(2, 1, 'funcionarios', $request, $request);
-
-                //Return
-                return $this->sendResponse('Documento enviado com sucesso.', 2000, null, $request);
-            }
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return $this->sendResponse($e->getMessage(), 5000, null, null);
-            }
-
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-        }
-    }
-
-    public function documentos($funcionario_id)
-    {
-        try {
-            $registros = array();
-
-            $registros['documento_fontes'] = DocumentoFonte::orderby('ordem', 'ASC')->get();
-
-            $registros['funcionarios_documentos'] = FuncionarioDocumento
-                ::join('documentos', 'funcionarios_documentos.documento_id', 'documentos.id')
-                ->join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
-                ->join('documento_fontes', 'documentos.documento_fonte_id', 'documento_fontes.id')
-                ->select('funcionarios_documentos.*', 'documentos.documento_fonte_id', 'documentos.name as documentoName', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
-                ->where('funcionarios_documentos.funcionario_id', $funcionario_id)
-                ->orderby('documento_fontes.ordem', 'ASC')
-                ->orderby('documentos.ordem', 'ASC')
-                ->get();
-
-            return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return $this->sendResponse($e->getMessage(), 5000, null, null);
-            }
-
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-        }
-    }
-
-    public function deletar_documento($funcionario_documento_id)
-    {
-        $registro = FuncionarioDocumento::find($funcionario_documento_id);
-
-        if (!$registro) {
-            return $this->sendResponse('Documento não encontrado.', 4040, null, $registro);
-        } else {
-            //Deletar
-            $registro->delete();
-
-            //gravar transacao
-            Transacoes::transacaoRecord(2, 3, 'funcionarios', $registro, $registro);
-
-            //Return
-            return $this->sendResponse('Documento excluído com sucesso.', 2000, null, $registro['caminho']);
-        }
-    }
-
     public function funcionario_acao_1_gerar_pdf_dados($funcionarios_ids)
     {
         try {
@@ -520,6 +395,195 @@ class FuncionarioController extends Controller
             } else {
                 return $this->sendResponse('Registros enviados com sucesso.', 2000, null, $registros);
             }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function modal_info($id)
+    {
+        try {
+            $registro = array();
+
+            //Funcionario
+            $funcionario = Funcionario
+                ::leftJoin('generos', 'funcionarios.genero_id', '=', 'generos.id')
+                ->leftJoin('empresas', 'funcionarios.empresa_id', '=', 'empresas.id')
+                ->leftJoin('departamentos', 'funcionarios.departamento_id', '=', 'departamentos.id')
+                ->leftJoin('funcoes', 'funcionarios.funcao_id', '=', 'funcoes.id')
+                ->leftJoin('estados_civis', 'funcionarios.estado_civil_id', '=', 'estados_civis.id')
+                ->leftJoin('clientes as tomador_servico_clientes', 'funcionarios.tomador_servico_cliente_id', '=', 'tomador_servico_clientes.id')
+                ->leftJoin('contratacao_tipos', 'funcionarios.contratacao_tipo_id', '=', 'contratacao_tipos.id')
+                ->select(['funcionarios.*', 'generos.name as generoName', 'empresas.name as empresaName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName', 'tomador_servico_clientes.name as tomadorServicoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName'])
+                ->where('funcionarios.id', '=', $id)
+                ->get();
+
+            $registro['funcionario'] = $funcionario[0];
+
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function estatisticas($id)
+    {
+        try {
+            $registro = array();
+
+            //Documentos
+            $documentos = FuncionarioDocumento
+                ::where('funcionario_id', '=', $id)
+                ->count();
+
+            $registro['documentos'] = $documentos;
+
+            //Tomadores de Serviços
+            $tomadores_servicos = 999;
+
+            $registro['tomadores_servicos'] = $tomadores_servicos;
+
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function upload_fotografia_documento(Request $request)
+    {
+        try {
+            $registro = $this->funcionario->find($request['funcionario_id']);
+
+            if (!$registro) {
+                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
+            } else {
+                //Alterando registro
+                $registro->fotografia_documento = $request['fotografia_documento'];
+                $registro->save();
+
+                return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
+            }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function upload_fotografia_cartao_emergencial(Request $request)
+    {
+        try {
+            $registro = $this->funcionario->find($request['funcionario_id']);
+
+            if (!$registro) {
+                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
+            } else {
+                //Alterando registro
+                $registro->fotografia_cartao_emergencial = $request['fotografia_cartao_emergencial'];
+                $registro->save();
+
+                return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
+            }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function upload_documento(Request $request)
+    {
+        try {
+            //Incluir Registro
+            if ($request['acao'] == 1) {
+                //Registro
+                FuncionarioDocumento::create($request->all());
+
+                //Transação
+                Transacoes::transacaoRecord(2, 1, 'funcionarios', $request, $request);
+
+                //Return
+                return $this->sendResponse('Documento enviado com sucesso.', 2000, null, $request);
+            }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function documentos($funcionario_id)
+    {
+        try {
+            $registros = array();
+
+            $registros['documento_fontes'] = DocumentoFonte::orderby('ordem', 'ASC')->get();
+
+            $registros['funcionarios_documentos'] = FuncionarioDocumento
+                ::join('documentos', 'funcionarios_documentos.documento_id', 'documentos.id')
+                ->join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
+                ->join('documento_fontes', 'documentos.documento_fonte_id', 'documento_fontes.id')
+                ->select('funcionarios_documentos.*', 'documentos.documento_fonte_id', 'documentos.name as documentoName', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
+                ->where('funcionarios_documentos.funcionario_id', $funcionario_id)
+                ->orderby('documento_fontes.ordem', 'ASC')
+                ->orderby('documentos.ordem', 'ASC')
+                ->get();
+
+            return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function deletar_documento($funcionario_documento_id)
+    {
+        $registro = FuncionarioDocumento::find($funcionario_documento_id);
+
+        if (!$registro) {
+            return $this->sendResponse('Documento não encontrado.', 4040, null, $registro);
+        } else {
+            //Deletar
+            $registro->delete();
+
+            //gravar transacao
+            Transacoes::transacaoRecord(2, 3, 'funcionarios', $registro, $registro);
+
+            //Return
+            return $this->sendResponse('Documento excluído com sucesso.', 2000, null, $registro['caminho']);
+        }
+    }
+
+    public function tomadores_servicos($funcionario_id)
+    {
+        try {
+            $registros = array();
+
+            //Tomadores de Serviços
+            $registros['tomadores_servicos'] = [];
+
+            return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return $this->sendResponse($e->getMessage(), 5000, null, null);

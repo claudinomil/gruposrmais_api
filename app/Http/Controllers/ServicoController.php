@@ -39,7 +39,6 @@ class ServicoController extends Controller
                 //Verificar se pode alterar os campos name e servico_tipo_id - para não afetar outros submódulos
                 $qtd = 0;
                 $qtd += SuporteFacade::verificarRelacionamento('propostas_servicos', 'servico_id', $id);
-                $qtd += SuporteFacade::verificarRelacionamento('clientes_servicos', 'servico_id', $id);
 
                 if ($qtd > 0) {$readonly = true;} else {$readonly = false;}
 
@@ -125,11 +124,6 @@ class ServicoController extends Controller
                 //Tabela propostas_servicos
                 if (SuporteFacade::verificarRelacionamento('propostas_servicos', 'servico_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir.<br>Registro relacionado em Propostas Serviços.', 2040, null, null);
-                }
-
-                //Tabela clientes_servicos
-                if (SuporteFacade::verificarRelacionamento('clientes_servicos', 'servico_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir.<br>Registro relacionado em Clientes Serviços.', 2040, null, null);
                 }
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 

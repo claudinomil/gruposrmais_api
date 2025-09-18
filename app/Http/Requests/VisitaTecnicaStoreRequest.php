@@ -14,16 +14,16 @@ class VisitaTecnicaStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'visita_tecnica_tipo_id' => ['required'],
-            'cliente_id' => ['required_if:visita_tecnica_tipo_id,1,2'],
+            //'visita_tecnica_tipo_id' => ['required'],
+            //'cliente_id' => ['required'],
         ];
     }
 
     public function messages()
     {
         return [
-            'visita_tecnica_tipo_id.required' => 'O Tipo é requerido.',
-            'cliente_id.required_if' => 'O Cliente é requerido.',
+            //'visita_tecnica_tipo_id.required' => 'O Tipo é requerido.',
+            //'cliente_id.required' => 'O Cliente é requerido.',
         ];
     }
 

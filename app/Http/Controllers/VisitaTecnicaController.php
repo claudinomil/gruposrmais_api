@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Facades\SuporteFacade;
+use App\Facades\Transacoes;
 use App\Http\Requests\VisitaTecnicaStoreRequest;
 use App\Http\Requests\VisitaTecnicaUpdateRequest;
 use App\Models\Cliente;
@@ -11,6 +12,7 @@ use App\Models\VisitaTecnicaDado;
 use App\Models\VisitaTecnicaPergunta;
 use App\Models\VisitaTecnicaStatus;
 use App\Models\VisitaTecnicaTipo;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\VisitaTecnica;
 use Illuminate\Http\Request;
@@ -43,9 +45,11 @@ class VisitaTecnicaController extends Controller
         try {
             $registro = $this->visita_tecnica
                 ->Join('clientes', 'visitas_tecnicas.cliente_id', '=', 'clientes.id')
+                ->leftJoin('clientes as principal_clientes', 'clientes.principal_cliente_id', '=', 'principal_clientes.id')
+                ->leftJoin('clientes as rede_clientes', 'clientes.rede_cliente_id', '=', 'rede_clientes.id')
                 ->Join('visita_tecnica_tipos', 'visitas_tecnicas.visita_tecnica_tipo_id', '=', 'visita_tecnica_tipos.id')
                 ->Join('visita_tecnica_status', 'visitas_tecnicas.visita_tecnica_status_id', '=', 'visita_tecnica_status.id')
-                ->select(['visitas_tecnicas.*', 'clientes.name as clienteName', 'visita_tecnica_tipos.name as visitaTecnicaTipoName', 'visita_tecnica_status.name as visitaTecnicaStatusName'])
+                ->select(['visitas_tecnicas.*', 'clientes.name as clienteName', 'principal_clientes.name as principalClienteName', 'rede_clientes.name as redeClienteName', 'visita_tecnica_tipos.name as visitaTecnicaTipoName', 'visita_tecnica_status.name as visitaTecnicaStatusName'])
                 ->where('visitas_tecnicas.id', '=', $id)
                 ->get()[0];
 
@@ -53,7 +57,7 @@ class VisitaTecnicaController extends Controller
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
                 //buscar dados visitas_tecnicas_dados
-                $registro['visitas_tecnicas_dados'] = VisitaTecnicaDado::where('visita_tecnica_id', '=', $id)->orderby('ordem')->get();
+                $registro['visitas_tecnicas_dados'] = VisitaTecnicaDado::where('visita_tecnica_id', '=', $id)->get();
 
                 return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
             }
@@ -87,6 +91,9 @@ class VisitaTecnicaController extends Controller
 
             //Visitas Tecnicas Status
             $registros['visita_tecnica_status'] = VisitaTecnicaStatus::all();
+
+            //Visitas Tecnicas Perguntas
+            $registros['visita_tecnica_perguntas'] = VisitaTecnicaPergunta::all();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -139,12 +146,29 @@ class VisitaTecnicaController extends Controller
                 return $this->sendResponse('Cliente não encontrado.', 2040, null, null);
             } else {
                 $request['cliente_nome'] = $cliente['name'];
+                $request['cliente_cnpj'] = $cliente['cnpj'];
                 $request['cliente_telefone'] = $cliente['telefone_1'];
                 $request['cliente_celular'] = $cliente['celular_1'];
                 $request['cliente_email'] = $cliente['email'];
                 $request['cliente_logradouro'] = $cliente['logradouro'];
+                $request['cliente_logradouro_numero'] = $cliente['numero'];
+                $request['cliente_logradouro_complemento'] = $cliente['complemento'];
                 $request['cliente_bairro'] = $cliente['bairro'];
                 $request['cliente_cidade'] = $cliente['localidade'];
+                $request['cliente_uf'] = $cliente['uf'];
+            }
+            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+            //Buscar dados Responsável''''''''''''''''''''''''''''''''''''''
+            if (Auth::user()->funcionario_id != null) {
+                $resp_func_id = Auth::user()->funcionario_id;
+
+                $responsavel = Funcionario::find($resp_func_id);
+
+                if ($responsavel) {
+                    $request['responsavel_funcionario_id'] = $responsavel['id'];
+                    $request['responsavel_nome'] = $responsavel['name'];
+                }
             }
             //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -154,8 +178,21 @@ class VisitaTecnicaController extends Controller
             //Incluindo registros na tabela visitas_tecnicas_dados''''''''''
             $visita_tecnica_id = $registro['id'];
             $visita_tecnica_tipo_id = $registro['visita_tecnica_tipo_id'];
+            $vt_cs = $registro['vt_cs'];
 
-            $visita_tecnica_perguntas = VisitaTecnicaPergunta::where('visita_tecnica_tipo_id', $visita_tecnica_tipo_id)->get();
+            if ($vt_cs == 1) {
+                $visita_tecnica_perguntas = VisitaTecnicaPergunta
+                    ::where('visita_tecnica_tipo_id', $visita_tecnica_tipo_id)
+                    ->where('completa', 1)
+                    ->orderby('completa_ordem')
+                    ->get();
+            } else {
+                $visita_tecnica_perguntas = VisitaTecnicaPergunta
+                    ::where('visita_tecnica_tipo_id', $visita_tecnica_tipo_id)
+                    ->where('sintetica', 1)
+                    ->orderby('sintetica_ordem')
+                    ->get();
+            }
 
             foreach ($visita_tecnica_perguntas as $visita_tecnica_pergunta) {
                 $dados = $visita_tecnica_pergunta->toArray(); // transforma o objeto em array
@@ -164,9 +201,6 @@ class VisitaTecnicaController extends Controller
                 unset($dados['id'], $dados['created_at'], $dados['updated_at']);
 
                 VisitaTecnicaDado::create($dados);
-
-                // Gravar transação
-                // Transacoes::transacaoRecord();
             }
             //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -215,6 +249,10 @@ class VisitaTecnicaController extends Controller
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
+                //Buscar todos os Ids da tabela visitas_tecnicas_dados relacionado ao Id da tabela visitas_tecnicas'''''
+                $ids = VisitaTecnicaDado::where('visita_tecnica_id', '=', $id)->get('id');
+                //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
                 //Apagar dados na tabela funcionarios_documentos''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 VisitaTecnicaDado::where('visita_tecnica_id', '=', $id)->delete();
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -222,7 +260,7 @@ class VisitaTecnicaController extends Controller
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 $registro->delete();
 
-                return $this->sendResponse('Registro excluído com sucesso.', 2000, null, null);
+                return $this->sendResponse('Registro excluído com sucesso.', 2000, null, $ids);
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
             }
         } catch (\Exception $e) {
@@ -296,7 +334,8 @@ class VisitaTecnicaController extends Controller
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
-    public function updatePergunta(Request $request, $visita_tecnica_dado_id)
+    
+    public function vtt1_updatePergunta(Request $request, $visita_tecnica_dado_id)
     {
         try {
             $registro = VisitaTecnicaDado::find($visita_tecnica_dado_id);
@@ -304,12 +343,92 @@ class VisitaTecnicaController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 2040, null, null);
             } else {
+                //Acertar fotografia_x'''''''''''''''''''''''''''''''''''''''''''''''
+                //fotografia_1
+                $path = parse_url($request['fotografia_1'], PHP_URL_PATH);
+                $path = ltrim($path, '/');
+                $request['fotografia_1'] = $path;
+
+                //fotografia_2
+                $path = parse_url($request['fotografia_2'], PHP_URL_PATH);
+                $path = ltrim($path, '/');
+                $request['fotografia_2'] = $path;
+
+                //fotografia_3
+                $path = parse_url($request['fotografia_3'], PHP_URL_PATH);
+                $path = ltrim($path, '/');
+                $request['fotografia_3'] = $path;
+                //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                //Acertar pdf_x''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                //pdf_1
+                $path = parse_url($request['pdf_1'], PHP_URL_PATH);
+                $path = ltrim($path, '/');
+                $request['pdf_1'] = $path;
+
+                //pdf_2
+                $path = parse_url($request['pdf_2'], PHP_URL_PATH);
+                $path = ltrim($path, '/');
+                $request['pdf_2'] = $path;
+
+                //pdf_3
+                $path = parse_url($request['pdf_3'], PHP_URL_PATH);
+                $path = ltrim($path, '/');
+                $request['pdf_3'] = $path;
+                //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                //Gravar transação
+                $dadosAnterior = VisitaTecnicaDado::find($visita_tecnica_dado_id);
+
                 //Alterando registro
                 $registro->update($request->all());
 
+                //Gravar transação
+                Transacoes::transacaoRecord(2, 2, 'visitas_tecnicas', $dadosAnterior, $request);
+
                 //Return
+                return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $request);
+            }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function vtt1_atualizar_pergunta(Request $request, $id)
+    {
+        try {
+            $registro = VisitaTecnicaPergunta::find($id);
+
+            if (!$registro) {
+                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
+            } else {
+                //Alterando registro
+                $registro->update($request->all());
+
                 return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
             }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function vtt1_perguntas_completa_sintetica($vt_cs)
+    {
+        try {
+            $registros = array();
+
+            $registros['perguntas_completa'] = VisitaTecnicaPergunta::where('completa', '=', 1)->orderby('completa_ordem')->get();
+            $registros['perguntas_sintetica'] = VisitaTecnicaPergunta::where('sintetica', '=', 1)->orderby('sintetica_ordem')->get();
+
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return $this->sendResponse($e->getMessage(), 5000, null, null);

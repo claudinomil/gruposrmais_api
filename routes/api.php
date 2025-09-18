@@ -60,9 +60,6 @@ require __DIR__ . '/routes_estados.php';
 //Clientes
 require __DIR__ . '/routes_clientes.php';
 
-//Clientes Servicos
-require __DIR__ . '/routes_clientes_servicos.php';
-
 //Dashboards
 require __DIR__ . '/routes_dashboards.php';
 
@@ -78,14 +75,8 @@ require __DIR__ . '/routes_ordens_servicos.php';
 //Propostas
 require __DIR__ . '/routes_propostas.php';
 
-//Brigadas Incêndios
-require __DIR__ . '/routes_brigadas.php';
-
 //Submodulos
 require __DIR__ . '/routes_submodulos.php';
-
-//Qrcodes
-require __DIR__ . '/routes_qrcodes.php';
 
 //Veículos
 require __DIR__ . '/routes_veiculos.php';
@@ -104,6 +95,12 @@ require __DIR__ . '/routes_mapas_pontos_interesse.php';
 
 //Visitas Técnicas
 require __DIR__ . '/routes_visitas_tecnicas.php';
+
+//Materiais
+require __DIR__ . '/routes_materiais.php';
+
+//Brigadas Incendios
+require __DIR__ . '/routes_brigadas_incendios.php';
 
 //Guests
 require __DIR__ . '/routes_guests.php';

@@ -101,6 +101,11 @@ class EstadoController extends Controller
                 }
 
                 //Tabela funcionarios
+                if (SuporteFacade::verificarRelacionamento('funcionarios', 'carteira_nacional_estado_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Funcionários.', 2040, null, null);
+                }
+
+                //Tabela funcionarios
                 if (SuporteFacade::verificarRelacionamento('funcionarios', 'personal_identidade_estado_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Funcionários.', 2040, null, null);
                 }

@@ -25,11 +25,4 @@ Route::prefix('clientes')->group(function () {
 
     //Visita Técnica
     Route::get('/visita_tecnica/{id}', [ClienteController::class, 'visita_tecnica'])->middleware(['auth:api']);
-
-    //Cliente Serviços
-    Route::get('/cliente_servicos_index/{id}', [ClienteController::class, 'cliente_servicos_index'])->middleware(['auth:api']);
-    Route::get('/cliente_servicos_show/{id}', [ClienteController::class, 'cliente_servicos_show'])->middleware(['auth:api']);
-    Route::post('/cliente_servicos_store', [ClienteController::class, 'cliente_servicos_store'])->middleware(['auth:api']);
-    Route::put('/cliente_servicos_update/{id}', [ClienteController::class, 'cliente_servicos_update'])->middleware(['auth:api']);
-    Route::delete('/cliente_servicos_destroy/{id}', [ClienteController::class, 'cliente_servicos_destroy'])->middleware(['auth:api']);
 });

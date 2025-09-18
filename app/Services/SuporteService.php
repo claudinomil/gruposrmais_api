@@ -3,14 +3,9 @@
 namespace App\Services;
 
 use App\Facades\Transacoes;
-use App\Models\Brigada;
-use App\Models\BrigadaEscala;
-use App\Models\BrigadaRonda;
-use App\Models\BrigadaRondaSegurancaMedida;
+use App\Models\BrigadaIncendioEscala;
+use App\Models\BrigadaIncendioMaterial;
 use App\Models\ClienteSegurancaMedida;
-use App\Models\ClienteServico;
-use App\Models\ClienteServicoBrigadista;
-use App\Models\Empresa;
 use App\Models\OrdemServicoDestino;
 use App\Models\OrdemServicoEquipe;
 use App\Models\OrdemServicoExecutivo;
@@ -19,7 +14,6 @@ use App\Models\OrdemServicoVeiculo;
 use App\Models\PropostaServico;
 use App\Models\SegurancaMedida;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class SuporteService
@@ -36,269 +30,191 @@ class SuporteService
     }
 
     /*
-     * Editar dados na tabela cliente_servicos_brigadistas
-     *
-     * @PARAM op=1 : Incluir Brigadistas
-     * @PARAM op=2 : Excluir Brigadistas (Todos)
-     * @PARAM op=3 : Excluir Brigadistas (Todos) e Incluir Brigadistas
+     * Retornar data formatada
+     * A) Recebe formatos de datas: 99/99/9999 ou 99-99-9999 ou 9999/99/99 ou 9999-99-99
+     * B) Depois retorna essa data no formato pedido pelo usuário
+     * @PARAM op=1 = recebe qualquer data e retorna 99/99/9999
+     * @PARAM op=2 = recebe qualquer data e retorna 99-99-9999
+     * @PARAM op=3 = recebe qualquer data e retorna 9999/99/99
+     * @PARAM op=4 = recebe qualquer data e retorna 9999-99-99
      */
-    public function editClienteServicoBrigadistas($op, $cliente_servico_id, $request)
+    public function getDataFormatada($op, $data)
     {
-        //Excluir
-        if ($op == 2 or $op == 3) {
-            //Verificar os Brigadistas
-            $clienteServicoBrigadistas = ClienteServicoBrigadista::where('cliente_servico_id', $cliente_servico_id)->get();
+        //Variáveis para formatar o retorno
+        $dia = '';
+        $mes = '';
+        $ano = '';
 
-            foreach ($clienteServicoBrigadistas as $clienteServicoBrigadista) {
-                //Dados Anterior
-                $dadosAnterior = $clienteServicoBrigadista;
+        //Verificando recebimento da data
+        if ($data == '') {
+            $data = null;
+        } else {
+            //Retirando espaços
+            $data = trim($data);
+            $data = str_replace(" ", "", $data);
 
-                //Excluir
-                ClienteServicoBrigadista::where('id', $clienteServicoBrigadista['id'])->delete();
+            //Formato: 9999-99-99
+            if (is_numeric(substr($data, 0, 4)) and substr($data, 4, 1) == '-' and is_numeric(substr($data, 5, 2)) and substr($data, 7, 1) == '-' and is_numeric(substr($data, 8, 2))) {
+                $dia = substr($data, 8, 2);
+                $mes = substr($data, 5, 2);
+                $ano = substr($data, 0, 4);
+            }
 
-                //gravar transacao
-                Transacoes::transacaoRecord(2, 3, 'clientes_servicos', $dadosAnterior, $dadosAnterior);
+            //Formato: 9999/99/99
+            if (is_numeric(substr($data, 0, 4)) and substr($data, 4, 1) == '/' and is_numeric(substr($data, 5, 2)) and substr($data, 7, 1) == '/' and is_numeric(substr($data, 8, 2))) {
+                $dia = substr($data, 8, 2);
+                $mes = substr($data, 5, 2);
+                $ano = substr($data, 0, 4);
+            }
+
+            //Formato: 99-99-9999
+            if (is_numeric(substr($data, 0, 2)) and substr($data, 2, 1) == '-' and is_numeric(substr($data, 3, 2)) and substr($data, 5, 1) == '-' and is_numeric(substr($data, 6, 4))) {
+                $dia = substr($data, 0, 2);
+                $mes = substr($data, 3, 2);
+                $ano = substr($data, 6, 4);
+            }
+
+            //Formato: 99/99/9999
+            if (is_numeric(substr($data, 0, 2)) and substr($data, 2, 1) == '/' and is_numeric(substr($data, 3, 2)) and substr($data, 5, 1) == '/' and is_numeric(substr($data, 6, 4))) {
+                $dia = substr($data, 0, 2);
+                $mes = substr($data, 3, 2);
+                $ano = substr($data, 6, 4);
             }
         }
 
-        //Incluir
+        //Retorno
+        if ($dia == '' or $mes == '' or $ano == '' or $dia == '00' or $mes == '00' or $ano == '0000') {
+            $data = null;
+        } else {
+            //Retorna no formato (99/99/9999)
+            if ($op == 1) {$data = $dia.'/'.$mes.'/'.$ano;}
+
+            //Retorna no formato (99-99-9999)
+            if ($op == 2) {$data = $dia.'-'.$mes.'-'.$ano;}
+
+            //Retorna no formato (9999/99/99)
+            if ($op == 3) {$data = $ano.'/'.$mes.'/'.$dia;}
+
+            //Retorna no formato (9999-99-99)
+            if ($op == 4) {$data = $ano.'-'.$mes.'-'.$dia;}
+        }
+
+        return $data;
+    }
+
+    /*
+     * Editar dados na tabela brigadasIncendios_materiais
+     *
+     * @PARAM op : 1(Incluir)  2(Excluir)  3(Alterar)
+     */
+    public function editBrigadaIncendioMaterial($op, $brigada_incendio_id, $request)
+    {
+        // Array de Materiais Atuais ()chave pelo material_id para facilitar comparação)
+        $materiaisAtuais = BrigadaIncendioMaterial::where('brigada_incendio_id', $brigada_incendio_id)->get()->keyBy('material_id');
+
+        // Array de Materiais Recebidos
+        $materiaisRecebidos = [];
+
         if ($op == 1 || $op == 3) {
-            //Qtd de Brigadistas
-            $qtd_reg = count($request['bi_funcionario_id']);
+            foreach ($request['mat_material_id'] ?? [] as $i => $material_id) {
+                $materiaisRecebidos[$material_id] = [
+                    'brigada_incendio_id'    => $brigada_incendio_id,
+                    'material_id'            => $material_id,
+                    'material_categoria_name'=> $request['mat_material_categoria_name'][$i] ?? null,
+                    'material_name'          => $request['mat_material_name'][$i] ?? null,
+                    'material_quantidade'    => $request['mat_material_quantidade'][$i] ?? null,
+                ];
+            }
+        }
 
-            for ($i=0; $i<=$qtd_reg; $i++) {
-                if (isset($request['bi_funcionario_id'][$i])) {
-                    //Dados Atual
-                    $dadosAtual = array();
-                    $dadosAtual['cliente_servico_id'] = $cliente_servico_id;
-                    $dadosAtual['funcionario_id'] = $request['bi_funcionario_id'][$i];
-                    $dadosAtual['funcionario_nome'] = $request['bi_funcionario_nome'][$i];
-                    $dadosAtual['ala'] = $request['bi_ala'][$i];
+        // Varrer Materiais Atuais e excluir os que não existem mais
+        foreach ($materiaisAtuais as $material_id => $registro) {
+            if (!isset($materiaisRecebidos[$material_id]) && ($op == 2 || $op == 3)) {
+                $dadosAnterior = $registro->toArray();
+                $registro->delete();
+                Transacoes::transacaoRecord(2, 3, 'brigadas_incendios', $dadosAnterior, $dadosAnterior);
+            }
+        }
 
-                    //Incluir
-                    ClienteServicoBrigadista::create($dadosAtual);
+        // Varrer Materiais Recebidos e inserir ou atualizar os que chegaram
+        foreach ($materiaisRecebidos as $material_id => $dadosAtual) {
+            if (isset($materiaisAtuais[$material_id])) {
+                // Atualizar somente se houve mudança
+                $registro = $materiaisAtuais[$material_id];
+                $dadosAnterior = $registro->toArray();
 
-                    //gravar transacao
-                    Transacoes::transacaoRecord(2, 1, 'clientes_servicos', $dadosAtual, $dadosAtual);
-                }
+                $registro->update($dadosAtual);
+
+                Transacoes::transacaoRecord(2, 2, 'brigadas_incendios', $dadosAnterior, $dadosAtual);
+            } else {
+                // Inserir novo
+                BrigadaIncendioMaterial::create($dadosAtual);
+
+                Transacoes::transacaoRecord(2, 1, 'brigadas_incendios', $dadosAtual, $dadosAtual);
             }
         }
     }
 
     /*
-     * Validar se pode alterar ou excluir registro na tabela clientes_servicos
-     * As validações serão feitas de acordo com o servico_tipo_id (Brigadas, Visitas Técnicas)
+     * Editar dados na tabela brigadasIncendios_escalas
      *
-     * @PARAM op=1 : Operação de Update
-     * @PARAM op=2 : Operação de Destroy
+     * @PARAM op : 1(Incluir)  2(Excluir)  3(Alterar)
      */
-    public function validarClienteServico($op, $cliente_servico_id)
+    public function editBrigadaIncendioEscala($op, $brigada_incendio_id, $request)
     {
-        //Cliente Serviço
-        $cliente_servico = ClienteServico
-            ::Join('servicos', 'servicos.id', '=', 'clientes_servicos.servico_id')
-            ->select('clientes_servicos.servico_status_id', 'servicos.servico_tipo_id')
-            ->where('clientes_servicos.id', $cliente_servico_id)
-            ->get();
+        // Array de Escalas Atuais (chave composta: escala_tipo_id + posto)
+        $escalasAtuais = BrigadaIncendioEscala::where('brigada_incendio_id', $brigada_incendio_id)
+            ->get()
+            ->keyBy(function ($item) {
+                return $item->escala_tipo_id . str_replace(' ', '', $item->posto);
+            });
 
-        //Dados
-        $servico_status_id = $cliente_servico[0]['servico_status_id'];
-        $servico_tipo_id = $cliente_servico[0]['servico_tipo_id'];
+        // Array de Escalas Recebidas
+        $escalasRecebidas = [];
 
-        //Validar servico_status_id (Se for "EXECUTADO" não deixar alterar/excluir)'''''''''''''''''''''''''''''''''''''
-        if ($servico_status_id == 1) {return 'Operação não pode ser realizada.<br>Serviço já foi Executado.';}
-        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-        //Tipo Serviço: BRIGADA DE INCÊNDIO'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        if ($servico_tipo_id == 1) {
-            //Validar Escalas já executadas
-            $escalas_executadas = Brigada
-                ::join('brigadas_escalas', 'brigadas_escalas.brigada_id', 'brigadas.id')
-                ->where('brigadas.cliente_servico_id', $cliente_servico_id)
-                ->where('brigadas_escalas.escala_frequencia_id', '!=', null)
-                ->count();
-
-            if ($escalas_executadas > 0) {return 'Operação não pode ser realizada.<br>Já existem Escalas executadas.';}
-
-            //Validar Rondas já executadas
-            $rondas_executadas = Brigada
-                ::join('brigadas_escalas', 'brigadas_escalas.brigada_id', 'brigadas.id')
-                ->join('brigadas_rondas', 'brigadas_rondas.brigada_escala_id', 'brigadas_escalas.id')
-                ->where('brigadas.cliente_servico_id', $cliente_servico_id)
-                ->count();
-
-            if ($rondas_executadas > 0) {return 'Operação não pode ser realizada.<br>Já existem Rondas executadas.';}
-        }
-        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-        //Tipo Serviço: MANUTENÇÃO''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        if ($servico_tipo_id == 2) {}
-        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-        //Tipo Serviço: VISITA TÉCNICA''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        if ($servico_tipo_id == 3) {}
-        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-        //Validado com sucesso
-        return false;
-    }
-
-    /*
-     * Editar dados na tabela clientes_seguranca_medidas
-     *
-     * @PARAM op=1 : Edição (verifica se é para Incluir, Alterar ou Excluir de acordo com os dados da Edificação)
-     * @PARAM op=3 : Excluir (vai direto para Excluir todos os registros pertencentes ao Cliente)
-     */
-    public function editClienteSegurancaMedida($op, $cliente_id, $request)
-    {
-        //Editar
-        if ($op == 1) {
-            //Número de Pavimentos da Edificação (Colocar um valor hard code para poder executar a função corretamente)
-            $numero_pavimentos = 50;
-
-            //Buscar Segurança Medidas para percorrer
-            $seguranca_medidas = SegurancaMedida::all();
-
-            //Varrer os Pavimentos
-            for($pavimento=1; $pavimento<=$numero_pavimentos; $pavimento++) {
-                foreach ($seguranca_medidas as $seguranca_medida) {
-                    //Segurança Medida Id
-                    $seguranca_medida_id = $seguranca_medida['id'];
-
-                    //Verificar se o Cliente já tem essa segurança medida para o Pavimento gravado no banco de dados
-                    $clienteSegurancaMedida = ClienteSegurancaMedida::where('pavimento', $pavimento)->where('cliente_id', $cliente_id)->where('seguranca_medida_id', $seguranca_medida_id)->get();
-
-                    //Se tem no banco (Copiar como dados anterior)
-                    if ($clienteSegurancaMedida->count() == 1) {
-                        //Dados anterior (que está no banco de dados)
-                        $dadosAnterior = $clienteSegurancaMedida[0];
-                    }
-
-                    //Verificando se existe dados para a empresa (testando um campo qualquer. Ex.: seguranca_medida_id)
-                    if (isset($request['seguranca_medida_' . $pavimento . '_' . $seguranca_medida_id])) {
-                        //Dados Atual
-                        $dadosAtual = array();
-                        $dadosAtual['pavimento'] = $pavimento;
-                        $dadosAtual['cliente_id'] = $cliente_id;
-                        $dadosAtual['seguranca_medida_id'] = $seguranca_medida_id;
-                        $dadosAtual['quantidade'] = $request['quantidade_' . $pavimento . '_' . $seguranca_medida_id];
-                        $dadosAtual['tipo'] = $request['tipo_' . $pavimento . '_' . $seguranca_medida_id];
-                        $dadosAtual['observacao'] = $request['observacao_' . $pavimento . '_' . $seguranca_medida_id];
-
-                        //Variavel para controle de operação $operacao (1: incluir / 2: alterar / 3: excluir)
-                        $operacao = 0;
-
-                        //Se não tem no banco (Mudar operação para inclusão)
-                        if ($clienteSegurancaMedida->count() == 0) {$operacao = 1;}
-
-                        //Se tem no banco (Mudar operação para alteração)
-                        if ($clienteSegurancaMedida->count() == 1) {$operacao = 2;}
-
-                        //Verificar se dados recebidos estão ok
-                        if ($dadosAtual['pavimento'] == '') {$operacao = 0;}
-                        if ($dadosAtual['cliente_id'] == '') {$operacao = 0;}
-                        if ($dadosAtual['seguranca_medida_id'] == '') {$operacao = 0;}
-                        if ($dadosAtual['quantidade'] == '') {$operacao = 0;}
-                        if ($dadosAtual['tipo'] == '') {}
-                        if ($dadosAtual['observacao'] == '') {}
-
-                        //Se $operacao = 1
-                        if ($operacao == 1) {
-                            ClienteSegurancaMedida::create($dadosAtual);
-
-                            //gravar transacao
-                            Transacoes::transacaoRecord(2, 1, 'clientes', $dadosAtual, $dadosAtual);
-                        }
-
-                        //Se $operacao = 2
-                        if ($operacao == 2) {
-                            ClienteSegurancaMedida::where('pavimento', $pavimento)->where('cliente_id', $cliente_id)->where('seguranca_medida_id', $seguranca_medida_id)->update($dadosAtual);
-
-                            //gravar transacao
-                            Transacoes::transacaoRecord(2, 2, 'clientes', $dadosAnterior, $dadosAtual);
-                        }
-                    } else {
-                        //Se tem no banco e não tem no request (Mudar operação para exclusão)
-                        if ($clienteSegurancaMedida->count() == 1) {
-                            $operacao = 3;
-
-                            //Se $operacao = 3
-                            if ($operacao == 3) {
-                                ClienteSegurancaMedida::where('pavimento', $pavimento)->where('cliente_id', $cliente_id)->where('seguranca_medida_id', $seguranca_medida_id)->delete();
-
-                                //gravar transacao
-                                Transacoes::transacaoRecord(2, 3, 'clientes', $dadosAnterior, $dadosAnterior);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        //Excluir
-        if ($op == 3) {
-            //Verificar as segurança medidas do Cliente
-            $clienteSegurancaMedidas = ClienteSegurancaMedida::where('cliente_id', $cliente_id)->get();
-
-            foreach ($clienteSegurancaMedidas as $clienteSegurancaMedida) {
-                //Dados
-                $dadosAnterior = $clienteSegurancaMedida;
-
-                //Excluir
-                ClienteSegurancaMedida::where('pavimento', $clienteSegurancaMedida['pavimento'])->where('cliente_id', $cliente_id)->where('seguranca_medida_id', $clienteSegurancaMedida['seguranca_medida_id'])->delete();
-
-                //gravar transacao
-                Transacoes::transacaoRecord(2, 3, 'clientes', $dadosAnterior, $dadosAnterior);
-            }
-        }
-    }
-
-    /*
-     * Editar dados na tabela propostas_servicos
-     *
-     * @PARAM op=1 : Incluir Serviços na Proposta
-     * @PARAM op=2 : Excluir Serviços da Proposta (Todos)
-     * @PARAM op=3 : Excluir Serviços da Proposta (Todos) e Incluir Serviços na Proposta
-     */
-    public function editPropostaServico($op, $proposta_id, $request)
-    {
-        //Excluir
-        if ($op == 2 or $op == 3) {
-            //Verificar os servicos da proposta
-            $propostaServicos = PropostaServico::where('proposta_id', $proposta_id)->get();
-
-            foreach ($propostaServicos as $propostaServico) {
-                //Dados Anterior
-                $dadosAnterior = $propostaServico;
-
-                //Excluir
-                PropostaServico::where('id', $propostaServico['id'])->delete();
-
-                //gravar transacao
-                Transacoes::transacaoRecord(2, 3, 'propostas', $dadosAnterior, $dadosAnterior);
-            }
-        }
-
-        //Incluir
         if ($op == 1 || $op == 3) {
-            for ($i = 0; $i <= 50; $i++) {
-                if (isset($request['servico_id'][$i])) {
-                    //Dados Atual
-                    $dadosAtual = array();
-                    $dadosAtual['proposta_id'] = $proposta_id;
-                    $dadosAtual['servico_id'] = $request['servico_id'][$i];
-                    $dadosAtual['servico_item'] = $request['servico_item'][$i];
-                    $dadosAtual['servico_nome'] = $request['servico_nome'][$i];
-                    $dadosAtual['servico_valor'] = $request['servico_valor'][$i];
-                    $dadosAtual['servico_quantidade'] = $request['servico_quantidade'][$i];
-                    $dadosAtual['servico_valor_total'] = $request['servico_valor_total'][$i];
+            foreach ($request['esc_escala_tipo_id'] ?? [] as $i => $escala_tipo_id) {
+                $chave = $escala_tipo_id . (str_replace(' ', '', $request['esc_posto'][$i]) ?? null);
 
-                    //Incluir
-                    PropostaServico::create($dadosAtual);
+                $escalasRecebidas[$chave] = [
+                    'brigada_incendio_id'                       => $brigada_incendio_id,
+                    'escala_tipo_id'                            => $escala_tipo_id,
+                    'escala_tipo_name'                          => $request['esc_escala_tipo_name'][$i] ?? null,
+                    'escala_tipo_quantidade_alas'               => $request['esc_escala_tipo_quantidade_alas'][$i] ?? null,
+                    'escala_tipo_quantidade_horas_trabalhadas'  => $request['esc_escala_tipo_quantidade_horas_trabalhadas'][$i] ?? null,
+                    'escala_tipo_quantidade_horas_descanso'     => $request['esc_escala_tipo_quantidade_horas_descanso'][$i] ?? null,
+                    'quantidade_brigadistas_por_ala'            => $request['esc_quantidade_brigadistas_por_ala'][$i] ?? null,
+                    'quantidade_brigadistas_total'              => $request['esc_quantidade_brigadistas_total'][$i] ?? null,
+                    'posto'                                     => $request['esc_posto'][$i] ?? null,
+                    'hora_inicio_ala_1'                         => $request['esc_hora_inicio_ala_1'][$i] ?? null,
+                ];
+            }
+        }
 
-                    //gravar transacao
-                    Transacoes::transacaoRecord(2, 1, 'propostas', $dadosAtual, $dadosAtual);
-                }
+        // Excluir escalas que não vieram mais no request
+        foreach ($escalasAtuais as $chave => $registro) {
+            if (!isset($escalasRecebidas[$chave]) && ($op == 2 || $op == 3)) {
+                $dadosAnterior = $registro->toArray();
+                $registro->delete();
+                Transacoes::transacaoRecord(3, 3, 'brigadas_incendios', $dadosAnterior, $dadosAnterior);
+            }
+        }
+
+        // Inserir ou atualizar escalas recebidas
+        foreach ($escalasRecebidas as $chave => $dadosAtual) {
+            if (isset($escalasAtuais[$chave])) {
+                // Atualizar somente se houve mudança
+                $registro = $escalasAtuais[$chave];
+                $dadosAnterior = $registro->toArray();
+
+                $registro->update($dadosAtual);
+
+                Transacoes::transacaoRecord(3, 2, 'brigadas_incendios', $dadosAnterior, $dadosAtual);
+            } else {
+                // Inserir nova escala
+                BrigadaIncendioEscala::create($dadosAtual);
+
+                Transacoes::transacaoRecord(3, 1, 'brigadas_incendios', $dadosAtual, $dadosAtual);
             }
         }
     }
@@ -570,357 +486,163 @@ class SuporteService
         }
     }
 
-    //Brigadas - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    //Brigadas - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
     /*
-     * Criar Brigada ao criar um Serviço de Brigada para um cliente
+     * Editar dados na tabela clientes_seguranca_medidas
+     *
+     * @PARAM op=1 : Edição (verifica se é para Incluir, Alterar ou Excluir de acordo com os dados da Edificação)
+     * @PARAM op=3 : Excluir (vai direto para Excluir todos os registros pertencentes ao Cliente)
      */
-    public function createBrigada($cliente_servico_id, $empresa_id)
+    public function editClienteSegurancaMedida($op, $cliente_id, $request)
     {
-        //Gravar Brigada
-        $brigada = Brigada::create(
-            [
-                'empresa_id' => $empresa_id,
-                'cliente_servico_id' => $cliente_servico_id
-            ]
-        );
+        //Editar
+        if ($op == 1) {
+            //Número de Pavimentos da Edificação (Colocar um valor hard code para poder executar a função corretamente)
+            $numero_pavimentos = 50;
 
-        //Gravar Escalas
-        $this->createBrigadaEscalas($brigada['id']);
-    }
+            //Buscar Segurança Medidas para percorrer
+            $seguranca_medidas = SegurancaMedida::all();
 
-    /*
-     * Alterar Brigada ao alterar um Serviço de Brigada para um cliente
-     */
-    public function updateBrigada($cliente_servico_id)
-    {
-        $brigada = Brigada::where('cliente_servico_id', $cliente_servico_id)->get();
-        $brigada_id = $brigada[0]['id'];
+            //Varrer os Pavimentos
+            for($pavimento=1; $pavimento<=$numero_pavimentos; $pavimento++) {
+                foreach ($seguranca_medidas as $seguranca_medida) {
+                    //Segurança Medida Id
+                    $seguranca_medida_id = $seguranca_medida['id'];
 
-        //Gravar Escalas
-        $this->createBrigadaEscalas($brigada_id);
-    }
+                    //Verificar se o Cliente já tem essa segurança medida para o Pavimento gravado no banco de dados
+                    $clienteSegurancaMedida = ClienteSegurancaMedida::where('pavimento', $pavimento)->where('cliente_id', $cliente_id)->where('seguranca_medida_id', $seguranca_medida_id)->get();
 
-    /*
-     * Criar Escalas na tabela brigadas_escalas
-    */
-    public function createBrigadaEscalas($brigada_id)
-    {
-        $brigada = Brigada
-            ::Join('clientes_servicos', 'brigadas.cliente_servico_id', '=', 'clientes_servicos.id')
-            ->Join('servicos', 'clientes_servicos.servico_id', '=', 'servicos.id')
-            ->Join('clientes', 'clientes_servicos.cliente_id', '=', 'clientes.id')
-            ->Join('escala_tipos', 'clientes_servicos.bi_escala_tipo_id', '=', 'escala_tipos.id')
-            ->select([
-                'brigadas.cliente_servico_id',
-
-                'clientes_servicos.cliente_id',
-                'clientes_servicos.bi_escala_tipo_id',
-                'clientes_servicos.bi_quantidade_alas_escala',
-                'clientes_servicos.bi_quantidade_brigadistas_por_ala',
-                'clientes_servicos.bi_quantidade_brigadistas_total',
-                'clientes_servicos.bi_hora_inicio_ala',
-                'clientes_servicos.data_inicio',
-                'clientes_servicos.data_fim',
-
-                'clientes.name as clienteName',
-                'escala_tipos.quantidade_horas',
-                'escala_tipos.name as escalaTipoName',
-            ])
-            ->where('brigadas.id', '=', $brigada_id)
-            ->where('servicos.servico_tipo_id', '=', 1)
-            ->where('clientes_servicos.servico_status_id', '!=', 1)
-            ->get();
-
-        if ($brigada->count() == 1) {
-            //Array [0]
-            $brigada = $brigada[0];
-
-            //Dados da Brigada Incêndio
-            $cliente_servico_id = $brigada['cliente_servico_id'];
-            $cliente_id = $brigada['cliente_id'];
-            $clienteName = $brigada['clienteName'];
-            $escala_tipo_id = $brigada['bi_escala_tipo_id'];
-            $escalaTipoName = $brigada['escalaTipoName'];
-            $quantidade_alas = $brigada['bi_quantidade_alas_escala'];
-            $quantidade_brigadistas_por_ala = $brigada['bi_quantidade_brigadistas_por_ala'];
-            $quantidade_brigadistas_total = $brigada['bi_quantidade_brigadistas_total'];
-            $hora_inicio_ala = $brigada['bi_hora_inicio_ala'];
-            $data_inicio = $brigada['data_inicio'];
-            $data_fim = $brigada['data_fim'];
-            $quantidade_horas = $brigada['quantidade_horas'];
-
-            //Datas / Horas'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-            $data_chegada = $data_inicio;
-            $hora_chegada = $hora_inicio_ala;
-
-            $chegada = $data_chegada.' '.$hora_chegada;
-            $saida = date('Y-m-d H:i:s', strtotime($chegada) + ($quantidade_horas *3600));
-
-            $data_saida = substr($saida, 0,10);
-            $hora_saida = substr($saida, 11);
-            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-            //Apagando escalas''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-            $this->deleteBrigadaEscalas(2, $brigada_id);
-            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-            //Criando escalas'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-            for($i=0; $i<=10000; $i++) {
-                for ($ala = 1; $ala <= $quantidade_alas; $ala++) {
-                    //Interromper fluxo de gravação
-                    if ($data_fim < $data_chegada) {
-                        $i = 999999999;
-                        break;
+                    //Se tem no banco (Copiar como dados anterior)
+                    if ($clienteSegurancaMedida->count() == 1) {
+                        //Dados anterior (que está no banco de dados)
+                        $dadosAnterior = $clienteSegurancaMedida[0];
                     }
 
-                    //Brigadistas da Ala
-                    $brigadistas = ClienteServicoBrigadista::where('cliente_servico_id', '=', $cliente_servico_id)->where('ala', '=', $ala)->get();
-
-                    //Varrer Brigadistas da Ala e gravar na tabela
-                    foreach ($brigadistas as $brigadista) {
+                    //Verificando se existe dados para a empresa (testando um campo qualquer. Ex.: seguranca_medida_id)
+                    if (isset($request['seguranca_medida_' . $pavimento . '_' . $seguranca_medida_id])) {
                         //Dados Atual
                         $dadosAtual = array();
-                        $dadosAtual['brigada_id'] = $brigada_id;
+                        $dadosAtual['pavimento'] = $pavimento;
                         $dadosAtual['cliente_id'] = $cliente_id;
-                        $dadosAtual['cliente_nome'] = $clienteName;
-                        $dadosAtual['escala_tipo_id'] = $escala_tipo_id;
-                        $dadosAtual['escala_tipo_nome'] = $escalaTipoName;
-                        $dadosAtual['quantidade_alas'] = $quantidade_alas;
-                        $dadosAtual['quantidade_brigadistas_por_ala'] = $quantidade_brigadistas_por_ala;
-                        $dadosAtual['quantidade_brigadistas_total'] = $quantidade_brigadistas_total;
-                        $dadosAtual['hora_inicio_ala'] = $hora_inicio_ala;
-                        $dadosAtual['data_chegada'] = $data_chegada;
-                        $dadosAtual['hora_chegada'] = $hora_chegada;
-                        $dadosAtual['data_saida'] = $data_saida;
-                        $dadosAtual['hora_saida'] = $hora_saida;
-                        $dadosAtual['funcionario_id'] = $brigadista['funcionario_id'];
-                        $dadosAtual['funcionario_nome'] = $brigadista['funcionario_nome'];
-                        $dadosAtual['ala'] = $brigadista['ala'];
-                        $dadosAtual['escala_frequencia_id'] = null;
-                        $dadosAtual['data_chegada_real'] = null;
-                        $dadosAtual['hora_chegada_real'] = null;
-                        $dadosAtual['data_saida_real'] = null;
-                        $dadosAtual['hora_saida_real'] = null;
+                        $dadosAtual['seguranca_medida_id'] = $seguranca_medida_id;
+                        $dadosAtual['quantidade'] = $request['quantidade_' . $pavimento . '_' . $seguranca_medida_id];
+                        $dadosAtual['tipo'] = $request['tipo_' . $pavimento . '_' . $seguranca_medida_id];
+                        $dadosAtual['observacao'] = $request['observacao_' . $pavimento . '_' . $seguranca_medida_id];
 
-                        //Gravar
-                        BrigadaEscala::create($dadosAtual);
+                        //Variavel para controle de operação $operacao (1: incluir / 2: alterar / 3: excluir)
+                        $operacao = 0;
 
-                        //gravar transacao
-                        Transacoes::transacaoRecord(2, 1, 'brigadas', $dadosAtual, $dadosAtual);
+                        //Se não tem no banco (Mudar operação para inclusão)
+                        if ($clienteSegurancaMedida->count() == 0) {$operacao = 1;}
+
+                        //Se tem no banco (Mudar operação para alteração)
+                        if ($clienteSegurancaMedida->count() == 1) {$operacao = 2;}
+
+                        //Verificar se dados recebidos estão ok
+                        if ($dadosAtual['pavimento'] == '') {$operacao = 0;}
+                        if ($dadosAtual['cliente_id'] == '') {$operacao = 0;}
+                        if ($dadosAtual['seguranca_medida_id'] == '') {$operacao = 0;}
+                        if ($dadosAtual['quantidade'] == '') {$operacao = 0;}
+                        if ($dadosAtual['tipo'] == '') {}
+                        if ($dadosAtual['observacao'] == '') {}
+
+                        //Se $operacao = 1
+                        if ($operacao == 1) {
+                            ClienteSegurancaMedida::create($dadosAtual);
+
+                            //gravar transacao
+                            Transacoes::transacaoRecord(2, 1, 'clientes', $dadosAtual, $dadosAtual);
+                        }
+
+                        //Se $operacao = 2
+                        if ($operacao == 2) {
+                            ClienteSegurancaMedida::where('pavimento', $pavimento)->where('cliente_id', $cliente_id)->where('seguranca_medida_id', $seguranca_medida_id)->update($dadosAtual);
+
+                            //gravar transacao
+                            Transacoes::transacaoRecord(2, 2, 'clientes', $dadosAnterior, $dadosAtual);
+                        }
+                    } else {
+                        //Se tem no banco e não tem no request (Mudar operação para exclusão)
+                        if ($clienteSegurancaMedida->count() == 1) {
+                            $operacao = 3;
+
+                            //Se $operacao = 3
+                            if ($operacao == 3) {
+                                ClienteSegurancaMedida::where('pavimento', $pavimento)->where('cliente_id', $cliente_id)->where('seguranca_medida_id', $seguranca_medida_id)->delete();
+
+                                //gravar transacao
+                                Transacoes::transacaoRecord(2, 3, 'clientes', $dadosAnterior, $dadosAnterior);
+                            }
+                        }
                     }
-
-                    //Datas / Horas'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                    $data_chegada = $data_saida;
-                    $hora_chegada = $hora_saida;
-
-                    $chegada = $data_chegada.' '.$hora_chegada;
-                    $saida = date('Y-m-d H:i:s', strtotime($chegada) + ($quantidade_horas *3600));
-
-                    $data_saida = substr($saida, 0,10);
-                    $hora_saida = substr($saida, 11);
-                    //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 }
             }
-            //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        }
-    }
-
-    /*
-     * @PARAM op=1 e id=cliente_servico_id  :   Deletar registros nas tabelas: brigadas, brigadas_escalas, brigadas_rondas, brigadas_rondas_seguranca_medidas de acordo com o cliente_servico_id deletado
-     * @PARAM op=2 e id=brigada_id          :   Deletar registros nas tabelas: brigadas_escalas, brigadas_rondas, brigadas_rondas_seguranca_medidas de acordo com o brigada_id deletado
-     */
-    public function deleteBrigadaEscalas($op, $id)
-    {
-        //Acerto conforme parametro recebido
-        $cliente_servico_id = 0;
-        $brigada_id = 0;
-
-        if ($op == 1) {$cliente_servico_id = $id;}
-        if ($op == 2) {$brigada_id = $id;}
-
-        if ($cliente_servico_id != 0) {
-            $brigada = Brigada::where('cliente_servico_id', $cliente_servico_id)->get();
-
-            if ($brigada->count() == 1) {$brigada_id = $brigada[0]['id'];}
         }
 
-        //Varrer Escalas
-        $brigadaEscalas = BrigadaEscala::where('brigada_id', $brigada_id)->get();
-        foreach ($brigadaEscalas as $brigadaEscala) {
-            $brigada_escala_id = $brigadaEscala['id'];
+        //Excluir
+        if ($op == 3) {
+            //Verificar as segurança medidas do Cliente
+            $clienteSegurancaMedidas = ClienteSegurancaMedida::where('cliente_id', $cliente_id)->get();
 
-            //Varrer Rondas
-            $brigadaRondas = BrigadaRonda::where('brigada_escala_id', $brigada_escala_id)->get();
-            foreach ($brigadaRondas as $brigadaRonda) {
-                $brigada_ronda_id = $brigadaRonda['id'];
+            foreach ($clienteSegurancaMedidas as $clienteSegurancaMedida) {
+                //Dados
+                $dadosAnterior = $clienteSegurancaMedida;
 
-                //Deletar na tabela brigadas_rondas_seguranca_medidas
-                BrigadaRondaSegurancaMedida::where('brigada_ronda_id', $brigada_ronda_id)->delete();
-
-                //Deletar na tabela brigadas_rondas
-                BrigadaRonda::find($brigada_ronda_id)->delete();
+                //Excluir
+                ClienteSegurancaMedida::where('pavimento', $clienteSegurancaMedida['pavimento'])->where('cliente_id', $cliente_id)->where('seguranca_medida_id', $clienteSegurancaMedida['seguranca_medida_id'])->delete();
 
                 //gravar transacao
-                Transacoes::transacaoRecord(3, 3, 'brigadas', $brigadaRonda, $brigadaRonda);
-            }
-
-            //Deletar na tabela brigadas_escalas
-            BrigadaEscala::find($brigada_escala_id)->delete();
-
-            //gravar transacao
-            Transacoes::transacaoRecord(2, 3, 'brigadas', $brigadaEscala, $brigadaEscala);
-        }
-
-        if ($op == 1) {
-            if ($brigada_id != 0) {
-                //Deletar na tabela brigadas
-                Brigada::find($brigada_id)->delete();
+                Transacoes::transacaoRecord(2, 3, 'clientes', $dadosAnterior, $dadosAnterior);
             }
         }
     }
 
     /*
-     * Incluir registros na tabela rondas_seguranca_medidas
+     * Editar dados na tabela propostas_servicos
+     *
+     * @PARAM op=1 : Incluir Serviços na Proposta
+     * @PARAM op=2 : Excluir Serviços da Proposta (Todos)
+     * @PARAM op=3 : Excluir Serviços da Proposta (Todos) e Incluir Serviços na Proposta
      */
-    public function createRondaSegurancaMedidas($brigada_ronda_id, $request)
+    public function editPropostaServico($op, $proposta_id, $request)
     {
-        $numero_pavimentos = 50;
+        //Excluir
+        if ($op == 2 or $op == 3) {
+            //Verificar os servicos da proposta
+            $propostaServicos = PropostaServico::where('proposta_id', $proposta_id)->get();
 
-        $seguranca_medidas = SegurancaMedida::all();
+            foreach ($propostaServicos as $propostaServico) {
+                //Dados Anterior
+                $dadosAnterior = $propostaServico;
 
-        for($i=1; $i<=$numero_pavimentos; $i++) {
-            foreach ($seguranca_medidas as $seguranca_medida) {
-                if (isset($request['seguranca_medida_id_' . $i . '_' . $seguranca_medida['id']])) {
+                //Excluir
+                PropostaServico::where('id', $propostaServico['id'])->delete();
+
+                //gravar transacao
+                Transacoes::transacaoRecord(2, 3, 'propostas', $dadosAnterior, $dadosAnterior);
+            }
+        }
+
+        //Incluir
+        if ($op == 1 || $op == 3) {
+            for ($i = 0; $i <= 50; $i++) {
+                if (isset($request['servico_id'][$i])) {
                     //Dados Atual
                     $dadosAtual = array();
-                    $dadosAtual['brigada_ronda_id'] = $brigada_ronda_id;
-                    $dadosAtual['pavimento'] = $i;
-                    $dadosAtual['seguranca_medida_id'] = $seguranca_medida['id'];
-                    $dadosAtual['seguranca_medida_nome'] = $request['seguranca_medida_nome_' . $i . '_' . $seguranca_medida['id']];
-                    $dadosAtual['seguranca_medida_quantidade'] = $request['seguranca_medida_quantidade_' . $i . '_' . $seguranca_medida['id']];
-                    $dadosAtual['seguranca_medida_tipo'] = $request['seguranca_medida_tipo_' . $i . '_' . $seguranca_medida['id']];
-                    //$dadosAtual['seguranca_medida_observacao'] = $request['seguranca_medida_observacao_' . $i . '_' . $seguranca_medida['id']];
-                    $dadosAtual['status'] = $request['status_' . $i . '_' . $seguranca_medida['id']];
-                    $dadosAtual['observacao'] = $request['observacao_' . $i . '_' . $seguranca_medida['id']];
-                    $dadosAtual['foto'] = $request['foto_' . $i . '_' . $seguranca_medida['id']];
+                    $dadosAtual['proposta_id'] = $proposta_id;
+                    $dadosAtual['servico_id'] = $request['servico_id'][$i];
+                    $dadosAtual['servico_item'] = $request['servico_item'][$i];
+                    $dadosAtual['servico_nome'] = $request['servico_nome'][$i];
+                    $dadosAtual['servico_valor'] = $request['servico_valor'][$i];
+                    $dadosAtual['servico_quantidade'] = $request['servico_quantidade'][$i];
+                    $dadosAtual['servico_valor_total'] = $request['servico_valor_total'][$i];
 
-                    BrigadaRondaSegurancaMedida::create($dadosAtual);
+                    //Incluir
+                    PropostaServico::create($dadosAtual);
 
                     //gravar transacao
-                    Transacoes::transacaoRecord(4, 1, 'brigadas', $dadosAtual, $dadosAtual);
+                    Transacoes::transacaoRecord(2, 1, 'propostas', $dadosAtual, $dadosAtual);
                 }
             }
         }
-    }
-
-    /*
-     * Varrer as Escalas para ver se existe ATRASO ou FALTA
-     * Alterar campo escala_frequencia_id
-    */
-    public function updateEscalaFrequenciaId()
-    {
-        //Escalas com escala_frequencia_id NULL
-        $escalas = BrigadaEscala::where('escala_frequencia_id', NULL)->orWhere('escala_frequencia_id', 2)->get();
-
-        //Varrer Escalas
-        foreach ($escalas as $escala) {
-            $data_hora_atual = date('Y-m-d H:i:s');
-            $data_hora_chegada_escala = Carbon::createFromFormat('d/m/Y', $escala['data_chegada'])->format('Y-m-d').' '.$escala['hora_chegada'];
-            $data_hora_saida_escala = Carbon::createFromFormat('d/m/Y', $escala['data_saida'])->format('Y-m-d').' '.$escala['hora_saida'];
-
-            $escala_frequencia_id = '';
-
-            //ATRASO
-            if (($data_hora_atual > $data_hora_chegada_escala) and ($data_hora_atual < $data_hora_saida_escala)) {
-                $escala_frequencia_id = 2;
-            }
-
-            //FALTA
-            if ($data_hora_atual > $data_hora_saida_escala) {
-                $escala_frequencia_id = 3;
-            }
-
-            //Alterar o registro
-            if ($escala_frequencia_id != '') {
-                BrigadaEscala::where('id', $escala['id'])->update(['escala_frequencia_id' => $escala_frequencia_id]);
-            }
-        }
-    }
-    //Brigadas - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    //Brigadas - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-    /*
-     * Retornar data formatada
-     * A) Recebe formatos de datas: 99/99/9999 ou 99-99-9999 ou 9999/99/99 ou 9999-99-99
-     * B) Depois retorna essa data no formato pedido pelo usuário
-     * @PARAM op=1 = recebe qualquer data e retorna 99/99/9999
-     * @PARAM op=2 = recebe qualquer data e retorna 99-99-9999
-     * @PARAM op=3 = recebe qualquer data e retorna 9999/99/99
-     * @PARAM op=4 = recebe qualquer data e retorna 9999-99-99
-     */
-    public function getDataFormatada($op, $data)
-    {
-        //Variáveis para formatar o retorno
-        $dia = '';
-        $mes = '';
-        $ano = '';
-
-        //Verificando recebimento da data
-        if ($data == '') {
-            $data = null;
-        } else {
-            //Retirando espaços
-            $data = trim($data);
-            $data = str_replace(" ", "", $data);
-
-            //Formato: 9999-99-99
-            if (is_numeric(substr($data, 0, 4)) and substr($data, 4, 1) == '-' and is_numeric(substr($data, 5, 2)) and substr($data, 7, 1) == '-' and is_numeric(substr($data, 8, 2))) {
-                $dia = substr($data, 8, 2);
-                $mes = substr($data, 5, 2);
-                $ano = substr($data, 0, 4);
-            }
-
-            //Formato: 9999/99/99
-            if (is_numeric(substr($data, 0, 4)) and substr($data, 4, 1) == '/' and is_numeric(substr($data, 5, 2)) and substr($data, 7, 1) == '/' and is_numeric(substr($data, 8, 2))) {
-                $dia = substr($data, 8, 2);
-                $mes = substr($data, 5, 2);
-                $ano = substr($data, 0, 4);
-            }
-
-            //Formato: 99-99-9999
-            if (is_numeric(substr($data, 0, 2)) and substr($data, 2, 1) == '-' and is_numeric(substr($data, 3, 2)) and substr($data, 5, 1) == '-' and is_numeric(substr($data, 6, 4))) {
-                $dia = substr($data, 0, 2);
-                $mes = substr($data, 3, 2);
-                $ano = substr($data, 6, 4);
-            }
-
-            //Formato: 99/99/9999
-            if (is_numeric(substr($data, 0, 2)) and substr($data, 2, 1) == '/' and is_numeric(substr($data, 3, 2)) and substr($data, 5, 1) == '/' and is_numeric(substr($data, 6, 4))) {
-                $dia = substr($data, 0, 2);
-                $mes = substr($data, 3, 2);
-                $ano = substr($data, 6, 4);
-            }
-        }
-
-        //Retorno
-        if ($dia == '' or $mes == '' or $ano == '' or $dia == '00' or $mes == '00' or $ano == '0000') {
-            $data = null;
-        } else {
-            //Retorna no formato (99/99/9999)
-            if ($op == 1) {$data = $dia.'/'.$mes.'/'.$ano;}
-
-            //Retorna no formato (99-99-9999)
-            if ($op == 2) {$data = $dia.'-'.$mes.'-'.$ano;}
-
-            //Retorna no formato (9999/99/99)
-            if ($op == 3) {$data = $ano.'/'.$mes.'/'.$dia;}
-
-            //Retorna no formato (9999-99-99)
-            if ($op == 4) {$data = $ano.'-'.$mes.'-'.$dia;}
-        }
-
-        return $data;
     }
 }
