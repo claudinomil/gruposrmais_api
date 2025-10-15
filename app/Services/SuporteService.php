@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Facades\Transacoes;
 use App\Models\BrigadaIncendioEscala;
+use App\Models\BrigadaIncendioEscalaBrigadista;
 use App\Models\BrigadaIncendioMaterial;
 use App\Models\ClienteSegurancaMedida;
 use App\Models\OrdemServicoDestino;
@@ -162,11 +163,17 @@ class SuporteService
      */
     public function editBrigadaIncendioEscala($op, $brigada_incendio_id, $request)
     {
+        // brigadas_incendios_escalas_brigadistas (EXCLUIR)
+        $escalas = BrigadaIncendioEscala::where('brigada_incendio_id', $brigada_incendio_id)->get();
+        foreach($escalas as $escala) {
+            BrigadaIncendioEscalaBrigadista::where('brigada_incendio_escala_id', $escala['id'])->delete();
+        }
+        
         // Array de Escalas Atuais (chave composta: escala_tipo_id + posto)
         $escalasAtuais = BrigadaIncendioEscala::where('brigada_incendio_id', $brigada_incendio_id)
             ->get()
             ->keyBy(function ($item) {
-                return $item->escala_tipo_id . str_replace(' ', '', $item->posto);
+                return $item->escala_tipo_id . '_' . str_replace(' ', '', $item->posto);
             });
 
         // Array de Escalas Recebidas
@@ -174,11 +181,12 @@ class SuporteService
 
         if ($op == 1 || $op == 3) {
             foreach ($request['esc_escala_tipo_id'] ?? [] as $i => $escala_tipo_id) {
-                $chave = $escala_tipo_id . (str_replace(' ', '', $request['esc_posto'][$i]) ?? null);
+                $chave = $escala_tipo_id . '_' . (str_replace(' ', '', $request['esc_posto'][$i]) ?? null);
 
                 $escalasRecebidas[$chave] = [
                     'brigada_incendio_id'                       => $brigada_incendio_id,
                     'escala_tipo_id'                            => $escala_tipo_id,
+                    'id_linha_hiddens'                          => $request['esc_id_linha_hiddens'][$i] ?? null,
                     'escala_tipo_name'                          => $request['esc_escala_tipo_name'][$i] ?? null,
                     'escala_tipo_quantidade_alas'               => $request['esc_escala_tipo_quantidade_alas'][$i] ?? null,
                     'escala_tipo_quantidade_horas_trabalhadas'  => $request['esc_escala_tipo_quantidade_horas_trabalhadas'][$i] ?? null,
@@ -186,7 +194,7 @@ class SuporteService
                     'quantidade_brigadistas_por_ala'            => $request['esc_quantidade_brigadistas_por_ala'][$i] ?? null,
                     'quantidade_brigadistas_total'              => $request['esc_quantidade_brigadistas_total'][$i] ?? null,
                     'posto'                                     => $request['esc_posto'][$i] ?? null,
-                    'hora_inicio_ala_1'                         => $request['esc_hora_inicio_ala_1'][$i] ?? null,
+                    'hora_inicio_ala_1'                         => $request['esc_hora_inicio_ala_1'][$i] ?? null
                 ];
             }
         }
@@ -195,12 +203,17 @@ class SuporteService
         foreach ($escalasAtuais as $chave => $registro) {
             if (!isset($escalasRecebidas[$chave]) && ($op == 2 || $op == 3)) {
                 $dadosAnterior = $registro->toArray();
+                
+                // Deletar Escala
                 $registro->delete();
+
                 Transacoes::transacaoRecord(3, 3, 'brigadas_incendios', $dadosAnterior, $dadosAnterior);
             }
         }
 
         // Inserir ou atualizar escalas recebidas
+        $fazerDelete = true;
+
         foreach ($escalasRecebidas as $chave => $dadosAtual) {
             if (isset($escalasAtuais[$chave])) {
                 // Atualizar somente se houve mudança
@@ -209,12 +222,156 @@ class SuporteService
 
                 $registro->update($dadosAtual);
 
+                // pegar o id
+                $brigada_incendio_escala_id = $registro->id;
+
                 Transacoes::transacaoRecord(3, 2, 'brigadas_incendios', $dadosAnterior, $dadosAtual);
             } else {
                 // Inserir nova escala
-                BrigadaIncendioEscala::create($dadosAtual);
+                $registro = BrigadaIncendioEscala::create($dadosAtual);
+
+                // pegar o id
+                $brigada_incendio_escala_id = $registro->id;
 
                 Transacoes::transacaoRecord(3, 1, 'brigadas_incendios', $dadosAtual, $dadosAtual);
+            }
+            
+            // brigadas_incendios_escalas_brigadistas (INCLUIR)
+            $ala = 0;
+            $num = 0;
+            
+            for($i=1; $i<=$dadosAtual['escala_tipo_quantidade_alas']; $i++) {
+                $ala++;
+
+                for($x=1; $x<=$dadosAtual['quantidade_brigadistas_por_ala']; $x++) {
+                    $num++;
+
+                    $regArray = array();
+                    $regArray['brigada_incendio_id'] = $brigada_incendio_id;
+                    $regArray['brigada_incendio_escala_id'] = $brigada_incendio_escala_id;
+                    $regArray['funcionario_id'] = $request['esc_funcionario_id_'.$num.'_'.$dadosAtual['id_linha_hiddens']];
+                    $regArray['funcionario_name'] = $request['esc_funcionario_name_'.$num.'_'.$dadosAtual['id_linha_hiddens']];
+                    $regArray['ala'] = $request['esc_ala_'.$num.'_'.$dadosAtual['id_linha_hiddens']];
+
+                    BrigadaIncendioEscalaBrigadista::create($regArray);
+                    Transacoes::transacaoRecord(4, 1, 'brigadas_incendios', $regArray, $regArray);
+                }
+            }
+        }
+    }
+    
+    /*
+     * Editar dados na tabela brigadas_incendios_escalas_geradas
+     *
+     * @PARAM op : 1(Incluir)  2(Excluir)
+     */
+    public function editBrigadaIncendioEscalaGerada($op, $brigada_incendio_id, $request)
+    {
+
+
+
+        // FAZER ROTINA PARA:
+        
+        // . PEGAR TODAS AS ESCALAS GERADAS NO BANCO
+        // . PEGAR TODAS AS ESCALAS GERADAS NO REQUEST
+        // . VERIFICAR QUAIS ESTÃO NO BANCO E NÃO ESTÃO NO REQUEST E VER SE PODE EXCLUIR
+        // . VERIFICAR QUAIS ESTÃO NO REQUEST E NÃO ESTÃO NO BANCO E INCLUIR
+
+
+
+        // brigadas_incendios_escalas_brigadistas (EXCLUIR)
+        $escalas = BrigadaIncendioEscala::where('brigada_incendio_id', $brigada_incendio_id)->get();
+        foreach($escalas as $escala) {
+            BrigadaIncendioEscalaBrigadista::where('brigada_incendio_escala_id', $escala['id'])->delete();
+        }
+        
+        // Array de Escalas Atuais (chave composta: escala_tipo_id + posto)
+        $escalasAtuais = BrigadaIncendioEscala::where('brigada_incendio_id', $brigada_incendio_id)
+            ->get()
+            ->keyBy(function ($item) {
+                return $item->escala_tipo_id . '_' . str_replace(' ', '', $item->posto);
+            });
+
+        // Array de Escalas Recebidas
+        $escalasRecebidas = [];
+
+        if ($op == 1 || $op == 3) {
+            foreach ($request['esc_escala_tipo_id'] ?? [] as $i => $escala_tipo_id) {
+                $chave = $escala_tipo_id . '_' . (str_replace(' ', '', $request['esc_posto'][$i]) ?? null);
+
+                $escalasRecebidas[$chave] = [
+                    'brigada_incendio_id'                       => $brigada_incendio_id,
+                    'escala_tipo_id'                            => $escala_tipo_id,
+                    'id_linha_hiddens'                          => $request['esc_id_linha_hiddens'][$i] ?? null,
+                    'escala_tipo_name'                          => $request['esc_escala_tipo_name'][$i] ?? null,
+                    'escala_tipo_quantidade_alas'               => $request['esc_escala_tipo_quantidade_alas'][$i] ?? null,
+                    'escala_tipo_quantidade_horas_trabalhadas'  => $request['esc_escala_tipo_quantidade_horas_trabalhadas'][$i] ?? null,
+                    'escala_tipo_quantidade_horas_descanso'     => $request['esc_escala_tipo_quantidade_horas_descanso'][$i] ?? null,
+                    'quantidade_brigadistas_por_ala'            => $request['esc_quantidade_brigadistas_por_ala'][$i] ?? null,
+                    'quantidade_brigadistas_total'              => $request['esc_quantidade_brigadistas_total'][$i] ?? null,
+                    'posto'                                     => $request['esc_posto'][$i] ?? null,
+                    'hora_inicio_ala_1'                         => $request['esc_hora_inicio_ala_1'][$i] ?? null
+                ];
+            }
+        }
+
+        // Excluir escalas que não vieram mais no request
+        foreach ($escalasAtuais as $chave => $registro) {
+            if (!isset($escalasRecebidas[$chave]) && ($op == 2 || $op == 3)) {
+                $dadosAnterior = $registro->toArray();
+                
+                // Deletar Escala
+                $registro->delete();
+
+                Transacoes::transacaoRecord(3, 3, 'brigadas_incendios', $dadosAnterior, $dadosAnterior);
+            }
+        }
+
+        // Inserir ou atualizar escalas recebidas
+        $fazerDelete = true;
+
+        foreach ($escalasRecebidas as $chave => $dadosAtual) {
+            if (isset($escalasAtuais[$chave])) {
+                // Atualizar somente se houve mudança
+                $registro = $escalasAtuais[$chave];
+                $dadosAnterior = $registro->toArray();
+
+                $registro->update($dadosAtual);
+
+                // pegar o id
+                $brigada_incendio_escala_id = $registro->id;
+
+                Transacoes::transacaoRecord(3, 2, 'brigadas_incendios', $dadosAnterior, $dadosAtual);
+            } else {
+                // Inserir nova escala
+                $registro = BrigadaIncendioEscala::create($dadosAtual);
+
+                // pegar o id
+                $brigada_incendio_escala_id = $registro->id;
+
+                Transacoes::transacaoRecord(3, 1, 'brigadas_incendios', $dadosAtual, $dadosAtual);
+            }
+            
+            // brigadas_incendios_escalas_brigadistas (INCLUIR)
+            $ala = 0;
+            $num = 0;
+            
+            for($i=1; $i<=$dadosAtual['escala_tipo_quantidade_alas']; $i++) {
+                $ala++;
+
+                for($x=1; $x<=$dadosAtual['quantidade_brigadistas_por_ala']; $x++) {
+                    $num++;
+
+                    $regArray = array();
+                    $regArray['brigada_incendio_id'] = $brigada_incendio_id;
+                    $regArray['brigada_incendio_escala_id'] = $brigada_incendio_escala_id;
+                    $regArray['funcionario_id'] = $request['esc_funcionario_id_'.$num.'_'.$dadosAtual['id_linha_hiddens']];
+                    $regArray['funcionario_name'] = $request['esc_funcionario_name_'.$num.'_'.$dadosAtual['id_linha_hiddens']];
+                    $regArray['ala'] = $request['esc_ala_'.$num.'_'.$dadosAtual['id_linha_hiddens']];
+
+                    BrigadaIncendioEscalaBrigadista::create($regArray);
+                    Transacoes::transacaoRecord(4, 1, 'brigadas_incendios', $regArray, $regArray);
+                }
             }
         }
     }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Banco;
 use App\Models\BrigadaIncendio;
+use App\Models\BrigadaIncendioEscala;
 use App\Models\Cliente;
 use App\Models\ClienteExecutivo;
 use App\Models\ClienteServico;
@@ -175,6 +176,17 @@ class Transacoes
                 $search_ano_brigada_incendio = $brigada_incendio['ano_brigada_incendio'];
 
                 $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $search_numero_brigada_incendio . "/" . $search_ano_brigada_incendio . "<br>";
+            }
+        }
+
+        //Opção para o campo brigada_incendio_escala_id
+        if ($op == 12) {
+            if (($dadoAtual != "") and ($dadoAtual != 0)) {
+                $brigada_incendio_escala = BrigadaIncendioEscala::where('id', $dadoAtual)->get()[0];
+                $search_escala_tipo_name = $brigada_incendio_escala['escala_tipo_name'];
+                $search_posto = $brigada_incendio_escala['posto'];
+
+                $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $search_escala_tipo_name . " - " . $search_posto . "<br>";
             }
         }
 
@@ -790,6 +802,15 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['quantidade_brigadistas_total'], $dadosAtual['quantidade_brigadistas_total'], 'Qtd. Brig/Total', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['posto'], $dadosAtual['posto'], 'Posto', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['hora_inicio_ala_1'], $dadosAtual['hora_inicio_ala_1'], 'Hr. início Ala 1', '', '');
+                }
+
+                //Tabela brigadas_incendios_escalas_brigadistas
+                if ($op == 4) {
+                    $dados .= '<b>:: Brigadas Incêndios Escalas Brigadistas</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(11, $dadosAnterior['brigada_incendio_id'], $dadosAtual['brigada_incendio_id'], 'Brigada Incêndio', '', '');
+                    $dados .= $this->retornaDado(12, $dadosAnterior['brigada_incendio_escala_id'], $dadosAtual['brigada_incendio_escala_id'], 'Brigada Incêndio Escala', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['funcionario_name'], $dadosAtual['funcionario_name'], 'Brigadista Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['ala'], $dadosAtual['ala'], 'Ala', '', '');
                 }
             }
 

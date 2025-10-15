@@ -29,6 +29,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Funcionario;
 use App\Models\FuncionarioDocumento;
+use App\Models\GrupoPermissao;
+use Illuminate\Support\Facades\Auth;
 
 class FuncionarioController extends Controller
 {
@@ -534,6 +536,13 @@ class FuncionarioController extends Controller
     {
         try {
             $registros = array();
+
+            $registros['permissoes'] = GrupoPermissao
+                ::join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
+                ->select('permissoes.name as permissao')
+                ->where('grupos_permissoes.grupo_id', Auth::user()->grupo_id)
+                ->where('permissoes.name', 'like', 'funcionarios_%')
+                ->get();
 
             $registros['documento_fontes'] = DocumentoFonte::orderby('ordem', 'ASC')->get();
 

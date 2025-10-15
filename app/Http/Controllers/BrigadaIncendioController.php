@@ -7,6 +7,8 @@ use App\Http\Requests\BrigadaIncendioStoreRequest;
 use App\Http\Requests\BrigadaIncendioUpdateRequest;
 use App\Models\BrigadaIncendio;
 use App\Models\BrigadaIncendioEscala;
+use App\Models\BrigadaIncendioEscalaBrigadista;
+use App\Models\BrigadaIncendioEscalaGerada;
 use App\Models\BrigadaIncendioMaterial;
 use App\Models\Cliente;
 use App\Models\EscalaTipo;
@@ -49,6 +51,17 @@ class BrigadaIncendioController extends Controller
 
                 // Escalas da Brigada de Incêndio
                 $registro['brigada_incendio_escalas'] = BrigadaIncendioEscala::where('brigada_incendio_id', '=', $id)->get();
+
+                // Brigadistas das Escalas da Brigada de Incêndio
+                $escalaIds = $registro['brigada_incendio_escalas']->pluck('id');
+                $registro['brigada_incendio_escalas_brigadistas'] = BrigadaIncendioEscalaBrigadista::whereIn('brigada_incendio_escala_id', $escalaIds)
+                    ->orderBy('brigada_incendio_escala_id')
+                    ->orderBy('ala')
+                    ->orderBy('funcionario_name')
+                    ->get();
+
+                // Escalas Geradas da Brigada de Incêndio
+                $registro['brigada_incendio_escalas_geradas'] = BrigadaIncendioEscalaGerada::where('brigada_incendio_id', '=', $id)->get();
                 
                 return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
             }
@@ -140,6 +153,9 @@ class BrigadaIncendioController extends Controller
             //Editar dados na tabela brigadas_incendios_escalas
             SuporteFacade::editBrigadaIncendioEscala(1, $registro['id'], $request);
 
+            //Editar dados na tabela brigadas_incendios_escalas_geradas
+            SuporteFacade::editBrigadaIncendioEscalaGerada(1, $registro['id'], $request);
+
             return $this->sendResponse('Registro criado com sucesso.', 2010, null, 'null');
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -166,6 +182,9 @@ class BrigadaIncendioController extends Controller
 
                 //Editar dados na tabela brigadas_incendios_escalas
                 SuporteFacade::editBrigadaIncendioEscala(3, $registro['id'], $request);
+
+                //Editar dados na tabela brigadas_incendios_escalas_geradas
+                SuporteFacade::editBrigadaIncendioEscalaGerada(1, $registro['id'], $request);
 
                 return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
             }
@@ -194,6 +213,9 @@ class BrigadaIncendioController extends Controller
 
                 //Editar dados na tabela brigadas_incendios_escalas
                 SuporteFacade::editBrigadaIncendioEscala(2, $registro['id'], '');
+
+                //Editar dados na tabela brigadas_incendios_escalas_geradas
+                SuporteFacade::editBrigadaIncendioEscalaGerada(2, $registro['id'], '');
 
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 $registro->delete();
