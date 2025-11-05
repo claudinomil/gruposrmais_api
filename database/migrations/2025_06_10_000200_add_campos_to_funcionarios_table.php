@@ -12,7 +12,7 @@ class AddCamposToFuncionariosTable extends Migration
             $table->text('tipo_sanguineo')->nullable();
             $table->text('fator_rh')->nullable();
             $table->decimal('altura', 5, 2)->nullable();
-            $table->decimal('peso', 5, 2)->nullable();
+            $table->decimal('peso', 6, 3)->nullable();
             $table->string('doenca_diabetes')->nullable();
             $table->string('doenca_hipertensao')->nullable();
             $table->string('doenca_asma')->nullable();

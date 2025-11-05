@@ -29,7 +29,8 @@ class ClienteExecutivo extends Model
         'telefone_2',
         'celular_1',
         'celular_2',
-        'foto',
+        'fotografia_documento',
+        'fotografia_cartao_emergencial',
         'cep',
         'numero',
         'complemento',
@@ -76,8 +77,9 @@ class ClienteExecutivo extends Model
     public function setExecutivoNomeAttribute($value) {$this->attributes['executivo_nome'] = mb_strtoupper($value);}
     public function setExecutivoFuncaoAttribute($value) {$this->attributes['executivo_funcao'] = mb_strtoupper($value);}
 
-    public function setFotoAttribute($value) {$this->attributes['foto'] = mb_strtolower($value);}
-
+    public function setFotografiaDocumentoAttribute($value) {$this->attributes['fotografia_documento'] = mb_strtolower($value);}
+    public function setFotografiaCartaoEmergencialAttribute($value) {$this->attributes['fotografia_cartao_emergencial'] = mb_strtolower($value);}
+    
     public function setDataNascimentoAttribute($value) {if ($value != '') {$this->attributes['data_nascimento'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
 
     public function setAlturaAttribute($value)

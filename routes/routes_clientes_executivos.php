@@ -12,11 +12,22 @@ Route::prefix('clientes_executivos')->group(function () {
     Route::get('/auxiliary/tables', [ClienteExecutivoController::class, 'auxiliary'])->middleware(['auth:api']);
 
     //Modal clientes_executivos_modal_info
+    
+    // Route::get('/modalInfo/modal_info/{id}', [ClienteExecutivoController::class, 'modal_info'])->middleware(['auth:api']);
+    // Route::put('/uploadFoto/upload_foto/{id}', [ClienteExecutivoController::class, 'upload_foto'])->middleware(['auth:api']);
+    // Route::post('/uploadDocumento/upload_documento', [ClienteExecutivoController::class, 'upload_documento'])->middleware(['auth:api']);
+    // Route::get('/modalInfo/documentos/{cliente_executivo_id}', [ClienteExecutivoController::class, 'documentos'])->middleware(['auth:api']);
+    // Route::delete('/modalInfo/deletar_documento/destroy/{id}', [ClienteExecutivoController::class, 'deletar_documento'])->middleware(['auth:api']);
+
     Route::get('/modalInfo/modal_info/{id}', [ClienteExecutivoController::class, 'modal_info'])->middleware(['auth:api']);
-    Route::put('/uploadFoto/upload_foto/{id}', [ClienteExecutivoController::class, 'upload_foto'])->middleware(['auth:api']);
+    Route::get('/modalInfo/estatisticas/{id}', [ClienteExecutivoController::class, 'estatisticas'])->middleware(['auth:api']);
+    Route::post('/uploadFotografia/upload_fotografia_documento', [ClienteExecutivoController::class, 'upload_fotografia_documento'])->middleware(['auth:api']);
+    Route::post('/uploadFotografia/upload_fotografia_cartao_emergencial', [ClienteExecutivoController::class, 'upload_fotografia_cartao_emergencial'])->middleware(['auth:api']);
     Route::post('/uploadDocumento/upload_documento', [ClienteExecutivoController::class, 'upload_documento'])->middleware(['auth:api']);
     Route::get('/modalInfo/documentos/{cliente_executivo_id}', [ClienteExecutivoController::class, 'documentos'])->middleware(['auth:api']);
     Route::delete('/modalInfo/deletar_documento/destroy/{id}', [ClienteExecutivoController::class, 'deletar_documento'])->middleware(['auth:api']);
+
+
 
     //Dados para Cartões Emergenciais
     Route::get('/cartoes_emergenciais/registros', [ClienteExecutivoController::class, 'cartoes_emergenciais_registros'])->middleware(['auth:api']);

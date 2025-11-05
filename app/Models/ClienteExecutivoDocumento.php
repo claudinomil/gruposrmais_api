@@ -14,8 +14,7 @@ class ClienteExecutivoDocumento extends Model
 
     protected $fillable = [
         'cliente_executivo_id',
-        'name',
-        'descricao',
+        'documento_id',
         'caminho',
         'data_documento',
         'aviso'

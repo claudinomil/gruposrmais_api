@@ -9,11 +9,15 @@ use App\Http\Requests\ClienteExecutivoUpdateRequest;
 use App\Models\Cliente;
 use App\Models\ClienteExecutivo;
 use App\Models\ClienteExecutivoDocumento;
+use App\Models\Documento;
+use App\Models\DocumentoFonte;
 use App\Models\Estado;
 use App\Models\Genero;
+use App\Models\GrupoPermissao;
 use App\Models\IdentidadeOrgao;
 use App\Models\Nacionalidade;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ClienteExecutivoController extends Controller
 {
@@ -73,6 +77,16 @@ class ClienteExecutivoController extends Controller
             //Estados para a Identidade
             $registros['identidade_estados'] = Estado::all();
 
+            //Documentos
+            $registros['documentos'] = Documento
+                ::join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
+                ->join('documento_fontes', 'documentos.documento_fonte_id', 'documento_fontes.id')
+                ->select('documentos.*', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
+                ->where('documentos.documento_submodulo_id', 3)
+                ->orderby('documento_fontes.ordem', 'ASC')
+                ->orderby('documentos.ordem', 'ASC')
+                ->get();
+                
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -224,20 +238,134 @@ class ClienteExecutivoController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
 
+    // public function modal_info($id)
+    // {
+    //     try {
+    //         $registro = array();
+
+    //         //ClienteExecutivo
+    //         $cliente_executivo = ClienteExecutivo
+    //             ::leftJoin('generos', 'clientes_executivos.genero_id', '=', 'generos.id')
+    //             ->select(['clientes_executivos.*', 'generos.name as generoName'])
+    //             ->where('clientes_executivos.id', '=', $id)
+    //             ->get();
+
+    //         $registro['cliente_executivo'] = $cliente_executivo[0];
+
+    //         return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
+    //     } catch (\Exception $e) {
+    //         if (config('app.debug')) {
+    //             return $this->sendResponse($e->getMessage(), 5000, null, null);
+    //         }
+
+    //         return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+    //     }
+    // }
+
+    // public function upload_foto(Request $request, $id)
+    // {
+    //     try {
+    //         $registro = $this->cliente_executivo->find($id);
+
+    //         if (!$registro) {
+    //             return $this->sendResponse('Registro não encontrado.', 4040, null, null);
+    //         } else {
+    //             //Alterando registro
+    //             $registro->update($request->all());
+
+    //             //Transação
+    //             $dadosAtual = array();
+    //             $dadosAtual['name'] = $request['name'];
+    //             $dadosAtual['foto'] = 'Foto atualizada';
+
+    //             Transacoes::transacaoRecord(3, 2, 'clientes_executivos', $request, $dadosAtual);
+
+    //             //Return
+    //             return $this->sendResponse('Foto atualizada com sucesso.', 2000, null, $registro);
+    //         }
+    //     } catch (\Exception $e) {
+    //         if (config('app.debug')) {
+    //             return $this->sendResponse($e->getMessage(), 5000, null, null);
+    //         }
+
+    //         return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+    //     }
+    // }
+
+    // public function upload_documento(Request $request)
+    // {
+    //     try {
+    //         //Incluir Registro
+    //         if ($request['acao'] == 1) {
+    //             //Registro
+    //             ClienteExecutivoDocumento::create($request->all());
+
+    //             //Transação
+    //             Transacoes::transacaoRecord(2, 1, 'clientes_executivos', $request, $request);
+
+    //             //Return
+    //             return $this->sendResponse('Documento enviado com sucesso.', 2000, null, $request);
+    //         }
+    //     } catch (\Exception $e) {
+    //         if (config('app.debug')) {
+    //             return $this->sendResponse($e->getMessage(), 5000, null, null);
+    //         }
+
+    //         return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+    //     }
+    // }
+
+    // public function documentos($cliente_executivo_id)
+    // {
+    //     try {
+    //         $registros = ClienteExecutivoDocumento
+    //             ::where('cliente_executivo_id', $cliente_executivo_id)
+    //             ->get();
+
+    //         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+    //     } catch (\Exception $e) {
+    //         if (config('app.debug')) {
+    //             return $this->sendResponse($e->getMessage(), 5000, null, null);
+    //         }
+
+    //         return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+    //     }
+    // }
+
+    // public function deletar_documento($cliente_executivo_documento_id)
+    // {
+    //     $registro = ClienteExecutivoDocumento::find($cliente_executivo_documento_id);
+
+    //     if (!$registro) {
+    //         return $this->sendResponse('Documento não encontrado.', 4040, null, $registro);
+    //     } else {
+    //         //Deletar
+    //         $registro->delete();
+
+    //         //gravar transacao
+    //         Transacoes::transacaoRecord(2, 3, 'clientes_executivos', $registro, $registro);
+
+    //         //Return
+    //         return $this->sendResponse('Documento excluído com sucesso.', 2000, null, $registro['caminho']);
+    //     }
+    // }
+
+
     public function modal_info($id)
     {
         try {
             $registro = array();
 
-            //ClienteExecutivo
+            //Cliente Executivo
             $cliente_executivo = ClienteExecutivo
                 ::leftJoin('generos', 'clientes_executivos.genero_id', '=', 'generos.id')
-                ->select(['clientes_executivos.*', 'generos.name as generoName'])
+                ->join('clientes', 'clientes_executivos.cliente_id', '=', 'clientes.id')
+                ->select(['clientes_executivos.*', 'generos.name as generoName', 'clientes.name as clienteName'])
                 ->where('clientes_executivos.id', '=', $id)
                 ->get();
-
+                
             $registro['cliente_executivo'] = $cliente_executivo[0];
-
+            
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -248,26 +376,64 @@ class ClienteExecutivoController extends Controller
         }
     }
 
-    public function upload_foto(Request $request, $id)
+    public function estatisticas($id)
     {
         try {
-            $registro = $this->cliente_executivo->find($id);
+            $registro = array();
+
+            //Documentos
+            $documentos = ClienteExecutivoDocumento
+                ::where('cliente_executivo_id', '=', $id)
+                ->count();
+
+            $registro['documentos'] = $documentos;
+            
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function upload_fotografia_documento(Request $request)
+    {
+        try {
+            $registro = $this->cliente_executivo->find($request['cliente_executivo_id']);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
                 //Alterando registro
-                $registro->update($request->all());
+                $registro->fotografia_documento = $request['fotografia_documento'];
+                $registro->save();
 
-                //Transação
-                $dadosAtual = array();
-                $dadosAtual['name'] = $request['name'];
-                $dadosAtual['foto'] = 'Foto atualizada';
+                return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
+            }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
 
-                Transacoes::transacaoRecord(3, 2, 'clientes_executivos', $request, $dadosAtual);
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
 
-                //Return
-                return $this->sendResponse('Foto atualizada com sucesso.', 2000, null, $registro);
+    public function upload_fotografia_cartao_emergencial(Request $request)
+    {
+        try {
+            $registro = $this->cliente_executivo->find($request['cliente_executivo_id']);
+
+            if (!$registro) {
+                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
+            } else {
+                //Alterando registro
+                $registro->fotografia_cartao_emergencial = $request['fotografia_cartao_emergencial'];
+                $registro->save();
+
+                return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
             }
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -304,8 +470,25 @@ class ClienteExecutivoController extends Controller
     public function documentos($cliente_executivo_id)
     {
         try {
-            $registros = ClienteExecutivoDocumento
-                ::where('cliente_executivo_id', $cliente_executivo_id)
+            $registros = array();
+
+            $registros['permissoes'] = GrupoPermissao
+                ::join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
+                ->select('permissoes.name as permissao')
+                ->where('grupos_permissoes.grupo_id', Auth::user()->grupo_id)
+                ->where('permissoes.name', 'like', 'clientes_executivos_%')
+                ->get();
+
+            $registros['documento_fontes'] = DocumentoFonte::orderby('ordem', 'ASC')->get();
+
+            $registros['clientes_executivos_documentos'] = ClienteExecutivoDocumento
+                ::join('documentos', 'clientes_executivos_documentos.documento_id', 'documentos.id')
+                ->join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
+                ->join('documento_fontes', 'documentos.documento_fonte_id', 'documento_fontes.id')
+                ->select('clientes_executivos_documentos.*', 'documentos.documento_fonte_id', 'documentos.name as documentoName', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
+                ->where('clientes_executivos_documentos.cliente_executivo_id', $cliente_executivo_id)
+                ->orderby('documento_fontes.ordem', 'ASC')
+                ->orderby('documentos.ordem', 'ASC')
                 ->get();
 
             return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -335,7 +518,7 @@ class ClienteExecutivoController extends Controller
             return $this->sendResponse('Documento excluído com sucesso.', 2000, null, $registro['caminho']);
         }
     }
-
+    
     public function cartoes_emergenciais_registros()
     {
         $registros = $this->cliente_executivo->orderby('id')->get(['id']);
