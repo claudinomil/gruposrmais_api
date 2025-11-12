@@ -7,11 +7,13 @@ use App\Models\BrigadaIncendioEscala;
 use App\Models\BrigadaIncendioEscalaBrigadista;
 use App\Models\BrigadaIncendioMaterial;
 use App\Models\ClienteSegurancaMedida;
+use App\Models\Especialidade;
 use App\Models\OrdemServicoDestino;
 use App\Models\OrdemServicoEquipe;
 use App\Models\OrdemServicoExecutivo;
 use App\Models\OrdemServicoServico;
 use App\Models\OrdemServicoVeiculo;
+use App\Models\PontoInteresseEspecialidade;
 use App\Models\PropostaServico;
 use App\Models\SegurancaMedida;
 use Carbon\Carbon;
@@ -101,6 +103,81 @@ class SuporteService
         }
 
         return $data;
+    }
+
+    /*
+     * Editar dados na tabela pontos_interesse_especialidades
+     *
+     * @PARAM op : 1(Incluir)  2(Alterar)  3(Excluir)
+     */
+    public function editPontosInteresseEspecialidades($op, $ponto_interesse_id, $request)
+    {
+        // Incluir ou Alterar
+        if ($op == 1 or $op == 2) {
+            // ponto_tipo_id
+            $ponto_tipo_id = $request['ponto_tipo_id'];
+
+            // especialidade_tipo_id para cada ponto_tipo_id (HARD CODE)'''''''''
+            $especialidade_tipo_id = 0;
+
+            if ($ponto_tipo_id == 1) {$especialidade_tipo_id = 1;} // Hospital
+            if ($ponto_tipo_id == 2) {$especialidade_tipo_id = 0;} // Ponto Turístico
+            if ($ponto_tipo_id == 3) {$especialidade_tipo_id = 2;} // Escola
+            if ($ponto_tipo_id == 4) {$especialidade_tipo_id = 0;} // Quartel PMERJ
+            if ($ponto_tipo_id == 5) {$especialidade_tipo_id = 0;} // Quartel CBMERJ
+            if ($ponto_tipo_id == 6) {$especialidade_tipo_id = 0;} // Endereço Residencial
+            if ($ponto_tipo_id == 7) {$especialidade_tipo_id = 0;} // Endereço Comercial
+            //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+            // Verificar se especialidade existe para ponto de interesse
+            function especialidadeExiste($pon_int_id, $esp_id) {
+                $count = PontoInteresseEspecialidade::where('ponto_interesse_id', $pon_int_id)->where('especialidade_id', $esp_id)->count();
+
+                return $count;
+            }
+
+            // Especialidades filtradas
+            $especialidadesVerificar = Especialidade::where('especialidade_tipo_id', $especialidade_tipo_id)->get();
+            $especialidadesDeletar = Especialidade::where('especialidade_tipo_id', '!=', $especialidade_tipo_id)->get();
+        }
+
+        // Incluir
+        if ($op == 1) {
+            // Varrendo para incluir todas as marcadas
+            foreach ($especialidadesVerificar as $especialidade) {
+                if ($request['especialidade_'.$especialidade['id']]) {
+                    PontoInteresseEspecialidade::create(['ponto_interesse_id' => $ponto_interesse_id, 'especialidade_id' => $especialidade['id']]);
+                }
+            }
+        }
+
+        // Alterar
+        if ($op == 2) {
+            // Varrendo para incluir as marcadas que não estejam gravadas na tabela e apagar as que não estão marcadas e estão gravadas na tabela
+            foreach ($especialidadesVerificar as $especialidade) {
+                if ($request['especialidade_'.$especialidade['id']]) {
+                    if (especialidadeExiste($ponto_interesse_id, $especialidade['id']) == 0) {
+                        PontoInteresseEspecialidade::create(['ponto_interesse_id' => $ponto_interesse_id, 'especialidade_id' => $especialidade['id']]);
+                    }
+                } else {
+                    if (especialidadeExiste($ponto_interesse_id, $especialidade['id']) == 1) {
+                        PontoInteresseEspecialidade::where('ponto_interesse_id', $ponto_interesse_id)->where('especialidade_id', $especialidade['id'])->delete();
+                    }
+                }
+            }
+
+            // Varrer para apagar as que estão marcadas (caso o usuário tenha alterado o ponto_tipo_id e não desmarcou as especialidades anteriores)
+            foreach ($especialidadesDeletar as $especialidade) {
+                if (especialidadeExiste($ponto_interesse_id, $especialidade['id']) == 1) {
+                    PontoInteresseEspecialidade::where('ponto_interesse_id', $ponto_interesse_id)->where('especialidade_id', $especialidade['id'])->delete();
+                }
+            }
+        }
+
+        // Excluir
+        if ($op == 3) {
+            PontoInteresseEspecialidade::where('ponto_interesse_id', $ponto_interesse_id)->delete();
+        }
     }
 
     /*

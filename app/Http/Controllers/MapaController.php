@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Facades\SuporteFacade;
 use App\Http\Requests\MapaStoreRequest;
 use App\Http\Requests\MapaUpdateRequest;
-use App\Models\MapaPontoInteresse;
-use App\Models\MapaPontoTipo;
+use App\Models\PontoInteresse;
+use App\Models\PontoTipo;
 use App\Models\OrdemServico;
 use App\Models\OrdemServicoDestino;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +55,7 @@ class MapaController extends Controller
             $registros = array();
 
             //Mapas Pontos Tipos
-            $registros['mapas_pontos_tipos'] = MapaPontoTipo::all();
+            $registros['pontos_tipos'] = PontoTipo::all();
 
             //Ordens de Serviços
             $registros['ordens_servicos'] = OrdemServico::where('ordem_servico_tipo_id', 3)->orderby('id', 'DESC')->get();
@@ -227,13 +227,13 @@ class MapaController extends Controller
     public function buscar_pontos_interesse($query)
     {
         try {
-            $registros = MapaPontoInteresse
-                ::select('mapas_pontos_interesse.*', 'mapas_pontos_tipos.name as mapa_ponto_tipo')
-                ->join('mapas_pontos_tipos', 'mapas_pontos_tipos.id', '=', 'mapas_pontos_interesse.mapa_ponto_tipo_id')
+            $registros = PontoInteresse
+                ::select('pontos_interesse.*', 'pontos_tipos.name as ponto_tipo')
+                ->join('pontos_tipos', 'pontos_tipos.id', '=', 'pontos_interesse.ponto_tipo_id')
                 ->where(function($q) use ($query) {
-                    $q->where('mapas_pontos_tipos.name', 'LIKE', "%{$query}%")
-                        ->orWhere('mapas_pontos_interesse.name', 'LIKE', "%{$query}%")
-                        ->orWhere('mapas_pontos_interesse.descricao', 'LIKE', "%{$query}%");
+                    $q->where('pontos_tipos.name', 'LIKE', "%{$query}%")
+                        ->orWhere('pontos_interesse.name', 'LIKE', "%{$query}%")
+                        ->orWhere('pontos_interesse.descricao', 'LIKE', "%{$query}%");
                 })
                 ->limit(12)
                 ->get();

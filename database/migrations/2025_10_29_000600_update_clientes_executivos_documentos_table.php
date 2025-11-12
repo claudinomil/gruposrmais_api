@@ -19,7 +19,7 @@ class UpdateClientesExecutivosDocumentosTable extends Migration
 
     public function down()
     {
-        Schema::table('funcionarios_documentos', function (Blueprint $table) {
+        Schema::table('clientes_executivos_documentos', function (Blueprint $table) {
             // Remove a foreign key e o campo
             $table->dropForeign(['documento_id']);
             $table->dropColumn('documento_id');

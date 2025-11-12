@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class MapaPontoInteresseUpdateRequest extends FormRequest
+class PontoInteresseUpdateRequest extends FormRequest
 {
     public function authorize()
     {
@@ -15,22 +15,28 @@ class MapaPontoInteresseUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'mapa_ponto_tipo_id' => ['required'],
+            'ponto_tipo_id' => ['required'],
             'name' => ['required'],
             'latitude' => ['required'],
             'longitude' => ['required'],
-            'icone' => ['required']
+            'icone' => ['required'],
+            'telefone_1' => ['nullable', 'numeric', 'digits:10'],
+            'telefone_2' => ['nullable', 'numeric', 'digits:10']
         ];
     }
 
     public function messages()
     {
         return [
-            'mapa_ponto_tipo_id.required' => 'O Ponto Tipo é requerido.',
+            'ponto_tipo_id.required' => 'O Ponto Tipo é requerido.',
             'name.required' => 'O Nome é requerido.',
             'latitude.required' => 'A Latitude é requerido.',
             'longitude.required' => 'A Longitude é requerido.',
-            'icone.required' => 'O Ícone é requerido.'
+            'icone.required' => 'O Ícone é requerido.',
+            'telefone_1.numeric' => 'O Telefone 1 deve ser um número válido.',
+            'telefone_1.digits' => 'O Telefone 1 deve ser um número válido.',
+            'telefone_2.numeric' => 'O Telefone 2 deve ser um número válido.',
+            'telefone_2.digits' => 'O Telefone 2 deve ser um número válido.'
         ];
     }
 

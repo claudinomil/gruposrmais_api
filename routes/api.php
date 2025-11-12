@@ -91,7 +91,7 @@ require __DIR__ . '/routes_relatorios.php';
 require __DIR__ . '/routes_mapas.php';
 
 //Mapas Pontos Interesse
-require __DIR__ . '/routes_mapas_pontos_interesse.php';
+require __DIR__ . '/routes_pontos_interesse.php';
 
 //Visitas Técnicas
 require __DIR__ . '/routes_visitas_tecnicas.php';

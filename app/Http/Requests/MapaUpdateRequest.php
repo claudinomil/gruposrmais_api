@@ -15,7 +15,7 @@ class MapaUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'mapa_ponto_tipo_id' => ['required'],
+            'ponto_tipo_id' => ['required'],
             'name' => ['required'],
             'latitude' => ['required'],
             'longitude' => ['required'],
@@ -26,7 +26,7 @@ class MapaUpdateRequest extends FormRequest
     public function messages()
     {
         return [
-            'mapa_ponto_tipo_id.required' => 'O Ponto Tipo é requerido.',
+            'ponto_tipo_id.required' => 'O Ponto Tipo é requerido.',
             'name.required' => 'O Nome é requerido.',
             'latitude.required' => 'A Latitude é requerido.',
             'longitude.required' => 'A Longitude é requerido.',

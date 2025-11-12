@@ -11,4 +11,5 @@ Route::prefix('relatorios')->group(function () {
     Route::get('/relatorio2/{grupo_id}/{situacao_id}/{idioma}', [RelatorioController::class, 'relatorio2'])->middleware(['auth:api']);
     Route::get('/relatorio3/{data}/{user_id}/{submodulo_id}/{operacao_id}/{dado}/{idioma}', [RelatorioController::class, 'relatorio3'])->middleware(['auth:api']);
     Route::get('/relatorio6/{data_inicio}/{data_fim}/{cidade_id}/{cidade}/{idioma}', [RelatorioController::class, 'relatorio6'])->middleware(['auth:api']);
+    Route::get('/relatorio8/{ponto_tipo_id}/{ponto_natureza_id}/{idioma}', [RelatorioController::class, 'relatorio8'])->middleware(['auth:api']);
 });

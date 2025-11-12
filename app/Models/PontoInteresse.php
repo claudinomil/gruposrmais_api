@@ -6,14 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
-class MapaPontoInteresse extends Model
+class PontoInteresse extends Model
 {
     use HasFactory;
 
-    protected $table = 'mapas_pontos_interesse';
+    protected $table = 'pontos_interesse';
 
     protected $fillable = [
-        'mapa_ponto_tipo_id',
+        'ponto_tipo_id',
+        'ponto_natureza_id',
         'name',
         'descricao',
         'cep',
@@ -26,8 +27,8 @@ class MapaPontoInteresse extends Model
         'latitude',
         'longitude',
         'icone',
-        'data_inicio',
-        'data_fim'
+        'telefone_1',
+        'telefone_2'
     ];
 
 

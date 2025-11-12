@@ -14,6 +14,10 @@ use App\Models\User;
 use App\Models\Agrupamento;
 use App\Models\Grupo;
 use App\Models\GrupoRelatorio;
+use App\Models\PontoInteresse;
+use App\Models\PontoInteresseEspecialidade;
+use App\Models\PontoNatureza;
+use App\Models\PontoTipo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -32,6 +36,8 @@ class RelatorioController extends Controller
         $content['operacoes'] = Operacao::orderby('name')->get();
         $content['clientes_executivos'] = ClienteExecutivo::join('clientes', 'clientes.id', 'clientes_executivos.cliente_id')->select('clientes_executivos.*')->orderby('clientes_executivos.executivo_nome')->get();
         $content['funcionarios'] = Funcionario::orderby('name')->get();
+        $content['pontos_tipos'] = PontoTipo::orderby('name')->get();
+        $content['pontos_naturezas'] = PontoNatureza::orderby('name')->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
     }
@@ -135,7 +141,7 @@ class RelatorioController extends Controller
         //Registros
         $relatorio_registros = User
             ::join('grupos', 'grupos.id', 'users.grupo_id')
-            ->join('situacoes', 'situacoes.id', 'users_.situacao_id')
+            ->join('situacoes', 'situacoes.id', 'users.situacao_id')
             ->select('users.*', 'grupos.name as grupo', 'situacoes.name as situacao')
             ->where(function($query) use($grupo_id, $situacao_id) {
                 if ($grupo_id != 0) {$query->where('grupos.id', $grupo_id);}
@@ -259,6 +265,68 @@ class RelatorioController extends Controller
         $content['relatorio_nome'] = $relatorio_nome;
         $content['relatorio_parametros'] = $relatorio_parametros;
         $content['relatorio_registros'] = $relatorio_registros;
+
+        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
+    }
+
+    public function relatorio8($ponto_tipo_id, $ponto_natureza_id, $idioma)
+    {
+        // Relatório Data
+        $relatorio_data = date('d/m/Y');
+
+        // Relatório Hora
+        $relatorio_hora = date('H:i:s');
+
+        // Relatório Nome
+        $relatorio = Relatorio::where('id', 8)->get();
+        $relatorio_nome = $relatorio[0]['name'];
+
+        // Parâmetros
+        $relatorio_parametros = '';
+        if ($ponto_tipo_id == 0) {
+            $relatorio_parametros .= 'Todos os Tipos';
+        } else {
+            $ponto_tipo = PontoTipo::where('id', $ponto_tipo_id)->get();
+            $relatorio_parametros .= $ponto_tipo[0]['name'];
+        }
+        if ($ponto_natureza_id == 0) {
+            $relatorio_parametros .= 'Todos as Naturezas';
+        } else {
+            $ponto_natureza = PontoNatureza::where('id', $ponto_natureza_id)->get();
+            $relatorio_parametros .= $ponto_natureza[0]['name'];
+        }
+        if ($idioma == 2) {$relatorio_parametros .= ' / '.'Inglês';}
+
+        // Registros
+        $relatorio_registros = PontoInteresse
+            ::join('pontos_tipos', 'pontos_tipos.id', 'pontos_interesse.ponto_tipo_id')
+            ->leftjoin('pontos_naturezas', 'pontos_naturezas.id', 'pontos_interesse.ponto_natureza_id')
+            ->select('pontos_interesse.*', 'pontos_tipos.name as ponto_tipo', 'pontos_naturezas.name as ponto_natureza')
+            ->where(function($query) use($ponto_tipo_id, $ponto_natureza_id) {
+                if ($ponto_tipo_id != 0) {$query->where('pontos_tipos.id', $ponto_tipo_id);}
+                if ($ponto_natureza_id != 0) {$query->where('pontos_naturezas.id', $ponto_natureza_id);}
+            })
+            ->orderby('pontos_interesse.name')
+            ->get();
+
+        // Obtém todos os IDs dos pontos de interesse encontrados
+        $ponto_ids = $relatorio_registros->pluck('id');
+
+        $relatorio_registros_especialidades = PontoInteresseEspecialidade
+            ::join('especialidades', 'especialidades.id', 'pontos_interesse_especialidades.especialidade_id')
+            ->join('especialidades_tipos', 'especialidades_tipos.id', 'especialidades.especialidade_tipo_id')
+            ->select('pontos_interesse_especialidades.ponto_interesse_id', 'especialidades_tipos.name as especialidadeTipoName', 'especialidades.name as especialidadeName')
+            ->whereIn('pontos_interesse_especialidades.ponto_interesse_id', $ponto_ids)
+            ->get();
+            
+        // Retorno
+        $content = array();
+        $content['relatorio_data'] = $relatorio_data;
+        $content['relatorio_hora'] = $relatorio_hora;
+        $content['relatorio_nome'] = $relatorio_nome;
+        $content['relatorio_parametros'] = $relatorio_parametros;
+        $content['relatorio_registros'] = $relatorio_registros;
+        $content['relatorio_registros_especialidades'] = $relatorio_registros_especialidades;
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
     }

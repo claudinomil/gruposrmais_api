@@ -13,7 +13,7 @@ class Mapa extends Model
     protected $table = 'mapas';
 
     protected $fillable = [
-        'mapa_ponto_tipo_id',
+        'ponto_tipo_id',
         'name',
         'descricao',
         'latitude',

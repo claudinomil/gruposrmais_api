@@ -8,9 +8,11 @@ use App\Models\ClienteServico;
 use App\Models\Funcionario;
 use App\Models\OrdemServico;
 use App\Models\Proposta;
+use App\Models\User;
 use App\Models\Veiculo;
 use App\Models\VisitaTecnica;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class Z_FakerSeeder extends Seeder
 {
@@ -293,6 +295,19 @@ class Z_FakerSeeder extends Seeder
                 'numero_proposta' => $i,
                 'ano_proposta' => '2025',
                 'cliente_id' => $faker->numberBetween(1, 3)
+            ]);
+        }
+
+        // Usuários
+        for($i=1; $i<=50; $i++) {
+            User::create([
+                'name' => $faker->name,
+                'email' => $faker->email,
+                'password' => Hash::make('12345678'),
+                'email_verified_at' => now(),
+                'user_confirmed_at' => now(),
+                'avatar' => 'build/assets/images/users/avatar-0.png',
+                'created_at' => now()
             ]);
         }
     }

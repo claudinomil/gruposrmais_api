@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\GrupoPermissao;
 use App\Models\Mapa;
 use App\Models\MapaModelo;
-use App\Models\MapaPontoTipo;
+use App\Models\PontoTipo;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use App\Models\Permissao;
