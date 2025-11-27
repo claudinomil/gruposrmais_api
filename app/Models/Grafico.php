@@ -5,15 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Relatorio extends Model
+class Grafico extends Model
 {
     use HasFactory;
 
-    protected $table = 'relatorios';
+    protected $table = 'graficos';
 
     protected $fillable = [
         'name',
-        'descricao',
+        'dashboard',
+        'tipo',
         'ordem_visualizacao'
     ];
 }

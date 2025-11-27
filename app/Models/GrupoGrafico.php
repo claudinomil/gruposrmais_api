@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Agrupamento extends Model
+class GrupoGrafico extends Model
 {
     use HasFactory;
 
-    protected $table = 'agrupamentos';
+    protected $table = 'grupos_graficos';
 
     protected $fillable = [
-        'name',
-        'ordem_visualizacao'
+        'grupo_id',
+        'grafico_id'
     ];
 }

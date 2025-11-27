@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Agrupamento;
 use App\Models\FormaPagamento;
 use App\Models\FormaPagamentoStatus;
 use App\Models\GrupoPermissao;

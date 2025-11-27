@@ -491,13 +491,13 @@ class ZZZ_20250721_Seeder extends Seeder
         GrupoPermissao::where('permissao_id', 113)->delete();
         GrupoPermissao::where('permissao_id', 114)->delete();
         GrupoPermissao::where('permissao_id', 115)->delete();
-        
+
         Permissao::where('id', 111)->delete();
         Permissao::where('id', 112)->delete();
         Permissao::where('id', 113)->delete();
         Permissao::where('id', 114)->delete();
         Permissao::where('id', 115)->delete();
-        
+
         Submodulo::where('id', 23)->delete();
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -507,13 +507,13 @@ class ZZZ_20250721_Seeder extends Seeder
         GrupoPermissao::where('permissao_id', 123)->delete();
         GrupoPermissao::where('permissao_id', 124)->delete();
         GrupoPermissao::where('permissao_id', 125)->delete();
-        
+
         Permissao::where('id', 121)->delete();
         Permissao::where('id', 122)->delete();
         Permissao::where('id', 123)->delete();
         Permissao::where('id', 124)->delete();
         Permissao::where('id', 125)->delete();
-        
+
         Submodulo::where('id', 25)->delete();
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 

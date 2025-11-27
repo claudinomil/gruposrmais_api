@@ -11,7 +11,6 @@ use App\Models\Situacao;
 use App\Models\Submodulo;
 use App\Models\Transacao;
 use App\Models\User;
-use App\Models\Agrupamento;
 use App\Models\Grupo;
 use App\Models\GrupoRelatorio;
 use App\Models\PontoInteresse;
@@ -47,21 +46,12 @@ class RelatorioController extends Controller
         //Retorno
         $content = array();
 
-        //Agrupamentos do Usuário
-        $content['agrupamentos'] = Relatorio
-            ::join('grupos_relatorios', 'grupos_relatorios.relatorio_id', '=', 'relatorios.id')
-            ->join('agrupamentos', 'agrupamentos.id', '=', 'relatorios.agrupamento_id')
-            ->select('agrupamentos.*')
-            ->distinct('agrupamentos.name')
-            ->where('grupos_relatorios.grupo_id', Auth::user()->grupo_id)
-            ->orderby('agrupamentos.ordem_visualizacao', 'ASC')
-            ->get();
+        $grupo_id = Auth::user()->grupo_id;
 
         $content['grupo_relatorios'] = GrupoRelatorio
             ::join('relatorios', 'relatorios.id', 'grupos_relatorios.relatorio_id')
-            ->select('relatorios.id as relatorio_id', 'relatorios.agrupamento_id', 'relatorios.name as relatorio_name', 'relatorios.descricao as relatorio_descricao', 'relatorios.ordem_visualizacao as relatorio_ordem_visualizacao')
-            ->where('grupos_relatorios.grupo_id', Auth::user()->grupo_id)
-            ->orderby('relatorios.agrupamento_id', 'ASC')
+            ->select('relatorios.id as relatorio_id', 'relatorios.name as relatorio_name', 'relatorios.descricao as relatorio_descricao', 'relatorios.ordem_visualizacao as relatorio_ordem_visualizacao')
+            ->where('grupos_relatorios.grupo_id', $grupo_id)
             ->orderby('relatorios.ordem_visualizacao', 'ASC')
             ->get();
 
@@ -269,7 +259,7 @@ class RelatorioController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
     }
 
-    public function relatorio8($ponto_tipo_id, $ponto_natureza_id, $idioma)
+    public function relatorio8($ponto_tipo_id, $ponto_natureza_id, $modelo, $idioma)
     {
         // Relatório Data
         $relatorio_data = date('d/m/Y');
@@ -290,9 +280,11 @@ class RelatorioController extends Controller
             $relatorio_parametros .= $ponto_tipo[0]['name'];
         }
         if ($ponto_natureza_id == 0) {
+            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
             $relatorio_parametros .= 'Todos as Naturezas';
         } else {
             $ponto_natureza = PontoNatureza::where('id', $ponto_natureza_id)->get();
+            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
             $relatorio_parametros .= $ponto_natureza[0]['name'];
         }
         if ($idioma == 2) {$relatorio_parametros .= ' / '.'Inglês';}
@@ -318,7 +310,39 @@ class RelatorioController extends Controller
             ->select('pontos_interesse_especialidades.ponto_interesse_id', 'especialidades_tipos.name as especialidadeTipoName', 'especialidades.name as especialidadeName')
             ->whereIn('pontos_interesse_especialidades.ponto_interesse_id', $ponto_ids)
             ->get();
-            
+
+        // Retorno
+        $content = array();
+        $content['relatorio_data'] = $relatorio_data;
+        $content['relatorio_hora'] = $relatorio_hora;
+        $content['relatorio_nome'] = $relatorio_nome;
+        $content['relatorio_modelo'] = $modelo;
+        $content['relatorio_parametros'] = $relatorio_parametros;
+        $content['relatorio_registros'] = $relatorio_registros;
+        $content['relatorio_registros_especialidades'] = $relatorio_registros_especialidades;
+
+        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
+    }
+
+    public function relatorio9($idioma)
+    {
+        // Relatório Data
+        $relatorio_data = date('d/m/Y');
+
+        // Relatório Hora
+        $relatorio_hora = date('H:i:s');
+
+        // Relatório Nome
+        $relatorio = Relatorio::where('id', 9)->get();
+        $relatorio_nome = $relatorio[0]['name'];
+
+        // Parâmetros
+        $relatorio_parametros = '';
+        if ($idioma == 2) {$relatorio_parametros .= ' / '.'Inglês';}
+
+        // Registros
+        $relatorio_registros = [];
+
         // Retorno
         $content = array();
         $content['relatorio_data'] = $relatorio_data;
@@ -326,7 +350,6 @@ class RelatorioController extends Controller
         $content['relatorio_nome'] = $relatorio_nome;
         $content['relatorio_parametros'] = $relatorio_parametros;
         $content['relatorio_registros'] = $relatorio_registros;
-        $content['relatorio_registros_especialidades'] = $relatorio_registros_especialidades;
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $content);
     }

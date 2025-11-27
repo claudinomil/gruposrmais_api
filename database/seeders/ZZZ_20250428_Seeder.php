@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Agrupamento;
 use App\Models\FormaPagamento;
 use App\Models\FormaPagamentoStatus;
 use App\Models\GrupoPermissao;
@@ -42,19 +41,13 @@ class ZZZ_20250428_Seeder extends Seeder
         //Grupo Permissão
         GrupoPermissao::create(['grupo_id' => 1, 'permissao_id' => 141]);
 
-        //Agrupamentos
-        Agrupamento::create(['id' => 1, 'name' => 'Cadastros', 'ordem_visualizacao' => 5]);
-        Agrupamento::create(['id' => 2, 'name' => 'Diversos', 'ordem_visualizacao' => 10]);
-
-        //agrupamento_id=1 : Cadastros
-        Relatorio::create(['id' => 1, 'agrupamento_id' => 1, 'name' => 'Grupos', 'descricao' => '', 'ordem_visualizacao' => 1]);
-        Relatorio::create(['id' => 2, 'agrupamento_id' => 1, 'name' => 'Usuários', 'descricao' => '', 'ordem_visualizacao' => 2]);
-        Relatorio::create(['id' => 3, 'agrupamento_id' => 1, 'name' => 'Log de Transações', 'descricao' => '', 'ordem_visualizacao' => 3]);
-        Relatorio::create(['id' => 4, 'agrupamento_id' => 1, 'name' => 'Notificações', 'descricao' => '', 'ordem_visualizacao' => 4]);
-        Relatorio::create(['id' => 5, 'agrupamento_id' => 1, 'name' => 'Ferramentas', 'descricao' => '', 'ordem_visualizacao' => 5]);
-
-        //agrupamento_id=2 : Diversos
-        Relatorio::create(['id' => 6, 'agrupamento_id' => 2, 'name' => 'Segurança', 'descricao' => '', 'ordem_visualizacao' => 1]);
+        // Relatórios
+        Relatorio::create(['id' => 1, 'name' => 'Grupos', 'descricao' => '', 'ordem_visualizacao' => 1]);
+        Relatorio::create(['id' => 2, 'name' => 'Usuários', 'descricao' => '', 'ordem_visualizacao' => 2]);
+        Relatorio::create(['id' => 3, 'name' => 'Log de Transações', 'descricao' => '', 'ordem_visualizacao' => 3]);
+        Relatorio::create(['id' => 4, 'name' => 'Notificações', 'descricao' => '', 'ordem_visualizacao' => 4]);
+        Relatorio::create(['id' => 5, 'name' => 'Ferramentas', 'descricao' => '', 'ordem_visualizacao' => 5]);
+        Relatorio::create(['id' => 6, 'name' => 'Segurança', 'descricao' => '', 'ordem_visualizacao' => 1]);
 
         //grupo_id=1
         GrupoRelatorio::create(['grupo_id' => 1, 'relatorio_id' => 1]);

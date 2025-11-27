@@ -43,8 +43,7 @@ class ZZZ_20251107_Seeder extends Seeder
         PontoNatureza::create(['id' => 9, 'name' => 'Privada Confessional']);
         PontoNatureza::create(['id' => 10, 'name' => 'Privada Filantrópica']);
 
-        //agrupamento_id=2 : Diversos
-        Relatorio::create(['id' => 8, 'agrupamento_id' => 2, 'name' => 'Ponto de Interesse', 'descricao' => '', 'ordem_visualizacao' => 3]);
+        Relatorio::create(['id' => 8, 'name' => 'Ponto de Interesse', 'descricao' => '', 'ordem_visualizacao' => 3]);
 
         //grupo_id=1
         GrupoRelatorio::create(['grupo_id' => 1, 'relatorio_id' => 8]);

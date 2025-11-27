@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Agrupamento;
 use App\Models\GrupoRelatorio;
 use App\Models\Relatorio;
 use App\Models\VisitaTecnicaPergunta;
@@ -20,8 +19,7 @@ class ZZZ_20250615_Seeder extends Seeder
 
     public function run()
     {
-        //agrupamento_id=2 : Diversos
-        Relatorio::create(['id' => 7, 'agrupamento_id' => 2, 'name' => 'Cartão Emergencial', 'descricao' => '', 'ordem_visualizacao' => 2]);
+        Relatorio::create(['id' => 7, 'name' => 'Cartão Emergencial', 'descricao' => '', 'ordem_visualizacao' => 2]);
 
         //grupo_id=1
         GrupoRelatorio::create(['grupo_id' => 1, 'relatorio_id' => 7]);

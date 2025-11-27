@@ -2,24 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BrigadaIncendio;
 use App\Models\Cliente;
 use App\Models\Funcionario;
 use App\Models\GrupoGrafico;
-use App\Models\OrdemServico;
-use App\Models\Proposta;
 use App\Models\Transacao;
 use App\Models\User;
-use App\Models\VisitaTecnica;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class DashboardController extends Controller
+class Dashboard3Controller extends Controller
 {
     public function graficos()
     {
         // QUALQUER ALTERAÇÃO REPLICAR PARA O DashbordController, Dashbord2Controller E Dashbord3Controller
-
+        
         try {
             // array
             $content = array();
@@ -29,10 +25,10 @@ class DashboardController extends Controller
             ::join('graficos', 'graficos.id', 'grupos_graficos.grafico_id')
             ->select('graficos.id as grafico_id', 'graficos.name as grafico_name', 'graficos.tipo as grafico_tipo', 'graficos.ordem_visualizacao as grafico_ordem_visualizacao')
             ->where('grupos_graficos.grupo_id', Auth::user()->grupo_id)
-            ->where('graficos.dashboard', 1)
+            ->where('graficos.dashboard', 3)
             ->orderby('graficos.ordem_visualizacao', 'ASC')
             ->get();
-
+            
             return $this->sendResponse('Registros enviados com sucesso.', 2000, null, $content);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -131,25 +127,7 @@ class DashboardController extends Controller
                 // Transações Distribuição por Submodulos
                 $content['transacoes_submodulos'] = DB::select("SELECT transacoes.submodulo_id, COUNT(*) as quantidade, submodulos.name FROM transacoes INNER JOIN submodulos ON submodulos.id = transacoes.submodulo_id GROUP BY submodulo_id");
             }
-
-            // Gráfico id=10 (Operações)
-            if ($grafico_id == 10) {
-                // Propostas Quantidade
-                $content['operacoes_propostas_quantidade'] = Proposta::count();
-
-                // Brigadas Incêndios Quantidade
-                $content['operacoes_brigadas_incendios_quantidade'] = BrigadaIncendio::count();
-
-                // Visitas Técnicas Quantidade
-                $content['operacoes_visitas_tecnicas_quantidade'] = VisitaTecnica::count();
-
-                // Ordens de Serviços Quantidade
-                $content['operacoes_ordens_servicos_quantidade'] = OrdemServico::count();
-
-                // Quantidade Total
-                $content['operacoes_total_quantidade'] = $content['operacoes_propostas_quantidade'] + $content['operacoes_brigadas_incendios_quantidade'] + $content['operacoes_visitas_tecnicas_quantidade'] + $content['operacoes_ordens_servicos_quantidade'];
-            }
-
+            
             return $this->sendResponse('Registros enviados com sucesso.', 2000, null, $content);
         } catch (\Exception $e) {
             if (config('app.debug')) {

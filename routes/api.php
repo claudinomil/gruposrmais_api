@@ -63,6 +63,12 @@ require __DIR__ . '/routes_clientes.php';
 //Dashboards
 require __DIR__ . '/routes_dashboards.php';
 
+//Dashboards2
+require __DIR__ . '/routes_dashboards2.php';
+
+//Dashboards3
+require __DIR__ . '/routes_dashboards3.php';
+
 //Fornecedores
 require __DIR__ . '/routes_fornecedores.php';
 

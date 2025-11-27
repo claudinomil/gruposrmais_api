@@ -8,6 +8,7 @@ use App\Http\Requests\UserUpdateRequest;
 use App\Models\Empresa;
 use App\Models\Funcionario;
 use App\Models\Grupo;
+use App\Models\GrupoGrafico;
 use App\Models\LayoutMode;
 use App\Models\LayoutStyle;
 use App\Models\Modulo;
@@ -419,6 +420,15 @@ class UserController extends Controller
 
                 //Submódulo nome dos campos
                 $registros['namesFieldsSubmodulo'] = Schema::getColumnListing($searchSubmodulo);
+                //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                // Dashboards que o usuário logado possui'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                $registros['userDashboards'] = GrupoGrafico
+                    ::join('graficos', 'graficos.id', '=', 'grupos_graficos.grafico_id')
+                    ->select('graficos.dashboard')
+                    ->where('grupos_graficos.grupo_id', Auth::user()->grupo_id)
+                    ->groupBy('graficos.dashboard')
+                    ->get();
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);

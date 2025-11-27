@@ -6,9 +6,11 @@ use App\Facades\SuporteFacade;
 use App\Http\Requests\GrupoStoreRequest;
 use App\Http\Requests\GrupoUpdateRequest;
 use App\Models\GrupoPermissao;
-use App\Models\GrupoRelatorio;
-use App\Models\Permissao;
 use App\Models\Relatorio;
+use App\Models\GrupoRelatorio;
+use App\Models\Grafico;
+use App\Models\GrupoGrafico;
+use App\Models\Permissao;
 use App\Models\Submodulo;
 use Illuminate\Support\Facades\DB;
 use App\Models\Grupo;
@@ -111,6 +113,9 @@ class GrupoController extends Controller
             //relatorios
             $registro['relatorios'] = GrupoRelatorio::where('grupo_id', $dados[0]->id)->get();
 
+            //graficos
+            $registro['graficos'] = GrupoGrafico::where('grupo_id', $dados[0]->id)->get();
+
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
@@ -137,7 +142,10 @@ class GrupoController extends Controller
             $registros['permissoes'] = Permissao::all();
 
             //Relatorios
-            $registros['relatorios'] = Relatorio::select('relatorios.*', 'agrupamentos.name as relatorio_agrupamento')->join('agrupamentos', 'agrupamentos.id', 'relatorios.agrupamento_id')->orderby('agrupamentos.ordem_visualizacao')->orderby('relatorios.ordem_visualizacao')->get();
+            $registros['relatorios'] = Relatorio::select('relatorios.*')->orderby('relatorios.ordem_visualizacao')->get();
+
+            // Graficos
+            $registros['graficos'] = Grafico::select('graficos.*')->orderby('graficos.ordem_visualizacao')->get();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -203,6 +211,13 @@ class GrupoController extends Controller
             for($i=1; $i<=100; $i++) {
                 if (isset($request['relatorio_'.$i])) {
                     GrupoRelatorio::create(['grupo_id' => $grupo_id, 'relatorio_id' => $i]);
+                }
+            }
+
+            //Incluindo registros na tabela grupos_graficos
+            for($i=1; $i<=100; $i++) {
+                if (isset($request['grafico_'.$i])) {
+                    GrupoGrafico::create(['grupo_id' => $grupo_id, 'grafico_id' => $i]);
                 }
             }
 
@@ -285,6 +300,16 @@ class GrupoController extends Controller
                     }
                 }
 
+                //Deletando registros na tabela grupos_graficos
+                GrupoGrafico::where('grupo_id', $grupo_id)->delete();
+
+                //Incluindo registros na tabela grupos_graficos
+                for($i=1; $i<=100; $i++) {
+                    if (isset($request['grafico_'.$i])) {
+                        GrupoGrafico::create(['grupo_id' => $grupo_id, 'grafico_id' => $i]);
+                    }
+                }
+
                 return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
             }
         } catch (\Exception $e) {
@@ -317,6 +342,9 @@ class GrupoController extends Controller
 
                 //Deletar antes na tabela grupos_relatorios
                 DB::table('grupos_relatorios')->where('grupo_id', $id)->delete();
+
+                //Deletar antes na tabela grupos_graficos
+                DB::table('grupos_graficos')->where('grupo_id', $id)->delete();
 
                 $registro->delete();
 

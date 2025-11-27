@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\BrigadaIncendio;
 use App\Models\Cliente;
 use App\Models\ClienteExecutivo;
-use App\Models\ClienteServico;
 use App\Models\Funcionario;
 use App\Models\OrdemServico;
 use App\Models\Proposta;
@@ -26,7 +26,7 @@ class Z_FakerSeeder extends Seeder
         $parentescos = ['PAI', 'MÃE', 'AMIGO'];
 
         //Funcionários
-        for($i=1; $i<=5; $i++) {
+        for($i=1; $i<=400; $i++) {
             Funcionario::create([
                 'name' => $faker->name,
                 'data_nascimento' => $faker->date('d/m/Y'),
@@ -193,7 +193,7 @@ class Z_FakerSeeder extends Seeder
             'Analista de Marketing', 'Designer Gráfico', 'Especialista em UX/UI', 'Executivo de Vendas',
             'Gerente Comercial', 'Operador de Produção', 'Técnico em Manutenção', 'Supervisor de Logística'
         ];
-        for($i=1; $i<=12; $i++) {
+        for($i=1; $i<=100; $i++) {
             ClienteExecutivo::create([
                 'cliente_id' => $faker->numberBetween(1, 6),
                 'executivo_nome' => $faker->name,
@@ -253,8 +253,22 @@ class Z_FakerSeeder extends Seeder
             ]);
         }
 
+        // Brigadas Incêndios
+        for($i=1; $i<=100; $i++) {
+            BrigadaIncendio::create([
+                'empresa_id' => $faker->numberBetween(1, 2),
+                'cliente_id' => $faker->numberBetween(1, 15),
+                'numero_brigada_incendio' => $i,
+                'ano_brigada_incendio' => '2025',
+                'data_abertura' => '24/07/2025',
+                'hora_abertura' => '18:09',
+                'data_prevista' => '24/07/2025',
+                'hora_prevista' => '18:09'
+            ]);
+        }
+
         //Visitas Técnicas
-        for($i=1; $i<=10; $i++) {
+        for($i=1; $i<=100; $i++) {
             VisitaTecnica::create([
                 'empresa_id' => $faker->numberBetween(1, 2),
                 'visita_tecnica_tipo_id' => $faker->numberBetween(1, 2),
@@ -271,7 +285,7 @@ class Z_FakerSeeder extends Seeder
         }
 
         //Ordens de Serviços
-        for($i=1; $i<=10; $i++) {
+        for($i=1; $i<=100; $i++) {
             OrdemServico::create([
                 'empresa_id' => $faker->numberBetween(1, 2),
                 'ordem_servico_tipo_id' => $faker->numberBetween(1, 3),
@@ -288,7 +302,7 @@ class Z_FakerSeeder extends Seeder
         }
 
         //Propostas
-        for($i=1; $i<=10; $i++) {
+        for($i=1; $i<=100; $i++) {
             Proposta::create([
                 'empresa_id' => $faker->numberBetween(1, 2),
                 'data_proposta' => '24/07/2025',
@@ -299,10 +313,12 @@ class Z_FakerSeeder extends Seeder
         }
 
         // Usuários
-        for($i=1; $i<=50; $i++) {
+        for($i=1; $i<=70; $i++) {
             User::create([
                 'name' => $faker->name,
                 'email' => $faker->email,
+                'situacao_id' => $faker->numberBetween(1, 2),
+                'grupo_id' => $faker->numberBetween(1, 5),
                 'password' => Hash::make('12345678'),
                 'email_verified_at' => now(),
                 'user_confirmed_at' => now(),
