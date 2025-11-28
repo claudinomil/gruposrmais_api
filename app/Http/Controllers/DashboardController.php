@@ -120,7 +120,24 @@ class DashboardController extends Controller
                 $content['transacoes_quantidade'] = Transacao::count();
 
                 // Transações Distribuição por Operações
-                $content['transacoes_operacoes'] = DB::select("SELECT transacoes.operacao_id, COUNT(*) as quantidade, operacoes.name FROM transacoes INNER JOIN operacoes ON operacoes.id = transacoes.operacao_id GROUP BY operacao_id");
+                //$content['transacoes_operacoes'] = DB::select("SELECT transacoes.operacao_id, COUNT(*) as quantidade, operacoes.name FROM transacoes INNER JOIN operacoes ON operacoes.id = transacoes.operacao_id GROUP BY operacao_id");
+
+
+
+                $content['transacoes_operacoes'] = DB::select("
+    SELECT
+        transacoes.operacao_id,
+        operacoes.name,
+        COUNT(*) as quantidade
+    FROM transacoes
+    INNER JOIN operacoes ON operacoes.id = transacoes.operacao_id
+    GROUP BY transacoes.operacao_id, operacoes.name
+    ORDER BY operacoes.name
+");
+
+
+
+
             }
 
             // Gráfico id=9 (Transações Submódulos)

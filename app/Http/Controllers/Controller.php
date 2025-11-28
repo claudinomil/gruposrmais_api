@@ -20,6 +20,6 @@ class Controller extends BaseController
             'content' => $content
         ];
 
-        return response()->json($response, 200, [], JSON_UNESCAPED_UNICODE);
+        return response()->json($response, 200);
     }
 }
