@@ -120,24 +120,7 @@ class DashboardController extends Controller
                 $content['transacoes_quantidade'] = Transacao::count();
 
                 // Transações Distribuição por Operações
-                //$content['transacoes_operacoes'] = DB::select("SELECT transacoes.operacao_id, COUNT(*) as quantidade, operacoes.name FROM transacoes INNER JOIN operacoes ON operacoes.id = transacoes.operacao_id GROUP BY operacao_id");
-
-
-
-                $content['transacoes_operacoes'] = DB::select("
-    SELECT
-        transacoes.operacao_id,
-        operacoes.name,
-        COUNT(*) as quantidade
-    FROM transacoes
-    INNER JOIN operacoes ON operacoes.id = transacoes.operacao_id
-    GROUP BY transacoes.operacao_id, operacoes.name
-    ORDER BY operacoes.name
-");
-
-
-
-
+                $content['transacoes_operacoes'] = DB::select("SELECT transacoes.operacao_id, operacoes.name, COUNT(*) as quantidade FROM transacoes INNER JOIN operacoes ON operacoes.id = transacoes.operacao_id GROUP BY transacoes.operacao_id, operacoes.name ORDER BY operacoes.name");
             }
 
             // Gráfico id=9 (Transações Submódulos)
@@ -146,7 +129,7 @@ class DashboardController extends Controller
                 $content['transacoes_quantidade'] = Transacao::count();
 
                 // Transações Distribuição por Submodulos
-                $content['transacoes_submodulos'] = DB::select("SELECT transacoes.submodulo_id, COUNT(*) as quantidade, submodulos.name FROM transacoes INNER JOIN submodulos ON submodulos.id = transacoes.submodulo_id GROUP BY submodulo_id");
+                $content['transacoes_submodulos'] = DB::select("SELECT transacoes.submodulo_id, submodulos.name, COUNT(*) as quantidade FROM transacoes INNER JOIN submodulos ON submodulos.id = transacoes.submodulo_id GROUP BY transacoes.submodulo_id, submodulos.name ORDER BY submodulos.name");
             }
 
             // Gráfico id=10 (Operações)
