@@ -94,16 +94,5 @@ class ZZZ_20251114_Seeder extends Seeder
         //grupo_id=1
         GrupoRelatorio::create(['grupo_id' => 1, 'relatorio_id' => 9]);
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-        // // Documento Fontes'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        // DocumentoFonte::create(['id' => 6, 'name' => 'DOCUMENTOS FINANCEIROS', 'ordem' => 60]);
-        // //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-        // // Documentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        // Documento::create(['id' => 65, 'name' => 'Folha de Ponto', 'documento_submodulo_id' => 2, 'documento_fonte_id' => 6, 'ordem' => 10]);
-        // Documento::create(['id' => 66, 'name' => 'Contracheque', 'documento_submodulo_id' => 2, 'documento_fonte_id' => 6, 'ordem' => 20]);
-        // Documento::create(['id' => 67, 'name' => 'Vale Refeição', 'documento_submodulo_id' => 2, 'documento_fonte_id' => 6, 'ordem' => 30]);
-        // Documento::create(['id' => 68, 'name' => 'Vale Transporte', 'documento_submodulo_id' => 2, 'documento_fonte_id' => 6, 'ordem' => 40]);
-        // //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     }
 }

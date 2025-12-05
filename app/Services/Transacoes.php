@@ -100,7 +100,7 @@ class Transacoes
                 $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $search[0][$modelCampoRetorno] . "<br>";
             }
         }
-        
+
         //Opção para o campo proposta_id
         if ($op == 4) {
             if (($dadoAtual != "") and ($dadoAtual != 0)) {
@@ -114,7 +114,7 @@ class Transacoes
                 $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $search_cliente . "/" . $search_data_proposta . "/" . $search_numero_proposta . "<br>";
             }
         }
-        
+
         //Opção para o campo visita_tecnica_id
         if ($op == 8) {
             if (($dadoAtual != "") and ($dadoAtual != 0)) {
@@ -382,6 +382,15 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['fotografia_documento'], $dadosAtual['fotografia_documento'], 'Fotografia Documento', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['fotografia_cartao_emergencial'], $dadosAtual['fotografia_cartao_emergencial'], 'Fotografia Cartão Emergencial', '', '');
                 }
+
+                //Tabela funcionarios_documentos_mensais
+                if ($op == 4) {
+                    $dados .= '<b>:: Funcionários Documentos Mensais</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['funcionario_id'], $dadosAtual['funcionario_id'], 'Funcionário', Funcionario::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['mes'], $dadosAtual['mes'], 'Mês', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['ano'], $dadosAtual['ano'], 'Ano', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['caminho'], $dadosAtual['caminho'], 'Caminho', '', '');
+                }
             }
 
             //identidade_orgaos
@@ -611,7 +620,7 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['pdf_3'], $dadosAtual['pdf_3'], 'PDF 3', '', '');
                 }
             }
-            
+
             //empresas
             if ($submodulo_id == 24) {
                 if ($op == 1) {
@@ -619,7 +628,7 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
                 }
             }
-            
+
             //Ordens Serviço
             if ($submodulo_id == 26) {
                 if ($op == 1) {

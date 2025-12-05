@@ -22,6 +22,8 @@ use App\Models\Nacionalidade;
 use App\Models\Naturalidade;
 use App\Models\Funcao;
 use App\Models\Banco;
+use App\Models\DocumentoMensal;
+use App\Models\DocumentoMensalFuncionario;
 use App\Models\Escolaridade;
 use App\Models\Estado;
 use App\Models\PixTipo;
@@ -29,6 +31,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Funcionario;
 use App\Models\FuncionarioDocumento;
+use App\Models\FuncionarioDocumentoMensal;
 use App\Models\GrupoPermissao;
 use Illuminate\Support\Facades\Auth;
 
@@ -581,6 +584,125 @@ class FuncionarioController extends Controller
 
             //Return
             return $this->sendResponse('Documento excluído com sucesso.', 2000, null, $registro['caminho']);
+        }
+    }
+
+    public function upload_documento_mensal(Request $request)
+    {
+        try {
+            // Verifica se é uma ação válida
+            if ($request['acao'] == 1) {
+
+                // Campos para identificar o registro
+                $where = [
+                    'funcionario_id' => $request['funcionario_id'],
+                    'mes' => $request['mes'],
+                    'ano' => $request['ano'],
+                    'documento_mensal_funcionario_id' => $request['documento_mensal_funcionario_id'],
+                ];
+
+                // Tenta encontrar registro existente
+                $registro = FuncionarioDocumentoMensal::where($where)->first();
+
+                if ($registro) {
+                    // Atualiza o registro existente
+                    $registro->update($request->all());
+                } else {
+                    // Cria novo registro
+                    FuncionarioDocumentoMensal::create($request->all());
+                }
+
+                //Transação
+                Transacoes::transacaoRecord(4, 1, 'funcionarios', $request, $request);
+
+                //Return
+                return $this->sendResponse('Documento Mensal enviado com sucesso.', 2000, null, $request);
+            }
+
+            // Caso a ação não seja válida
+            return $this->sendResponse('Ação inválida.', 4000, null, null);
+
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function verificar_documentos_mensais($funcionario_id, $mes, $ano)
+    {
+        try {
+            $registros = array();
+
+            $registros['documentos_mensais'] = DocumentoMensalFuncionario::orderby('ordem', 'ASC')->get();
+
+            $registros['verificar_documentos_mensais'] = FuncionarioDocumentoMensal
+                ::join('documentos_mensais_funcionarios', 'funcionarios_documentos_mensais.documento_mensal_funcionario_id', 'documentos_mensais_funcionarios.id')
+                ->select('funcionarios_documentos_mensais.*', 'documentos_mensais_funcionarios.name as documentoMensalName')
+                ->where('funcionarios_documentos_mensais.funcionario_id', $funcionario_id)
+                ->where('funcionarios_documentos_mensais.mes', $mes)
+                ->where('funcionarios_documentos_mensais.ano', $ano)
+                ->orderby('documentos_mensais_funcionarios.ordem', 'ASC')
+                ->get();
+
+            return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function documentos_mensais($funcionario_id)
+    {
+        try {
+            $registros = array();
+
+            $registros['permissoes'] = GrupoPermissao
+                ::join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
+                ->select('permissoes.name as permissao')
+                ->where('grupos_permissoes.grupo_id', Auth::user()->grupo_id)
+                ->where('permissoes.name', 'like', 'funcionarios_%')
+                ->get();
+
+            $registros['funcionarios_documentos_mensais'] = FuncionarioDocumentoMensal
+                ::join('documentos_mensais_funcionarios', 'funcionarios_documentos_mensais.documento_mensal_funcionario_id', 'documentos_mensais_funcionarios.id')
+                ->select('funcionarios_documentos_mensais.*', 'documentos_mensais_funcionarios.name as documentoMensalName')
+                ->where('funcionarios_documentos_mensais.funcionario_id', $funcionario_id)
+                ->orderby('funcionarios_documentos_mensais.ano', 'DESC')
+                ->orderby('funcionarios_documentos_mensais.mes', 'DESC')
+                ->orderby('documentos_mensais_funcionarios.ordem', 'ASC')
+                ->get();
+
+            return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function deletar_documento_mensal($funcionario_documento_mensal_id)
+    {
+        $registro = FuncionarioDocumentoMensal::find($funcionario_documento_mensal_id);
+
+        if (!$registro) {
+            return $this->sendResponse('Documento Mensal não encontrado.', 4040, null, $registro);
+        } else {
+            //Deletar
+            $registro->delete();
+
+            //gravar transacao
+            Transacoes::transacaoRecord(4, 3, 'funcionarios', $registro, $registro);
+
+            //Return
+            return $this->sendResponse('Documento Mensal excluído com sucesso.', 2000, null, $registro['caminho']);
         }
     }
 

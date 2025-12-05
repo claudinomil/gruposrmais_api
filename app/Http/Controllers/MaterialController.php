@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\MaterialStoreRequest;
 use App\Http\Requests\MaterialUpdateRequest;
+use App\Models\Cor;
 use App\Models\Material;
 use App\Models\MaterialCategoria;
+use Illuminate\Http\Request;
 
 class MaterialController extends Controller
 {
@@ -45,15 +47,18 @@ class MaterialController extends Controller
             return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
         }
     }
-    
+
     public function auxiliary()
     {
         try {
             $registros = array();
 
             //Categorias
-            $registros['material_categorias'] = MaterialCategoria::all();
-            
+            $registros['material_categorias'] = MaterialCategoria::orderby('name')->get();
+
+            // Cores
+            $registros['cores'] = Cor::orderby('name')->get();
+
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -63,7 +68,7 @@ class MaterialController extends Controller
             return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
         }
     }
-    
+
     public function store(MaterialStoreRequest $request)
     {
         try {
@@ -188,5 +193,53 @@ class MaterialController extends Controller
         //$sql = DB::getQueryLog();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+    }
+
+    public function modal_info($id)
+    {
+        try {
+            $registro = array();
+
+            // Material
+            $material = Material
+                ::Join('material_categorias', 'material_categorias.id', '=', 'materiais.material_categoria_id')
+                ->leftJoin('cores', 'cores.id', '=', 'materiais.cor_id')
+                ->select(['materiais.*', 'material_categorias.name as materialCategoriaName', 'cores.name as corName'])
+                ->where('materiais.id', '=', $id)
+                ->get();
+
+            $registro['material'] = $material[0];
+
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function upload_fotografia(Request $request)
+    {
+        try {
+            $registro = $this->material->find($request['material_id']);
+
+            if (!$registro) {
+                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
+            } else {
+                //Alterando registro
+                $registro->fotografia = $request['fotografia'];
+                $registro->save();
+
+                return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
+            }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
     }
 }

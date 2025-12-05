@@ -10,4 +10,8 @@ Route::prefix('materiais')->group(function () {
     Route::put('/update/{id}', [MaterialController::class, 'update'])->middleware(['auth:api']);
     Route::delete('/destroy/{id}', [MaterialController::class, 'destroy'])->middleware(['auth:api']);
     Route::get('/auxiliary/tables', [MaterialController::class, 'auxiliary'])->middleware(['auth:api']);
+
+    // Modal materiais_modal_info
+    Route::get('/modalInfo/modal_info/{id}', [MaterialController::class, 'modal_info'])->middleware(['auth:api']);
+    Route::post('/uploadFotografia/upload_fotografia', [MaterialController::class, 'upload_fotografia'])->middleware(['auth:api']);
 });

@@ -4,19 +4,20 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMaterialCategoriasTable extends Migration
+class CreateDocumentosMensaisFuncionariosTable extends Migration
 {
     public function up()
     {
-        Schema::create('material_categorias', function (Blueprint $table) {
+        Schema::create('documentos_mensais_funcionarios', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->integer('ordem');
             $table->timestamps();
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('material_categorias');
+        Schema::dropIfExists('documentos_mensais_funcionarios');
     }
 }
