@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\BrigadaIncendio;
 use App\Models\Cliente;
 use App\Models\ClienteExecutivo;
+use App\Models\Fornecedor;
 use App\Models\Funcionario;
 use App\Models\OrdemServico;
 use App\Models\Proposta;
@@ -83,6 +84,29 @@ class Z_FakerSeeder extends Seeder
                 'contato_2_parentesco' => $faker->randomElement($parentescos),
                 'contato_2_telefone' => '21'.$faker->numerify('########'),
                 'contato_2_celular' => '21'.$faker->numerify('9########'),
+                'created_at' => now()
+            ]);
+        }
+
+        // Fornecedores
+        for($i=1; $i<=10; $i++) {
+            Fornecedor::create([
+                'status' => 1,
+                'tipo' => 1,
+                'name' => $faker->name,
+                'cnpj' => $faker->cnpj(false),
+                'email' => $faker->email,
+                'telefone_1' => '21'.$faker->numerify('########'),
+                'telefone_2' => '21'.$faker->numerify('########'),
+                'celular_1' => '21'.$faker->numerify('9########'),
+                'celular_2' => '21'.$faker->numerify('9########'),
+                'cep' => '20735130',
+                'numero' => '309',
+                'complemento' => '302',
+                'logradouro' => 'Rua Medina',
+                'bairro' => 'Meier',
+                'localidade' => 'Rio de Janeiro',
+                'uf' => 'RJ',
                 'created_at' => now()
             ]);
         }

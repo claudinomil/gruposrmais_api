@@ -8,6 +8,7 @@ use App\Models\BrigadaIncendioEscalaBrigadista;
 use App\Models\BrigadaIncendioMaterial;
 use App\Models\ClienteSegurancaMedida;
 use App\Models\Especialidade;
+use App\Models\MaterialEntradaItem;
 use App\Models\OrdemServicoDestino;
 use App\Models\OrdemServicoEquipe;
 use App\Models\OrdemServicoExecutivo;
@@ -245,7 +246,7 @@ class SuporteService
         foreach($escalas as $escala) {
             BrigadaIncendioEscalaBrigadista::where('brigada_incendio_escala_id', $escala['id'])->delete();
         }
-        
+
         // Array de Escalas Atuais (chave composta: escala_tipo_id + posto)
         $escalasAtuais = BrigadaIncendioEscala::where('brigada_incendio_id', $brigada_incendio_id)
             ->get()
@@ -280,7 +281,7 @@ class SuporteService
         foreach ($escalasAtuais as $chave => $registro) {
             if (!isset($escalasRecebidas[$chave]) && ($op == 2 || $op == 3)) {
                 $dadosAnterior = $registro->toArray();
-                
+
                 // Deletar Escala
                 $registro->delete();
 
@@ -312,11 +313,11 @@ class SuporteService
 
                 Transacoes::transacaoRecord(3, 1, 'brigadas_incendios', $dadosAtual, $dadosAtual);
             }
-            
+
             // brigadas_incendios_escalas_brigadistas (INCLUIR)
             $ala = 0;
             $num = 0;
-            
+
             for($i=1; $i<=$dadosAtual['escala_tipo_quantidade_alas']; $i++) {
                 $ala++;
 
@@ -336,7 +337,7 @@ class SuporteService
             }
         }
     }
-    
+
     /*
      * Editar dados na tabela brigadas_incendios_escalas_geradas
      *
@@ -348,7 +349,7 @@ class SuporteService
 
 
         // FAZER ROTINA PARA:
-        
+
         // . PEGAR TODAS AS ESCALAS GERADAS NO BANCO
         // . PEGAR TODAS AS ESCALAS GERADAS NO REQUEST
         // . VERIFICAR QUAIS ESTÃO NO BANCO E NÃO ESTÃO NO REQUEST E VER SE PODE EXCLUIR
@@ -361,7 +362,7 @@ class SuporteService
         foreach($escalas as $escala) {
             BrigadaIncendioEscalaBrigadista::where('brigada_incendio_escala_id', $escala['id'])->delete();
         }
-        
+
         // Array de Escalas Atuais (chave composta: escala_tipo_id + posto)
         $escalasAtuais = BrigadaIncendioEscala::where('brigada_incendio_id', $brigada_incendio_id)
             ->get()
@@ -396,7 +397,7 @@ class SuporteService
         foreach ($escalasAtuais as $chave => $registro) {
             if (!isset($escalasRecebidas[$chave]) && ($op == 2 || $op == 3)) {
                 $dadosAnterior = $registro->toArray();
-                
+
                 // Deletar Escala
                 $registro->delete();
 
@@ -428,11 +429,11 @@ class SuporteService
 
                 Transacoes::transacaoRecord(3, 1, 'brigadas_incendios', $dadosAtual, $dadosAtual);
             }
-            
+
             // brigadas_incendios_escalas_brigadistas (INCLUIR)
             $ala = 0;
             $num = 0;
-            
+
             for($i=1; $i<=$dadosAtual['escala_tipo_quantidade_alas']; $i++) {
                 $ala++;
 
@@ -449,6 +450,60 @@ class SuporteService
                     BrigadaIncendioEscalaBrigadista::create($regArray);
                     Transacoes::transacaoRecord(4, 1, 'brigadas_incendios', $regArray, $regArray);
                 }
+            }
+        }
+    }
+
+    /*
+     * Editar dados na tabela materiais_entradas_itens
+     *
+     * @PARAM op : 1(Incluir)  2(Excluir)  3(Alterar)
+     */
+    public function editMaterialEntradaItem($op, $material_entrada_id, $request)
+    {
+        // Array de Materiais Atuais ()chave pelo material_id para facilitar comparação)
+        $materiaisAtuais = MaterialEntradaItem::where('material_entrada_id', $material_entrada_id)->get()->keyBy('material_id');
+
+        // Array de Materiais Recebidos
+        $materiaisRecebidos = [];
+
+        if ($op == 1 || $op == 3) {
+            foreach ($request['mat_material_id'] ?? [] as $i => $material_id) {
+                $materiaisRecebidos[$material_id] = [
+                    'material_entrada_id'    => $material_entrada_id,
+                    'material_id'            => $material_id,
+                    'material_categoria_name'=> $request['mat_material_categoria_name'][$i] ?? null,
+                    'material_name'          => $request['mat_material_name'][$i] ?? null,
+                    'material_quantidade'    => $request['mat_material_quantidade'][$i] ?? null,
+                    'material_valor_unitario'    => $request['mat_material_valor_unitario'][$i] ?? null,
+                ];
+            }
+        }
+
+        // Varrer Materiais Atuais e excluir os que não existem mais
+        foreach ($materiaisAtuais as $material_id => $registro) {
+            if (!isset($materiaisRecebidos[$material_id]) && ($op == 2 || $op == 3)) {
+                $dadosAnterior = $registro->toArray();
+                $registro->delete();
+                Transacoes::transacaoRecord(2, 3, 'materiais_entradas', $dadosAnterior, $dadosAnterior);
+            }
+        }
+
+        // Varrer Materiais Recebidos e inserir ou atualizar os que chegaram
+        foreach ($materiaisRecebidos as $material_id => $dadosAtual) {
+            if (isset($materiaisAtuais[$material_id])) {
+                // Atualizar somente se houve mudança
+                $registro = $materiaisAtuais[$material_id];
+                $dadosAnterior = $registro->toArray();
+
+                $registro->update($dadosAtual);
+
+                Transacoes::transacaoRecord(2, 2, 'materiais_entradas', $dadosAnterior, $dadosAtual);
+            } else {
+                // Inserir novo
+                MaterialEntradaItem::create($dadosAtual);
+
+                Transacoes::transacaoRecord(2, 1, 'materiais_entradas', $dadosAtual, $dadosAtual);
             }
         }
     }

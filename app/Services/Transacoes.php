@@ -9,6 +9,7 @@ use App\Models\Cliente;
 use App\Models\ClienteExecutivo;
 use App\Models\ClienteServico;
 use App\Models\ContratacaoTipo;
+use App\Models\Cor;
 use App\Models\Departamento;
 use App\Models\EdificacaoClassificacao;
 use App\Models\Empresa;
@@ -39,8 +40,10 @@ use App\Models\ServicoTipo;
 use App\Models\SistemaAcesso;
 use App\Models\Situacao;
 use App\Models\Estado;
+use App\Models\Fornecedor;
 use App\Models\Material;
 use App\Models\MaterialCategoria;
+use App\Models\MaterialEntrada;
 use App\Models\Transacao;
 use App\Models\User;
 
@@ -187,6 +190,17 @@ class Transacoes
                 $search_posto = $brigada_incendio_escala['posto'];
 
                 $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $search_escala_tipo_name . " - " . $search_posto . "<br>";
+            }
+        }
+
+        //Opção para o campo material_entrada_id
+        if ($op == 13) {
+            if (($dadoAtual != "") and ($dadoAtual != 0)) {
+                $material_entrada = MaterialEntrada::where('id', $dadoAtual)->get()[0];
+                $search_nf_numero_material_entrada = $material_entrada['nf_numero'];
+                $search_nf_serie_material_entrada = $material_entrada['nf_serie'];
+
+                $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $search_nf_numero_material_entrada . "/" . $search_nf_serie_material_entrada . "<br>";
             }
         }
 
@@ -757,6 +771,16 @@ class Transacoes
                 }
             }
 
+            //clientes_locais
+            if ($submodulo_id == 36) {
+                if ($op == 1) {
+                    $dados .= '<b>:: Clientes Locais</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Cliente', Cliente::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');
+                }
+            }
+
             //materiais
             if ($submodulo_id == 32) {
                 if ($op == 1) {
@@ -764,6 +788,9 @@ class Transacoes
                     $dados .= $this->retornaDado(2, $dadosAnterior['material_categoria_id'], $dadosAtual['material_categoria_id'], 'Categoria', MaterialCategoria::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['numero_patrimonio'], $dadosAtual['numero_patrimonio'], 'Número Patrimônio', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['cor_id'], $dadosAtual['cor_id'], 'Cor', Cor::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['ca'], $dadosAtual['ca'], 'CA', '', '');
                 }
             }
 
@@ -820,6 +847,43 @@ class Transacoes
                     $dados .= $this->retornaDado(12, $dadosAnterior['brigada_incendio_escala_id'], $dadosAtual['brigada_incendio_escala_id'], 'Brigada Incêndio Escala', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['funcionario_name'], $dadosAtual['funcionario_name'], 'Brigadista Nome', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['ala'], $dadosAtual['ala'], 'Ala', '', '');
+                }
+            }
+
+            // Materiais Entradas
+            if ($submodulo_id == 37) {
+                if ($op == 1) {
+                    $dados .= '<b>:: Materiais Entradas</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['nf_numero'], $dadosAtual['nf_numero'], 'NF Número', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['nf_serie'], $dadosAtual['nf_serie'], 'NF Série', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['nf_chave_acesso'], $dadosAtual['nf_chave_acesso'], 'NF Chave Acesso', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_emissao'], $dadosAtual['data_emissao'], 'Data Emissão', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['valor_total'], $dadosAtual['valor_total'], 'Valor Total', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['valor_desconto'], $dadosAtual['valor_desconto'], 'Valor Desconto', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['fornecedor_id'], $dadosAtual['fornecedor_id'], 'Fornecedor', Fornecedor::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fornecedor_nome'], $dadosAtual['fornecedor_nome'], 'Fornecedor Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fornecedor_cnpj'], $dadosAtual['fornecedor_cnpj'], 'Fornecedor CNPJ', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fornecedor_telefone'], $dadosAtual['fornecedor_telefone'], 'Fornecedor Telefone', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fornecedor_celular'], $dadosAtual['fornecedor_celular'], 'Fornecedor Celular', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fornecedor_email'], $dadosAtual['fornecedor_email'], 'Fornecedor E-mail', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fornecedor_logradouro'], $dadosAtual['fornecedor_logradouro'], 'Fornecedor Logradouro', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fornecedor_logradouro_numero'], $dadosAtual['fornecedor_logradouro_numero'], 'Fornecedor Logradouro Número', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fornecedor_logradouro_complemento'], $dadosAtual['fornecedor_logradouro_complemento'], 'Fornecedor Logradouro Complemento', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fornecedor_bairro'], $dadosAtual['fornecedor_bairro'], 'Fornecedor Bairro', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fornecedor_cidade'], $dadosAtual['fornecedor_cidade'], 'Fornecedor Cidade', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['fornecedor_uf'], $dadosAtual['fornecedor_uf'], 'Fornecedor UF', '', '');
+                }
+
+                //Tabela materiais_entradas_itens
+                if ($op == 2) {
+                    $dados .= '<b>:: Materiais Entradas Itens</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(13, $dadosAnterior['material_entrada_id'], $dadosAtual['material_entrada_id'], 'Material Entrada', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['material_id'], $dadosAtual['material_id'], 'Material', Material::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['material_categoria_name'], $dadosAtual['material_categoria_name'], 'Categoria', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['material_name'], $dadosAtual['material_name'], 'Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['material_quantidade'], $dadosAtual['material_quantidade'], 'Quantidade', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['material_valor_unitario'], $dadosAtual['material_valor_unitario'], 'Valor Unitário', '', '');
                 }
             }
 

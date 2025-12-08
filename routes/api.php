@@ -105,8 +105,14 @@ require __DIR__ . '/routes_visitas_tecnicas.php';
 //Materiais
 require __DIR__ . '/routes_materiais.php';
 
+//Materiais Entradas
+require __DIR__ . '/routes_materiais_entradas.php';
+
 //Brigadas Incendios
 require __DIR__ . '/routes_brigadas_incendios.php';
+
+// Clientes Locais
+require __DIR__ . '/routes_clientes_locais.php';
 
 //Guests
 require __DIR__ . '/routes_guests.php';
