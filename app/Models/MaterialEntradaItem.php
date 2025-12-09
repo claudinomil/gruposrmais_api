@@ -16,23 +16,9 @@ class MaterialEntradaItem extends Model
         'material_id',
         'material_categoria_name',
         'material_name',
-        'material_quantidade',
+        'material_numero_patrimonio',
         'material_valor_unitario'
     ];
-
-    public function setMaterialQuantidadeAttribute($value)
-    {
-        if ($value != '') {
-            $value = str_replace('.', '', $value);
-            $value = str_replace('.', '', $value);
-            $value = str_replace('.', '', $value);
-            $value = str_replace(',', '.', $value);
-
-            $this->attributes['material_quantidade'] = $value;
-        } else {
-            $this->attributes['material_quantidade'] = 0;
-        }
-    }
 
     public function setMaterialValorUnitarioAttribute($value)
     {

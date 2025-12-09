@@ -17,7 +17,6 @@ class Material extends Model
         'descricao',
         'fotografia',
         'cor_id',
-        'numero_patrimonio',
         'ca'
     ];
 

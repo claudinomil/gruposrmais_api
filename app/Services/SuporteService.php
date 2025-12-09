@@ -474,7 +474,7 @@ class SuporteService
                     'material_id'            => $material_id,
                     'material_categoria_name'=> $request['mat_material_categoria_name'][$i] ?? null,
                     'material_name'          => $request['mat_material_name'][$i] ?? null,
-                    'material_quantidade'    => $request['mat_material_quantidade'][$i] ?? null,
+                    'material_numero_patrimonio'    => $request['mat_material_numero_patrimonio'][$i] ?? null,
                     'material_valor_unitario'    => $request['mat_material_valor_unitario'][$i] ?? null,
                 ];
             }

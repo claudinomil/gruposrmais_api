@@ -788,7 +788,6 @@ class Transacoes
                     $dados .= $this->retornaDado(2, $dadosAnterior['material_categoria_id'], $dadosAtual['material_categoria_id'], 'Categoria', MaterialCategoria::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['numero_patrimonio'], $dadosAtual['numero_patrimonio'], 'Número Patrimônio', '', '');
                     $dados .= $this->retornaDado(2, $dadosAnterior['cor_id'], $dadosAtual['cor_id'], 'Cor', Cor::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['ca'], $dadosAtual['ca'], 'CA', '', '');
                 }
@@ -882,7 +881,7 @@ class Transacoes
                     $dados .= $this->retornaDado(2, $dadosAnterior['material_id'], $dadosAtual['material_id'], 'Material', Material::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['material_categoria_name'], $dadosAtual['material_categoria_name'], 'Categoria', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['material_name'], $dadosAtual['material_name'], 'Nome', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['material_quantidade'], $dadosAtual['material_quantidade'], 'Quantidade', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['material_numero_patrimonio'], $dadosAtual['material_numero_patrimonio'], 'Número Patrimônio', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['material_valor_unitario'], $dadosAtual['material_valor_unitario'], 'Valor Unitário', '', '');
                 }
             }
