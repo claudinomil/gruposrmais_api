@@ -40,6 +40,7 @@ use App\Models\ServicoTipo;
 use App\Models\SistemaAcesso;
 use App\Models\Situacao;
 use App\Models\Estado;
+use App\Models\Estoque;
 use App\Models\Fornecedor;
 use App\Models\Material;
 use App\Models\MaterialCategoria;
@@ -771,10 +772,12 @@ class Transacoes
                 }
             }
 
-            //clientes_locais
+            //estoques_locais
             if ($submodulo_id == 36) {
                 if ($op == 1) {
-                    $dados .= '<b>:: Clientes Locais</b>'.'<br><br>';
+                    $dados .= '<b>:: Estoques Locais</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['estoque_id'], $dadosAtual['estoque_id'], 'Estoque', Estoque::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['empresa_id'], $dadosAtual['empresa_id'], 'Empresa', Empresa::class, 'name');
                     $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Cliente', Cliente::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');

@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class ClienteLocalStoreRequest extends FormRequest
+class EstoqueLocalStoreRequest extends FormRequest
 {
     public function authorize()
     {
@@ -14,17 +15,20 @@ class ClienteLocalStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'cliente_id' => ['required', 'integer'],
-            'name' => ['required']
+            'estoque_id' => ['required'],
+            'name' => ['required'],
+            'empresa_id' => ['required_if:estoque_id,1', 'nullable', 'integer'],
+            'cliente_id' => ['required_if:estoque_id,2', 'nullable', 'integer'],
         ];
     }
 
     public function messages()
     {
         return [
-            'cliente_id.required' => 'O Cliente é requerido.',
-            'cliente_id.integer' => 'O Cliente deve ser um ítem da lista.',
-            'name.required' => 'O Nome é requerido.'
+            'estoque_id.required' => 'O campo Estoque é obrigatório.',
+            'name.required' => 'O Nome é obrigatório.',
+            'empresa_id.required_if' => 'O campo Empresa é obrigatório quando o Estoque for "Empresa".',
+            'cliente_id.required_if' => 'O campo Cliente é obrigatório quando o Estoque for "Cliente".',
         ];
     }
 

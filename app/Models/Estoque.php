@@ -5,16 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ClienteLocal extends Model
+class Estoque extends Model
 {
     use HasFactory;
 
-    protected $table = 'clientes_locais';
+    protected $table = 'estoques';
 
     protected $fillable = [
-        'cliente_id',
         'name',
-        'descricao'
+        'ordem'
     ];
 
     public function setNameAttribute($value) {$this->attributes['name'] = mb_strtoupper($value);}

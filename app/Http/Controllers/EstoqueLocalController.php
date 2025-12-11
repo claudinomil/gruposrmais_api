@@ -2,37 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Facades\SuporteFacade;
-use App\Facades\Transacoes;
-use App\Http\Requests\ClienteLocalStoreRequest;
-use App\Http\Requests\ClienteLocalUpdateRequest;
+use App\Http\Requests\EstoqueLocalStoreRequest;
+use App\Http\Requests\EstoqueLocalUpdateRequest;
 use App\Models\Cliente;
-use App\Models\ClienteLocal;
-use App\Models\ClienteLocalDocumento;
-use App\Models\Documento;
-use App\Models\DocumentoFonte;
-use App\Models\Estado;
-use App\Models\Genero;
-use App\Models\GrupoPermissao;
-use App\Models\IdentidadeOrgao;
-use App\Models\Nacionalidade;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\EstoqueLocal;
+use App\Models\Empresa;
+use App\Models\Estoque;
 
-class ClienteLocalController extends Controller
+class EstoqueLocalController extends Controller
 {
-    private $cliente_local;
+    private $estoque_local;
 
-    public function __construct(ClienteLocal $cliente_local)
+    public function __construct(EstoqueLocal $estoque_local)
     {
-        $this->cliente_local = $cliente_local;
+        $this->estoque_local = $estoque_local;
     }
 
     public function index()
     {
-        $registros = $this->cliente_local
-            ->Join('clientes', 'clientes.id', 'clientes_locais.cliente_id', '=')
-            ->select(['clientes_locais.*', 'clientes.name as clienteName'])
+        $registros = $this->estoque_local
+            ->Join('estoques', 'estoques.id', 'estoques_locais.estoque_id')
+            ->leftJoin('empresas', 'empresas.id', 'estoques_locais.empresa_id')
+            ->leftJoin('clientes', 'clientes.id', 'estoques_locais.cliente_id')
+            ->select(['estoques_locais.*', 'estoques.name as estoqueName', 'empresas.name as empresaName', 'clientes.name as clienteName'])
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -41,7 +33,7 @@ class ClienteLocalController extends Controller
     public function show($id)
     {
         try {
-            $registro = $this->cliente_local->find($id);
+            $registro = $this->estoque_local->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
@@ -62,8 +54,14 @@ class ClienteLocalController extends Controller
         try {
             $registros = array();
 
-            //Clientes
-            $registros['clientes'] = Cliente::all();
+            // Estoques
+            $registros['estoques'] = Estoque::orderby('ordem')->get();
+
+            // Empresas
+            $registros['empresas'] = Empresa::orderby('name')->get();
+
+            // Clientes
+            $registros['clientes'] = Cliente::orderby('name')->get();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -75,11 +73,11 @@ class ClienteLocalController extends Controller
         }
     }
 
-    public function store(ClienteLocalStoreRequest $request)
+    public function store(EstoqueLocalStoreRequest $request)
     {
         try {
             //Incluindo registro
-            $registro = $this->cliente_local->create($request->all());
+            $registro = $this->estoque_local->create($request->all());
 
             //Return
             return $this->sendResponse('Registro criado com sucesso.', 2010, null, null);
@@ -92,10 +90,10 @@ class ClienteLocalController extends Controller
         }
     }
 
-    public function update(ClienteLocalUpdateRequest $request, $id)
+    public function update(EstoqueLocalUpdateRequest $request, $id)
     {
         try {
-            $registro = $this->cliente_local->find($id);
+            $registro = $this->estoque_local->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
@@ -117,7 +115,7 @@ class ClienteLocalController extends Controller
     public function destroy($id)
     {
         try {
-            $registro = $this->cliente_local->find($id);
+            $registro = $this->estoque_local->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
@@ -150,9 +148,9 @@ class ClienteLocalController extends Controller
 
 
         //Registros
-        $registros = $this->cliente_local
-            ->Join('clientes', 'clientes.id', 'clientes_locais.cliente_id', '=')
-            ->select(['clientes_locais.*', 'clientes.name as clienteName'])
+        $registros = $this->estoque_local
+            ->Join('estoques', 'estoques.id', 'estoques_locais.estoque_id', '=')
+            ->select(['estoques_locais.*', 'estoques.name as estoqueName'])
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

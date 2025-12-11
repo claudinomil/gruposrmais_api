@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Models\Banco;
 use App\Models\ClienteExecutivo;
-use App\Models\ClienteLocal;
+use App\Models\EstoqueLocal;
 use App\Models\Departamento;
 use App\Models\AdminCliente;
 use App\Models\BrigadaIncendio;
@@ -32,7 +32,7 @@ use App\Models\VisitaTecnicaStatus;
 use App\Observers\BancoObserver;
 use App\Observers\BrigadaIncendioObserver;
 use App\Observers\ClienteExecutivoObserver;
-use App\Observers\ClienteLocalObserver;
+use App\Observers\EstoqueLocalObserver;
 use App\Observers\DepartamentoObserver;
 use App\Observers\EmpresaObserver;
 use App\Observers\FornecedorObserver;
@@ -72,7 +72,7 @@ class EventServiceProvider extends ServiceProvider
         Banco::observe(BancoObserver::class);
         BrigadaIncendio::observe(BrigadaIncendioObserver::class);
         ClienteExecutivo::observe(ClienteExecutivoObserver::class);
-        ClienteLocal::observe(ClienteLocalObserver::class);
+        EstoqueLocal::observe(EstoqueLocalObserver::class);
         Cliente::observe(ClienteObserver::class);
         Departamento::observe(DepartamentoObserver::class);
         Empresa::observe(EmpresaObserver::class);

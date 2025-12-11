@@ -6,18 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
-class MovimentacaoMaterial extends Model
+class MaterialMovimentacao extends Model
 {
     use HasFactory;
 
-    protected $table = 'movimentacoes_materiais';
+    protected $table = 'materiais_movimentacoes';
 
     protected $fillable = [
         'material_id',
+        'origem_estoque_local_id',
+        'destino_estoque_local_id',
         'origem_cliente_id',
-        'origem_local_id',
         'destino_cliente_id',
-        'destino_local_id',
         'tipo',
         'quantidade',
         'data_movimentacao',

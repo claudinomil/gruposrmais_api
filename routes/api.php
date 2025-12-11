@@ -108,11 +108,14 @@ require __DIR__ . '/routes_materiais.php';
 //Materiais Entradas
 require __DIR__ . '/routes_materiais_entradas.php';
 
+//Materiais Movimentações
+require __DIR__ . '/routes_materiais_movimentacoes.php';
+
 //Brigadas Incendios
 require __DIR__ . '/routes_brigadas_incendios.php';
 
 // Clientes Locais
-require __DIR__ . '/routes_clientes_locais.php';
+require __DIR__ . '/routes_estoques_locais.php';
 
 //Guests
 require __DIR__ . '/routes_guests.php';

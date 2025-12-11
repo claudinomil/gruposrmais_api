@@ -5,22 +5,24 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ClienteLocalUpdateRequest extends FormRequest
+class MaterialMovimentacaoUpdateRequest extends FormRequest
 {
+    public function authorize()
+    {
+        return true;
+    }
+
     public function rules()
     {
         return [
-            'cliente_id' => ['required', 'integer'],
-            'name' => ['required']
+            'fornecedor_id' => ['required']
         ];
     }
 
     public function messages()
     {
         return [
-            'cliente_id.required' => 'O Cliente é requerido.',
-            'cliente_id.integer' => 'O Cliente deve ser um ítem da lista.',
-            'name.required' => 'O Nome é requerido.'
+            'fornecedor_id.required' => 'O Fornecedor é requerido.'
         ];
     }
 
