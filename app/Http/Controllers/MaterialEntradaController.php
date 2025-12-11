@@ -85,10 +85,10 @@ class MaterialEntradaController extends Controller
     {
         try {
             // Empresa ID no $request
-            $empresa_id = $request->header('X-Empresa-Id');
+            //$empresa_id = $request->header('X-Empresa-Id');
 
             // Merge no request
-            $request['empresa_id'] = $empresa_id;
+            $request['empresa_id'] = 2;
 
             //Incluindo registro
             $registro = $this->material_entrada->create($request->all());
