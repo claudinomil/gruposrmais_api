@@ -85,10 +85,11 @@ class MaterialEntradaController extends Controller
     {
         try {
             // Empresa ID no $request
-            //$empresa_id = $request->header('X-Empresa-Id');
+            $empresa_id = $request->header('X-Empresa-Id');
 
             // Merge no request
-            $request['empresa_id'] = 2;
+            $request->merge(['empresa_id' => $empresa_id]);
+
 
             //Incluindo registro
             $registro = $this->material_entrada->create($request->all());
@@ -102,7 +103,8 @@ class MaterialEntradaController extends Controller
                 return $this->sendResponse($e->getMessage(), 5000, null, null);
             }
 
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+            //return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+            return $this->sendResponse($e->getMessage(), 5000, null, null);
         }
     }
 
