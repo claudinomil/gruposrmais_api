@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Estoque;
+use App\Models\EstoqueLocal;
 use App\Models\Permissao;
 use App\Models\Submodulo;
 use Illuminate\Database\Seeder;
@@ -62,9 +63,14 @@ class ZZZ_20251210_Seeder extends Seeder
         ]);
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-        // Estoques
+        // Estoques'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
         Estoque::create(['id' => 1, 'name' => 'Empresa', 'ordem' => 1]);
         Estoque::create(['id' => 2, 'name' => 'Cliente', 'ordem' => 2]);
+        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+        // Estoques Locais''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        EstoqueLocal::create(['id' => 1, 'name' => 'ALMOXARIFADO GLOBAL', 'estoque_id' => 1, 'empresa_id' => 1]);
+        EstoqueLocal::create(['id' => 2, 'name' => 'ALMOXARIFADO GLOBAL', 'estoque_id' => 1, 'empresa_id' => 2]);
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     }
 }

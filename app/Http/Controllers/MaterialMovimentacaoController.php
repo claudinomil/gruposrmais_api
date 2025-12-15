@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Facades\SuporteFacade;
 use App\Http\Requests\MaterialMovimentacaoStoreRequest;
 use App\Http\Requests\MaterialMovimentacaoUpdateRequest;
-use App\Models\Fornecedor;
-use App\Models\Material;
+use App\Models\EstoqueLocal;
 use App\Models\MaterialMovimentacao;
-use App\Models\MaterialMovimentacaoItem;
 use Illuminate\Http\Request;
 
 class MaterialMovimentacaoController extends Controller
@@ -22,13 +19,81 @@ class MaterialMovimentacaoController extends Controller
 
     public function index(Request $request)
     {
-        $empresa_id = $request->header('X-Empresa-Id');
-
         $registros = $this->material_movimentacao
-        ->join('fornecedores', 'fornecedores.id', 'materiais_movimentacoes.fornecedor_id')
-        ->select('materiais_movimentacoes.*', 'fornecedores.name as fornecedorName')
-        ->where('materiais_movimentacoes.empresa_id', $empresa_id)
-        ->get();
+        ->join('estoques_locais as origens_estoques_locais', 'origens_estoques_locais.id', 'materiais_movimentacoes.origem_estoque_local_id')
+        ->join('estoques as origens_estoques', 'origens_estoques.id', 'origens_estoques_locais.estoque_id')
+        ->leftjoin('empresas as origens_empresas', 'origens_empresas.id', 'origens_estoques_locais.empresa_id')
+        ->leftjoin('clientes as origens_clientes', 'origens_clientes.id', 'origens_estoques_locais.cliente_id')
+
+        ->join('estoques_locais as destinos_estoques_locais', 'destinos_estoques_locais.id', 'materiais_movimentacoes.destino_estoque_local_id')
+        ->join('estoques as destinos_estoques', 'destinos_estoques.id', 'destinos_estoques_locais.estoque_id')
+        ->leftjoin('empresas as destinos_empresas', 'destinos_empresas.id', 'destinos_estoques_locais.empresa_id')
+        ->leftjoin('clientes as destinos_clientes', 'destinos_clientes.id', 'destinos_estoques_locais.cliente_id')
+
+        ->select(
+            'materiais_movimentacoes.*',
+
+            'origens_estoques_locais.name as origemEstoqueLocalName',
+            'origens_estoques.name as origemEstoqueName',
+            'origens_empresas.name as origemEmpresaName',
+            'origens_clientes.name as origemClienteName',
+
+            'destinos_estoques_locais.name as destinoEstoqueLocalName',
+            'destinos_estoques.name as destinoEstoqueName',
+            'destinos_empresas.name as destinoEmpresaName',
+            'destinos_clientes.name as destinoClienteName'
+        )->get();
+
+
+
+//         $query = $this->material_movimentacao
+//         ->join('estoques_locais as origens_estoques_locais', 'origens_estoques_locais.id', 'materiais_movimentacoes.origem_estoque_local_id')
+//         ->join('estoques as origens_estoques', 'origens_estoques.id', 'origens_estoques_locais.estoque_id')
+//         ->leftjoin('empresas as origens_empresas', 'origens_empresas.id', 'origens_estoques_locais.empresa_id')
+//         ->leftjoin('clientes as origens_clientes', 'origens_clientes.id', 'origens_estoques_locais.cliente_id')
+
+//         ->join('estoques_locais as destinos_estoques_locais', 'destinos_estoques_locais.id', 'materiais_movimentacoes.destino_estoque_local_id')
+//         ->join('estoques as destinos_estoques', 'destinos_estoques.id', 'destinos_estoques_locais.estoque_id')
+//         ->leftjoin('empresas as destinos_empresas', 'destinos_empresas.id', 'destinos_estoques_locais.empresa_id')
+//         ->leftjoin('clientes as destinos_clientes', 'destinos_clientes.id', 'destinos_estoques_locais.cliente_id')
+
+//         ->select(
+//             'materiais_movimentacoes.*',
+
+//             'origens_estoques_locais.name as origemEstoqueLocalName',
+//             'origens_estoques.name as origemEstoqueName',
+//             'origens_empresas.name as origemEmpresaName',
+//             'origens_clientes.name as origemClienteName',
+
+//             'destinos_estoques_locais.name as destinoEstoqueLocalName',
+//             'destinos_estoques.name as destinoEstoqueName',
+//             'destinos_empresas.name as destinoEmpresaName',
+//             'destinos_clientes.name as destinoClienteName'
+//         );
+
+
+
+//         // Obter SQL e bindings
+// $sql = $query->toSql();
+// $bindings = $query->getBindings();
+
+// // Substituir os ? pelos valores reais (para visualização)
+// $fullSql = vsprintf(
+//     str_replace('?', "'%s'", $sql),
+//     array_map(function ($binding) {
+//         return is_numeric($binding) ? $binding : addslashes($binding);
+//     }, $bindings)
+// );
+
+// // Agora $fullSql contém a SQL completa
+// // Você pode dd, logar ou guardar onde quiser:
+// $registros = $fullSql;
+
+
+
+
+
+
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
     }
@@ -41,9 +106,6 @@ class MaterialMovimentacaoController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, []);
             } else {
-                // Materiais Movimentacoes Itens
-                $registro['material_movimentacao_itens'] = MaterialMovimentacaoItem::where('material_movimentacao_id', '=', $id)->get();
-
                 return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
             }
         } catch (\Exception $e) {
@@ -60,15 +122,16 @@ class MaterialMovimentacaoController extends Controller
         try {
             $registros = array();
 
-            // Fornecedores
-            $registros['fornecedores'] = Fornecedor::orderby('name')->get();
-
-            //Materiais (com Categorias)
-            $registros['materiais'] = Material
-                ::join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
-                ->select('materiais.*', 'material_categorias.name as materialCategoriaName')
-                ->orderby('material_categorias.name')
-                ->orderby('materiais.name')
+            // Estoques Locais
+            $registros['estoques_locais'] = EstoqueLocal
+                ::leftjoin('estoques', 'estoques.id', 'estoques_locais.estoque_id')
+                ->leftjoin('empresas', 'empresas.id', 'estoques_locais.empresa_id')
+                ->leftjoin('clientes', 'clientes.id', 'estoques_locais.cliente_id')
+                ->select('estoques_locais.*', 'estoques.name as estoqueName', 'empresas.name as empresaName', 'clientes.name as clienteName')
+                ->orderby('estoques.name')
+                ->orderby('empresas.name')
+                ->orderby('clientes.name')
+                ->orderby('estoques_locais.name')
                 ->get();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
@@ -84,18 +147,8 @@ class MaterialMovimentacaoController extends Controller
     public function store(MaterialMovimentacaoStoreRequest $request)
     {
         try {
-            // Empresa ID no $request
-            $empresa_id = $request->header('X-Empresa-Id');
-
-            // Merge no request
-            $request->merge(['empresa_id' => $empresa_id]);
-
-
             //Incluindo registro
             $registro = $this->material_movimentacao->create($request->all());
-
-            //Editar dados na tabela materiais_movimentacoes_itens
-            SuporteFacade::editMaterialMovimentacaoItem(1, $registro['id'], $request);
 
             return $this->sendResponse('Registro criado com sucesso.', 2010, null, 'null');
         } catch (\Exception $e) {
@@ -118,9 +171,6 @@ class MaterialMovimentacaoController extends Controller
                 //Alterando registro
                 $registro->update($request->all());
 
-                //Editar dados na tabela materiais_movimentacoes_itens
-                SuporteFacade::editMaterialMovimentacaoItem(3, $registro['id'], $request);
-
                 return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
             }
         } catch (\Exception $e) {
@@ -142,9 +192,6 @@ class MaterialMovimentacaoController extends Controller
             } else {
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-                //Editar dados na tabela materiais_movimentacoes_itens
-                SuporteFacade::editMaterialMovimentacaoItem(2, $registro['id'], '');
 
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 $registro->delete();

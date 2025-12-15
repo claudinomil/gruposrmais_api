@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Facades\SuporteFacade;
 use App\Http\Requests\MaterialEntradaStoreRequest;
 use App\Http\Requests\MaterialEntradaUpdateRequest;
+use App\Models\EstoqueLocal;
 use App\Models\Fornecedor;
 use App\Models\Material;
 use App\Models\MaterialEntrada;
@@ -55,10 +56,13 @@ class MaterialEntradaController extends Controller
         }
     }
 
-    public function auxiliary()
+    public function auxiliary(Request $request)
     {
         try {
             $registros = array();
+
+            // Empresa ID no $request
+            $empresa_id = $request->header('X-Empresa-Id');
 
             // Fornecedores
             $registros['fornecedores'] = Fornecedor::orderby('name')->get();
@@ -69,6 +73,14 @@ class MaterialEntradaController extends Controller
                 ->select('materiais.*', 'material_categorias.name as materialCategoriaName')
                 ->orderby('material_categorias.name')
                 ->orderby('materiais.name')
+                ->get();
+
+            // Estoques Locais
+            $registros['estoques_locais'] = EstoqueLocal
+                ::leftjoin('empresas', 'empresas.id', 'estoques_locais.empresa_id')
+                ->select('estoques_locais.*', 'empresas.name as empresaName')
+                ->where('estoques_locais.empresa_id', $empresa_id)
+                ->orderby('estoques_locais.name')
                 ->get();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
@@ -90,6 +102,8 @@ class MaterialEntradaController extends Controller
             // Merge no request
             $request->merge(['empresa_id' => $empresa_id]);
 
+            // Dispara validação customizada (lança ValidationException se houver erro)
+            SuporteFacade::validarPatrimoniosDuplicados($request);
 
             //Incluindo registro
             $registro = $this->material_entrada->create($request->all());
@@ -103,8 +117,7 @@ class MaterialEntradaController extends Controller
                 return $this->sendResponse($e->getMessage(), 5000, null, null);
             }
 
-            //return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-            return $this->sendResponse($e->getMessage(), 5000, null, null);
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
         }
     }
 
@@ -222,5 +235,52 @@ class MaterialEntradaController extends Controller
         //$sql = DB::getQueryLog();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+    }
+
+    public function modal_info($id)
+    {
+        try {
+            $registro = array();
+
+            // Material Entrada
+            $material_entrada = MaterialEntrada
+                ::join('empresas', 'empresas.id', '=', 'materiais_entradas.empresa_id')
+                ->select(['materiais_entradas.*', 'empresas.name as empresaName'])
+                ->where('materiais_entradas.id', '=', $id)
+                ->get();
+
+            $registro['material_entrada'] = $material_entrada[0];
+
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function upload_nota_fiscal(Request $request)
+    {
+        try {
+            $registro = $this->material_entrada->find($request['material_entrada_id']);
+
+            if (!$registro) {
+                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
+            } else {
+                //Alterando registro
+                $registro->nf_pdf_caminho = $request['nf_pdf_caminho'];
+                $registro->save();
+
+                return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
+            }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
     }
 }

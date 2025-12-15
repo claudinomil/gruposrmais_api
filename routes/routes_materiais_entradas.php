@@ -10,4 +10,8 @@ Route::prefix('materiais_entradas')->group(function () {
     Route::put('/update/{id}', [MaterialEntradaController::class, 'update'])->middleware(['auth:api']);
     Route::delete('/destroy/{id}', [MaterialEntradaController::class, 'destroy'])->middleware(['auth:api']);
     Route::get('/auxiliary/tables', [MaterialEntradaController::class, 'auxiliary'])->middleware(['auth:api']);
+
+    // Modal
+    Route::get('/modalInfo/modal_info/{id}', [MaterialEntradaController::class, 'modal_info'])->middleware(['auth:api']);
+    Route::post('/uploadNotaFiscal/upload_nota_fiscal', [MaterialEntradaController::class, 'upload_nota_fiscal'])->middleware(['auth:api']);
 });

@@ -19,6 +19,8 @@ use App\Models\PropostaServico;
 use App\Models\SegurancaMedida;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 
 class SuporteService
 {
@@ -461,53 +463,116 @@ class SuporteService
      */
     public function editMaterialEntradaItem($op, $material_entrada_id, $request)
     {
-        // Array de Materiais Atuais ()chave pelo material_id para facilitar comparação)
-        $materiaisAtuais = MaterialEntradaItem::where('material_entrada_id', $material_entrada_id)->get()->keyBy('material_id');
+        // Buscar todos os itens atuais da entrada
+        $materiaisAtuais = MaterialEntradaItem::where('material_entrada_id', $material_entrada_id)->get();
+        $materiaisAtuaisPorId = $materiaisAtuais->keyBy('id');
 
-        // Array de Materiais Recebidos
+        // Montar array de itens recebidos do request
         $materiaisRecebidos = [];
 
-        if ($op == 1 || $op == 3) {
+        if (in_array($op, [1, 3])) {
             foreach ($request['mat_material_id'] ?? [] as $i => $material_id) {
-                $materiaisRecebidos[$material_id] = [
-                    'material_entrada_id'    => $material_entrada_id,
-                    'material_id'            => $material_id,
-                    'material_categoria_name'=> $request['mat_material_categoria_name'][$i] ?? null,
-                    'material_name'          => $request['mat_material_name'][$i] ?? null,
+                $materiaisRecebidos[] = [
+                    'id'                            => $request['mat_material_item_id'][$i] ?? null, // ID real do item (ou null se novo)
+                    'material_entrada_id'           => $material_entrada_id,
+                    'material_id'                   => $material_id,
+                    'material_categoria_name'       => $request['mat_material_categoria_name'][$i] ?? null,
+                    'material_name'                 => $request['mat_material_name'][$i] ?? null,
                     'material_numero_patrimonio'    => $request['mat_material_numero_patrimonio'][$i] ?? null,
-                    'material_valor_unitario'    => $request['mat_material_valor_unitario'][$i] ?? null,
+                    'material_valor_unitario'       => $request['mat_material_valor_unitario'][$i] ?? null,
+                    'estoque_local_id'              => $request['estoque_local_id'],
                 ];
             }
         }
 
-        // Varrer Materiais Atuais e excluir os que não existem mais
-        foreach ($materiaisAtuais as $material_id => $registro) {
-            if (!isset($materiaisRecebidos[$material_id]) && ($op == 2 || $op == 3)) {
-                $dadosAnterior = $registro->toArray();
-                $registro->delete();
-                Transacoes::transacaoRecord(2, 3, 'materiais_entradas', $dadosAnterior, $dadosAnterior);
+        // IDs recebidos do frontend
+        $idsRecebidos = collect($materiaisRecebidos)
+            ->pluck('id')
+            ->filter()
+            ->toArray();
+
+        // 1. Excluir registros que foram removidos da tela
+        if (in_array($op, [2, 3])) {
+            foreach ($materiaisAtuais as $registro) {
+                if (!in_array($registro->id, $idsRecebidos)) {
+                    $dadosAnterior = $registro->toArray();
+                    $registro->delete();
+
+                    Transacoes::transacaoRecord(2, 3, 'materiais_entradas', $dadosAnterior, $dadosAnterior);
+                }
             }
         }
 
-        // Varrer Materiais Recebidos e inserir ou atualizar os que chegaram
-        foreach ($materiaisRecebidos as $material_id => $dadosAtual) {
-            if (isset($materiaisAtuais[$material_id])) {
-                // Atualizar somente se houve mudança
-                $registro = $materiaisAtuais[$material_id];
+        // 2. Inserir ou atualizar registros recebidos
+        foreach ($materiaisRecebidos as $dadosAtual) {
+            // UPDATE — manter o mesmo ID
+            if (!empty($dadosAtual['id']) && isset($materiaisAtuaisPorId[$dadosAtual['id']])) {
+                $registro = $materiaisAtuaisPorId[$dadosAtual['id']];
                 $dadosAnterior = $registro->toArray();
 
-                $registro->update($dadosAtual);
+                // Atualiza apenas se algo mudou
+                if ($this->editMaterialEntradaItemDadosDiferentes($registro, $dadosAtual)) {
+                    $registro->update($dadosAtual);
+                    Transacoes::transacaoRecord(2, 2, 'materiais_entradas', $dadosAnterior, $dadosAtual);
+                }
+            }
 
-                Transacoes::transacaoRecord(2, 2, 'materiais_entradas', $dadosAnterior, $dadosAtual);
-            } else {
-                // Inserir novo
-                MaterialEntradaItem::create($dadosAtual);
-
-                Transacoes::transacaoRecord(2, 1, 'materiais_entradas', $dadosAtual, $dadosAtual);
+            // INSERT — novo item sem ID
+            else {
+                $novo = MaterialEntradaItem::create($dadosAtual);
+                Transacoes::transacaoRecord(2, 1, 'materiais_entradas', $dadosAtual, $novo->toArray());
             }
         }
     }
 
+    /**
+     * Função auxiliar para detectar alterações entre o registro e o array atual.
+     * Evita update desnecessário.
+     */
+    private function editMaterialEntradaItemDadosDiferentes($registro, $dados)
+    {
+        foreach ($dados as $campo => $valor) {
+            if ($campo === 'id') {
+                continue;
+            }
+            if ($registro->$campo != $valor) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*
+     * Verificar se existe numero_patrimonio antes de editar dados na tabela materiais_entradas_itens
+     */
+    public function validarPatrimoniosDuplicados($request, $material_entrada_id = null)
+    {
+        $patrimonios = array_filter($request['mat_material_numero_patrimonio'] ?? []);
+
+        if (empty($patrimonios)) {
+            return; // nada a validar
+        }
+
+        // Buscar duplicados já existentes em outras entradas
+        $query = MaterialEntradaItem::whereIn('material_numero_patrimonio', $patrimonios);
+
+        if ($material_entrada_id) {
+            $query->where('material_entrada_id', '!=', $material_entrada_id);
+        }
+
+        $duplicados = $query->pluck('material_numero_patrimonio')->toArray();
+
+        if (!empty($duplicados)) {
+            // Monta mensagem de validação no formato do Laravel
+            $mensagem = [];
+            foreach ($duplicados as $pat) {
+                $mensagem["mat_material_numero_patrimonio"][] = "O número de patrimônio '{$pat}' já está cadastrado.";
+            }
+
+            // Lança ValidationException (Laravel trata automaticamente)
+            throw ValidationException::withMessages($mensagem);
+        }
+    }
     /*
      * Editar dados na tabela ordens_servicos_servicos
      *

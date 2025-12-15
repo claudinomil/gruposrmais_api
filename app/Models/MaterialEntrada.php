@@ -31,7 +31,9 @@ class MaterialEntrada extends Model
         'fornecedor_logradouro_numero',
         'fornecedor_logradouro_complemento',
         'fornecedor_cidade',
-        'fornecedor_uf'
+        'fornecedor_uf',
+        'nf_pdf_caminho',
+        'estoque_local_id'
     ];
 
     protected $dates = [

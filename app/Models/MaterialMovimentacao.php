@@ -13,11 +13,9 @@ class MaterialMovimentacao extends Model
     protected $table = 'materiais_movimentacoes';
 
     protected $fillable = [
-        'material_id',
+        'material_entrada_item_id',
         'origem_estoque_local_id',
         'destino_estoque_local_id',
-        'origem_cliente_id',
-        'destino_cliente_id',
         'tipo',
         'quantidade',
         'data_movimentacao',

@@ -33,7 +33,13 @@ class EstoqueLocalController extends Controller
     public function show($id)
     {
         try {
-            $registro = $this->estoque_local->find($id);
+            $registro = EstoqueLocal
+                ::leftjoin('estoques', 'estoques.id', 'estoques_locais.estoque_id')
+                ->leftjoin('empresas', 'empresas.id', 'estoques_locais.empresa_id')
+                ->leftjoin('clientes', 'clientes.id', 'estoques_locais.cliente_id')
+                ->select('estoques_locais.*', 'estoques.name as estoque_nome', 'empresas.name as empresa_nome', 'clientes.name as cliente_nome')
+                ->where('estoques_locais.id', $id)
+                ->get()[0];
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);

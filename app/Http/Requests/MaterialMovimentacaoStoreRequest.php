@@ -14,14 +14,32 @@ class MaterialMovimentacaoStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'fornecedor_id' => ['required']
+        //     'fornecedor_id' => ['required']
+
+
+
+
+
+        //     'material_entrada_item_id',
+        // 'origem_estoque_local_id',
+        // 'destino_estoque_local_id',
+        // 'tipo',
+        // 'quantidade',
+        // 'data_movimentacao',
+        // 'observacoes'
+
+
+
+
+
+
         ];
     }
 
     public function messages()
     {
         return [
-            'fornecedor_id.required' => 'O Fornecedor é requerido.'
+            // 'fornecedor_id.required' => 'O Fornecedor é requerido.'
         ];
     }
 
