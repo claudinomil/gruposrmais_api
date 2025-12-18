@@ -18,7 +18,8 @@ class MaterialEntradaItem extends Model
         'material_name',
         'material_numero_patrimonio',
         'material_valor_unitario',
-        'estoque_local_id'
+        'estoque_local_id',
+        'material_situacao_id'
     ];
 
     public function setMaterialValorUnitarioAttribute($value)

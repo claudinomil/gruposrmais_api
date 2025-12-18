@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\MaterialMovimentacaoStoreRequest;
-use App\Http\Requests\MaterialMovimentacaoUpdateRequest;
 use App\Models\EstoqueLocal;
+use App\Models\MaterialEntradaItem;
 use App\Models\MaterialMovimentacao;
+use App\Models\MaterialMovimentacaoItem;
 use Illuminate\Http\Request;
 
 class MaterialMovimentacaoController extends Controller
@@ -33,67 +34,21 @@ class MaterialMovimentacaoController extends Controller
         ->select(
             'materiais_movimentacoes.*',
 
+            'origens_estoques.id as origemEstoqueId',
             'origens_estoques_locais.name as origemEstoqueLocalName',
             'origens_estoques.name as origemEstoqueName',
             'origens_empresas.name as origemEmpresaName',
             'origens_clientes.name as origemClienteName',
 
+            'destinos_estoques.id as destinoEstoqueId',
             'destinos_estoques_locais.name as destinoEstoqueLocalName',
             'destinos_estoques.name as destinoEstoqueName',
             'destinos_empresas.name as destinoEmpresaName',
             'destinos_clientes.name as destinoClienteName'
-        )->get();
-
-
-
-//         $query = $this->material_movimentacao
-//         ->join('estoques_locais as origens_estoques_locais', 'origens_estoques_locais.id', 'materiais_movimentacoes.origem_estoque_local_id')
-//         ->join('estoques as origens_estoques', 'origens_estoques.id', 'origens_estoques_locais.estoque_id')
-//         ->leftjoin('empresas as origens_empresas', 'origens_empresas.id', 'origens_estoques_locais.empresa_id')
-//         ->leftjoin('clientes as origens_clientes', 'origens_clientes.id', 'origens_estoques_locais.cliente_id')
-
-//         ->join('estoques_locais as destinos_estoques_locais', 'destinos_estoques_locais.id', 'materiais_movimentacoes.destino_estoque_local_id')
-//         ->join('estoques as destinos_estoques', 'destinos_estoques.id', 'destinos_estoques_locais.estoque_id')
-//         ->leftjoin('empresas as destinos_empresas', 'destinos_empresas.id', 'destinos_estoques_locais.empresa_id')
-//         ->leftjoin('clientes as destinos_clientes', 'destinos_clientes.id', 'destinos_estoques_locais.cliente_id')
-
-//         ->select(
-//             'materiais_movimentacoes.*',
-
-//             'origens_estoques_locais.name as origemEstoqueLocalName',
-//             'origens_estoques.name as origemEstoqueName',
-//             'origens_empresas.name as origemEmpresaName',
-//             'origens_clientes.name as origemClienteName',
-
-//             'destinos_estoques_locais.name as destinoEstoqueLocalName',
-//             'destinos_estoques.name as destinoEstoqueName',
-//             'destinos_empresas.name as destinoEmpresaName',
-//             'destinos_clientes.name as destinoClienteName'
-//         );
-
-
-
-//         // Obter SQL e bindings
-// $sql = $query->toSql();
-// $bindings = $query->getBindings();
-
-// // Substituir os ? pelos valores reais (para visualização)
-// $fullSql = vsprintf(
-//     str_replace('?', "'%s'", $sql),
-//     array_map(function ($binding) {
-//         return is_numeric($binding) ? $binding : addslashes($binding);
-//     }, $bindings)
-// );
-
-// // Agora $fullSql contém a SQL completa
-// // Você pode dd, logar ou guardar onde quiser:
-// $registros = $fullSql;
-
-
-
-
-
-
+        )
+        ->orderby('materiais_movimentacoes.data_movimentacao', 'DESC')
+        ->orderby('materiais_movimentacoes.hora_movimentacao', 'DESC')
+        ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
     }
@@ -147,58 +102,44 @@ class MaterialMovimentacaoController extends Controller
     public function store(MaterialMovimentacaoStoreRequest $request)
     {
         try {
-            //Incluindo registro
+            // Data, Hora e Tipo de Movimentação
+            $request['data_movimentacao'] = date('d/m/Y');
+            $request['hora_movimentacao'] = date('H:i:s');
+            $request['tipo'] = 'transferencia';
+
+            // Incluindo registro
             $registro = $this->material_movimentacao->create($request->all());
 
+            // Estoque Local de Destino
+            $destino_estoque_local_id = $request['destino_estoque_local_id'];
+
+            // Verificar Estoque Local Destino se é Empresa ou Cliente para lançar na variável $material_situacao_id
+            $destino_estoque_local = EstoqueLocal::where('id', $destino_estoque_local_id)->first();
+            $estoque_id = $destino_estoque_local->estoque_id;
+
+            if ($estoque_id == 1) {
+                $material_situacao_id = 1; // ATIVO - permite movimentação
+            } else if ($estoque_id == 2) {
+                $material_situacao_id = 2; // EM USO - permite movimentação
+            } else {
+                $material_situacao_id = 1; // ATIVO - permite movimentação
+            }
+
+            // Edições
+            if (isset($request['materiais_entradas_itens'])) {
+                $materiaisEntradasItensSelecionados = $request['materiais_entradas_itens'];
+
+                // Varrer selecionados
+                foreach ($materiaisEntradasItensSelecionados as $materialEntradaItemId) {
+                    // Incluir na tabela materiais_movimentacoes_itens
+                    MaterialMovimentacaoItem::create(['material_movimentacao_id' => $registro['id'], 'material_entrada_item_id' => $materialEntradaItemId]);
+
+                    // Alterar tabela materiais_entradas_itens
+                    MaterialEntradaItem::where('id', $materialEntradaItemId)->update(['estoque_local_id' => $destino_estoque_local_id, 'material_situacao_id' => $material_situacao_id]);
+                }
+            }
+
             return $this->sendResponse('Registro criado com sucesso.', 2010, null, 'null');
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return $this->sendResponse($e->getMessage(), 5000, null, null);
-            }
-
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-        }
-    }
-
-    public function update(MaterialMovimentacaoUpdateRequest $request, $id)
-    {
-        try {
-            $registro = $this->material_movimentacao->find($id);
-
-            if (!$registro) {
-                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
-            } else {
-                //Alterando registro
-                $registro->update($request->all());
-
-                return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
-            }
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return $this->sendResponse($e->getMessage(), 5000, null, null);
-            }
-
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-        }
-    }
-
-    public function destroy($id)
-    {
-        try {
-            $registro = $this->material_movimentacao->find($id);
-
-            if (!$registro) {
-                return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
-            } else {
-                //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-                //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                $registro->delete();
-
-                return $this->sendResponse('Registro excluído com sucesso.', 2000, null, null);
-                //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-            }
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return $this->sendResponse($e->getMessage(), 5000, null, null);
@@ -268,5 +209,35 @@ class MaterialMovimentacaoController extends Controller
         //$sql = DB::getQueryLog();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+    }
+
+    public function materiais_entradas_itens($operacao, $estoque_local_id, $material_movimentacao_id)
+    {
+        if ($operacao == 'create') {
+            $registros = MaterialEntradaItem
+                ::join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
+                ->select('materiais_entradas_itens.*', 'materiais.fotografia as materialFotografia')
+                ->where('materiais_entradas_itens.estoque_local_id', $estoque_local_id)
+                ->whereIn('materiais_entradas_itens.material_situacao_id', [1, 2, 5]) // 1(ATIVO)  2(EM USO)  5(EMPRÉSTIMO)
+                ->orderby('materiais.name')
+                ->orderby('materiais_entradas_itens.material_numero_patrimonio')
+                ->get();
+        }
+
+        if ($operacao == 'view') {
+            $registros = MaterialMovimentacao
+                ::join('materiais_movimentacoes_itens', 'materiais_movimentacoes_itens.material_movimentacao_id', 'materiais_movimentacoes.id')
+                ->join('materiais_entradas_itens', 'materiais_entradas_itens.id', 'materiais_movimentacoes_itens.material_entrada_item_id')
+                ->join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
+                ->select('materiais_entradas_itens.*', 'materiais.fotografia as materialFotografia')
+                ->where('materiais_movimentacoes.id', $material_movimentacao_id)
+                ->where('materiais_movimentacoes.origem_estoque_local_id', $estoque_local_id)
+                ->whereIn('materiais_entradas_itens.material_situacao_id', [1, 2, 5]) // 1(ATIVO)  2(EM USO)  5(EMPRÉSTIMO)
+                ->orderby('materiais.name')
+                ->orderby('materiais_entradas_itens.material_numero_patrimonio')
+                ->get();
+        }
+
+        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
     }
 }

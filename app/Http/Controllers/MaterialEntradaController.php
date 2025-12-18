@@ -10,6 +10,8 @@ use App\Models\Fornecedor;
 use App\Models\Material;
 use App\Models\MaterialEntrada;
 use App\Models\MaterialEntradaItem;
+use App\Models\MaterialMovimentacao;
+use App\Models\MaterialMovimentacaoItem;
 use Illuminate\Http\Request;
 
 class MaterialEntradaController extends Controller
@@ -275,6 +277,65 @@ class MaterialEntradaController extends Controller
 
                 return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
             }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function executar_entrada($id)
+    {
+        try {
+            // Material Entrada
+            $material_entrada = MaterialEntrada::find($id);
+
+            // Material Entrada Itens
+            $material_entrada_itens = MaterialEntradaItem::where('material_entrada_id', $id)->get();
+
+            // Dados
+            $data = array();
+            $data['origem_estoque_local_id'] = $material_entrada->estoque_local_id;
+            $data['destino_estoque_local_id'] = $material_entrada->estoque_local_id;
+            $data['data_movimentacao'] = date('d/m/Y');
+            $data['hora_movimentacao'] = date('H:i:s');
+            $data['tipo'] = 'entrada';
+
+            // Incluir na tabela materiais_movimentacoes
+            $registro = MaterialMovimentacao::create($data);
+
+            // Estoque Local de Destino
+            $destino_estoque_local_id = $material_entrada->estoque_local_id;
+
+            // Verificar Estoque Local Destino se é Empresa ou Cliente para lançar na variável $material_situacao_id
+            $destino_estoque_local = EstoqueLocal::where('id', $destino_estoque_local_id)->first();
+            $estoque_id = $destino_estoque_local->estoque_id;
+
+            if ($estoque_id == 1) {
+                $material_situacao_id = 1; // ATIVO - permite movimentação
+            } else if ($estoque_id == 2) {
+                $material_situacao_id = 2; // EM USO - permite movimentação
+            } else {
+                $material_situacao_id = 1; // ATIVO - permite movimentação
+            }
+
+            // Edições
+            if (isset($material_entrada_itens)) {
+                foreach ($material_entrada_itens as $material_entrada_item) {
+                    // Incluir na tabela materiais_movimentacoes_itens
+                    MaterialMovimentacaoItem::create(['material_movimentacao_id' => $registro['id'], 'material_entrada_item_id' => $material_entrada_item['id']]);
+
+                    // Alterar tabela materiais_entradas_itens
+                    MaterialEntradaItem::where('id', $material_entrada_item['id'])->update(['estoque_local_id' => $destino_estoque_local_id, 'material_situacao_id' => $material_situacao_id]);
+                }
+            }
+
+            // Alterar tabela materiais_entradas
+            MaterialEntrada::where('id', $id)->update(['executada' => 1]);
+
+            return $this->sendResponse('Registro criado com sucesso.', 2010, null, null);
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return $this->sendResponse($e->getMessage(), 5000, null, null);

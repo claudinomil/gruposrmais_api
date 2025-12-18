@@ -16,15 +16,39 @@ class MaterialEntradaUpdateRequest extends FormRequest
 
     public function rules()
     {
-        return [
-            'fornecedor_id' => ['required']
+        // IDs de fornecedores que não exigem NF
+        $fornecedoresSemNF = [1, 2, 3];
+
+        $rules = [
+            'fornecedor_id'     => ['required'],
+            'fornecedor_nome'   => ['required'],
+            'data_emissao'      => ['required', 'date'],
+            'estoque_local_id'  => ['required'],
+            'valor_total'       => ['required'],
+            'valor_desconto'    => ['required'],
         ];
+
+        // Aplica obrigatoriedade apenas se o fornecedor_id NÃO estiver na lista
+        if (!in_array((int) $this->input('fornecedor_id'), $fornecedoresSemNF)) {
+            $rules['nf_numero'] = ['required'];
+            $rules['nf_serie']  = ['required'];
+        }
+
+        return $rules;
     }
 
     public function messages()
     {
         return [
-            'fornecedor_id.required' => 'O Fornecedor é requerido.'
+            'fornecedor_id.required'     => 'O Fornecedor é requerido.',
+            'fornecedor_nome.required'   => 'O nome do Fornecedor é requerido.',
+            'nf_numero.required'         => 'O número da Nota Fiscal é requerido.',
+            'nf_serie.required'          => 'A série da Nota Fiscal é requerida.',
+            'data_emissao.required'      => 'A Data de Emissão é requerida.',
+            'data_emissao.date'          => 'A Data de Emissão é inválida.',
+            'estoque_local_id.required'  => 'O Local de Estoque é requerido.',
+            'valor_total.required'       => 'O Valor Total é requerido.',
+            'valor_desconto.required'    => 'O Valor de Desconto é requerido.',
         ];
     }
 

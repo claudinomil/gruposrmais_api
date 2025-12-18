@@ -14,4 +14,7 @@ Route::prefix('materiais_entradas')->group(function () {
     // Modal
     Route::get('/modalInfo/modal_info/{id}', [MaterialEntradaController::class, 'modal_info'])->middleware(['auth:api']);
     Route::post('/uploadNotaFiscal/upload_nota_fiscal', [MaterialEntradaController::class, 'upload_nota_fiscal'])->middleware(['auth:api']);
+
+    // Executar Entrada
+    Route::get('/executar_entrada/{id}', [MaterialEntradaController::class, 'executar_entrada'])->middleware(['auth:api']);
 });

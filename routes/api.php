@@ -119,3 +119,6 @@ require __DIR__ . '/routes_estoques_locais.php';
 
 //Guests
 require __DIR__ . '/routes_guests.php';
+
+// Patrimonio
+require __DIR__ . '/routes_patrimonio.php';

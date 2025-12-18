@@ -41,10 +41,12 @@ use App\Models\SistemaAcesso;
 use App\Models\Situacao;
 use App\Models\Estado;
 use App\Models\Estoque;
+use App\Models\EstoqueLocal;
 use App\Models\Fornecedor;
 use App\Models\Material;
 use App\Models\MaterialCategoria;
 use App\Models\MaterialEntrada;
+use App\Models\MaterialEntradaItem;
 use App\Models\Transacao;
 use App\Models\User;
 
@@ -202,6 +204,31 @@ class Transacoes
                 $search_nf_serie_material_entrada = $material_entrada['nf_serie'];
 
                 $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $search_nf_numero_material_entrada . "/" . $search_nf_serie_material_entrada . "<br>";
+            }
+        }
+
+        // Opção para o campo origem_estoque_local_id
+        if ($op == 14) {
+            if (($dadoAtual != "") and ($dadoAtual != 0)) {
+                $estoque_local = EstoqueLocal::where('id', $dadoAtual)->get()[0];
+
+                $estoque = Estoque::where('id', $estoque_local->estoque_id)->get()[0];
+
+                $val_retorno = '';
+
+                if ($estoque_local->estoque_id == 1) {
+                    $empresa = Empresa::where('id', $estoque_local->empresa_id)->get()[0];
+
+                    $val_retorno = $estoque_local->name.' - '.$estoque->name.' - '.$empresa->name;
+                }
+
+                if ($estoque_local->estoque_id == 2) {
+                    $cliente = Cliente::where('id', $estoque_local->cliente_id)->get()[0];
+
+                    $val_retorno = $estoque_local->name.' - '.$estoque->name.' - '.$cliente->name;
+                }
+
+                $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $val_retorno . "<br>";
             }
         }
 
@@ -886,6 +913,18 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['material_name'], $dadosAtual['material_name'], 'Nome', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['material_numero_patrimonio'], $dadosAtual['material_numero_patrimonio'], 'Número Patrimônio', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['material_valor_unitario'], $dadosAtual['material_valor_unitario'], 'Valor Unitário', '', '');
+                }
+            }
+
+            // Materiais Movimentações
+            if ($submodulo_id == 38) {
+                if ($op == 1) {
+                    $dados .= '<b>:: Materiais Movimentações</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(14, $dadosAnterior['origem_estoque_local_id'], $dadosAtual['origem_estoque_local_id'], 'Origem Local', '', '');
+                    $dados .= $this->retornaDado(14, $dadosAnterior['destino_estoque_local_id'], $dadosAtual['destino_estoque_local_id'], 'Destino Local', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_movimentacao'], $dadosAtual['data_movimentacao'], 'Data Movimentação', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['hora_movimentacao'], $dadosAtual['hora_movimentacao'], 'Hora Movimentação', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['observacoes'], $dadosAtual['observacoes'], 'Observações', '', '');
                 }
             }
 

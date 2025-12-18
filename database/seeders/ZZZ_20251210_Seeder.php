@@ -71,6 +71,7 @@ class ZZZ_20251210_Seeder extends Seeder
         // Estoques Locais''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
         EstoqueLocal::create(['id' => 1, 'name' => 'ALMOXARIFADO GLOBAL', 'estoque_id' => 1, 'empresa_id' => 1]);
         EstoqueLocal::create(['id' => 2, 'name' => 'ALMOXARIFADO GLOBAL', 'estoque_id' => 1, 'empresa_id' => 2]);
+        EstoqueLocal::create(['id' => 3, 'name' => 'ALMOXARIFADO', 'estoque_id' => 2, 'cliente_id' => 1]);
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     }
 }
