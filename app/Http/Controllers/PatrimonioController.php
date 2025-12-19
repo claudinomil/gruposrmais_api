@@ -38,17 +38,6 @@ class PatrimonioController extends Controller
             )
             ->where('materiais_entradas_itens.material_numero_patrimonio', $material_numero_patrimonio)->first();
 
-        // $dados['movimentacoes'] = MaterialMovimentacao
-        //     ::join('materiais_movimentacoes_itens', 'materiais_movimentacoes_itens.material_movimentacao_id', 'materiais_movimentacoes.id')
-        //     ->join('materiais_entradas_itens', 'materiais_entradas_itens.id', 'materiais_movimentacoes_itens.material_entrada_item_id')
-        //     ->join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
-        //     ->select('materiais_movimentacoes.*')
-        //     ->where('materiais_entradas_itens.material_numero_patrimonio', $material_numero_patrimonio)
-        //     ->orderby('materiais_movimentacoes.data_movimentacao')
-        //     ->orderby('materiais_movimentacoes.hora_movimentacao')
-        //     ->get();
-
-
         $dados['movimentacoes'] = MaterialMovimentacao
             ::join('estoques_locais as origens_estoques_locais', 'origens_estoques_locais.id', 'materiais_movimentacoes.origem_estoque_local_id')
             ->join('estoques as origens_estoques', 'origens_estoques.id', 'origens_estoques_locais.estoque_id')
@@ -76,6 +65,45 @@ class PatrimonioController extends Controller
                 'destinos_clientes.name as destinoClienteName'
             )->orderby('materiais_movimentacoes.data_movimentacao')
             ->orderby('materiais_movimentacoes.hora_movimentacao')
+            ->get();
+
+        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $dados);
+    }
+
+    public function listagem_geral()
+    {
+        $dados = array();
+
+        $dados['materiais'] = MaterialEntradaItem
+            ::join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
+            ->join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
+            ->join('material_situacoes', 'material_situacoes.id', 'materiais_entradas_itens.material_situacao_id')
+            ->join('estoques_locais', 'estoques_locais.id', 'materiais_entradas_itens.estoque_local_id')
+            ->join('estoques', 'estoques.id', 'estoques_locais.estoque_id')
+            ->leftjoin('empresas', 'empresas.id', 'estoques_locais.empresa_id')
+            ->leftjoin('clientes', 'clientes.id', 'estoques_locais.cliente_id')
+            ->select(
+                'materiais.name as nome',
+                'materiais.descricao',
+                'materiais.fotografia',
+                'materiais.ca',
+
+                'material_categorias.name as categoria',
+
+                'materiais_entradas_itens.material_numero_patrimonio as numero_patrimonio',
+
+                'estoques.name as estoque',
+
+                'estoques_locais.name as local',
+                'estoques_locais.estoque_id',
+
+                'material_situacoes.id as situacao_id',
+                'material_situacoes.name as situacao',
+
+                'empresas.name as local_empresa',
+                'clientes.name as local_cliente'
+            )
+            ->orderby('materiais.name')
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $dados);
