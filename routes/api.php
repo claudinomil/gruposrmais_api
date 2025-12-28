@@ -111,6 +111,12 @@ require __DIR__ . '/routes_materiais_entradas.php';
 //Materiais Movimentações
 require __DIR__ . '/routes_materiais_movimentacoes.php';
 
+// Materiais Controle Situações
+require __DIR__ . '/routes_materiais_controle_situacoes.php';
+
+// Materiais Listagem Geral
+require __DIR__ . '/routes_materiais_listagem_geral.php';
+
 //Brigadas Incendios
 require __DIR__ . '/routes_brigadas_incendios.php';
 

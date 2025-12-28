@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Facades\Transacoes;
+use App\Models\BlockTableOrRecord;
 use App\Models\BrigadaIncendioEscala;
 use App\Models\BrigadaIncendioEscalaBrigadista;
 use App\Models\BrigadaIncendioMaterial;
@@ -21,6 +22,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class SuporteService
 {
@@ -998,5 +1000,75 @@ class SuporteService
                 }
             }
         }
+    }
+
+    /*
+     * Bloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
+     *
+     * @param   string      $tabela         : Nome da Tabela (ex: 'funcionarios')
+     * @param   int|null    $tabela_id      : ID do registro (opcional, para travar um item específico)
+     * @param   int         $timeOutMinutes : Tempo de expiração automática do lock (padrão: 3 min)
+     *
+     * @return  array                       : Retorna ['status' => 'ok'] ou ['status' => 'locked', 'message' => ...]
+    */
+    public static function bloquearTabelaRegistro($tabela, $tabela_id = null, $timeOutMinutes = 1)
+    {
+        // Usuário que está acessando
+        $userId = Auth::id();
+
+        // Sessão Hash para identificar Usuário, IP e Máquina
+        $sessionHash = hash('sha256', $userId . '|' . session()->getId() . '|' . request()->ip());
+
+        // Limpa locks antigos (expirados)
+        BlockTableOrRecord::where('locked_at', '<', now()->subMinutes($timeOutMinutes))->delete();
+
+        // Verifica se já há lock ativo
+        $query = BlockTableOrRecord::where('tabela', $tabela);
+        if ($tabela_id) {
+            $query->where('tabela_id', $tabela_id);
+        }
+
+        $lock = $query->first();
+
+        // Se existe lock e não é da mesma sessão, bloqueia
+        if ($lock && $lock->session_hash !== $sessionHash) {
+            return [
+                'status' => 'locked',
+                'message' => 'Este recurso está bloqueado por outro usuário ou sessão ativa.'
+            ];
+        }
+
+        // Cria ou renova o lock para a sessão atual
+        BlockTableOrRecord::updateOrCreate(
+            ['tabela' => $tabela, 'tabela_id' => $tabela_id],
+            [
+                'user_id' => $userId,
+                'session_hash' => $sessionHash,
+                'locked_at' => now()
+            ]
+        );
+
+        return ['status' => 'unlocked'];
+    }
+
+    /*
+     * Desbloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
+     *
+     * @param   string      $tabela         : Nome da Tabela (ex: 'funcionarios')
+     * @param   int|null    $tabela_id      : ID do registro (opcional, para destravar um item específico)
+    */
+    public static function desbloquearTabelaRegistro($tabela, $tabela_id = null)
+    {
+        // Usuário que está acessando
+        $userId = Auth::id();
+
+        // Sessão Hash para identificar Usuário, IP e Máquina
+        $sessionHash = hash('sha256', $userId . '|' . session()->getId() . '|' . request()->ip());
+
+        BlockTableOrRecord::where('tabela', $tabela)
+            ->when($tabela_id, fn($q) => $q->where('tabela_id', $tabela_id))
+            ->where('user_id', $userId)
+            ->where('session_hash', $sessionHash)
+            ->delete();
     }
 }

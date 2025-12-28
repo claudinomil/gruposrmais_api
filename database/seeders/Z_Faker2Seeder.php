@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\MaterialEntrada;
 use App\Models\PontoInteresse;
 use App\Models\PontoInteresseEspecialidade;
 use Illuminate\Database\Seeder;
@@ -13,7 +14,7 @@ class Z_Faker2Seeder extends Seeder
         $faker = \Faker\Factory::create('pt_BR');
 
         // Alterando PontoInteresse - Iníco'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        
+
         // Bairros comumente considerados Zona Sul do RJ
         $bairros = ['COPACABANA', 'IPANEMA', 'LEBLON', 'BOTAFOGO', 'FLAMENGO', 'LEME', 'JARDIM BOTÂNICO', 'GÁVEA', 'HUMAITÁ', 'LARANJEIRAS', 'URCA', 'SANTA TERESA', 'GLÓRIA'];
 

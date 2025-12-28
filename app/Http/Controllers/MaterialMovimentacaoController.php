@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Facades\SuporteFacade;
 use App\Http\Requests\MaterialMovimentacaoStoreRequest;
 use App\Models\EstoqueLocal;
 use App\Models\MaterialEntradaItem;
@@ -102,6 +103,13 @@ class MaterialMovimentacaoController extends Controller
     public function store(MaterialMovimentacaoStoreRequest $request)
     {
         try {
+            // Bloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
+            $lock = SuporteFacade::bloquearTabelaRegistro('materiais_movimentacoes');
+
+            if ($lock['status'] === 'locked') {
+                return $this->sendResponse($lock['message'], 4423, null, null);
+            }
+
             // Data, Hora e Tipo de Movimentação
             $request['data_movimentacao'] = date('d/m/Y');
             $request['hora_movimentacao'] = date('H:i:s');
@@ -138,6 +146,9 @@ class MaterialMovimentacaoController extends Controller
                     MaterialEntradaItem::where('id', $materialEntradaItemId)->update(['estoque_local_id' => $destino_estoque_local_id, 'material_situacao_id' => $material_situacao_id]);
                 }
             }
+
+            // Desbloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
+            SuporteFacade::desbloquearTabelaRegistro('materiais_movimentacoes');
 
             return $this->sendResponse('Registro criado com sucesso.', 2010, null, 'null');
         } catch (\Exception $e) {

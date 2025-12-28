@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MaterialEntrada;
 use App\Models\MaterialEntradaItem;
 use App\Models\MaterialMovimentacao;
 
@@ -36,10 +37,13 @@ class PatrimonioController extends Controller
                 'empresas.name as local_empresa',
                 'clientes.name as local_cliente'
             )
-            ->where('materiais_entradas_itens.material_numero_patrimonio', $material_numero_patrimonio)->first();
+            ->where('materiais_entradas_itens.material_numero_patrimonio', $material_numero_patrimonio)
+            ->first();
 
         $dados['movimentacoes'] = MaterialMovimentacao
-            ::join('estoques_locais as origens_estoques_locais', 'origens_estoques_locais.id', 'materiais_movimentacoes.origem_estoque_local_id')
+            ::join('materiais_movimentacoes_itens', 'materiais_movimentacoes_itens.material_movimentacao_id', 'materiais_movimentacoes.id')
+            ->join('materiais_entradas_itens', 'materiais_entradas_itens.id', 'materiais_movimentacoes_itens.material_entrada_item_id')
+            ->join('estoques_locais as origens_estoques_locais', 'origens_estoques_locais.id', 'materiais_movimentacoes.origem_estoque_local_id')
             ->join('estoques as origens_estoques', 'origens_estoques.id', 'origens_estoques_locais.estoque_id')
             ->leftjoin('empresas as origens_empresas', 'origens_empresas.id', 'origens_estoques_locais.empresa_id')
             ->leftjoin('clientes as origens_clientes', 'origens_clientes.id', 'origens_estoques_locais.cliente_id')
@@ -65,6 +69,7 @@ class PatrimonioController extends Controller
                 'destinos_clientes.name as destinoClienteName'
             )->orderby('materiais_movimentacoes.data_movimentacao')
             ->orderby('materiais_movimentacoes.hora_movimentacao')
+            ->where('materiais_entradas_itens.material_numero_patrimonio', $material_numero_patrimonio)
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $dados);
@@ -74,8 +79,9 @@ class PatrimonioController extends Controller
     {
         $dados = array();
 
-        $dados['materiais'] = MaterialEntradaItem
-            ::join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
+        $dados['materiais'] = MaterialEntrada
+            ::join('materiais_entradas_itens', 'materiais_entradas_itens.material_entrada_id', 'materiais_entradas.id')
+            ->join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
             ->join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
             ->join('material_situacoes', 'material_situacoes.id', 'materiais_entradas_itens.material_situacao_id')
             ->join('estoques_locais', 'estoques_locais.id', 'materiais_entradas_itens.estoque_local_id')
@@ -90,7 +96,10 @@ class PatrimonioController extends Controller
 
                 'material_categorias.name as categoria',
 
+                'materiais_entradas.data_emissao as data_emissao',
+
                 'materiais_entradas_itens.material_numero_patrimonio as numero_patrimonio',
+                'materiais_entradas_itens.material_valor_unitario as valor_unitario',
 
                 'estoques.name as estoque',
 

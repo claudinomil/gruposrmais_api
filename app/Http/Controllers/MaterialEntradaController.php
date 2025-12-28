@@ -28,6 +28,7 @@ class MaterialEntradaController extends Controller
         $empresa_id = $request->header('X-Empresa-Id');
 
         $registros = $this->material_entrada
+        ->with('materiais_entradas_itens') // carrega todos os itens relacionados
         ->join('fornecedores', 'fornecedores.id', 'materiais_entradas.fornecedor_id')
         ->select('materiais_entradas.*', 'fornecedores.name as fornecedorName')
         ->where('materiais_entradas.empresa_id', $empresa_id)
@@ -309,17 +310,8 @@ class MaterialEntradaController extends Controller
             // Estoque Local de Destino
             $destino_estoque_local_id = $material_entrada->estoque_local_id;
 
-            // Verificar Estoque Local Destino se é Empresa ou Cliente para lançar na variável $material_situacao_id
-            $destino_estoque_local = EstoqueLocal::where('id', $destino_estoque_local_id)->first();
-            $estoque_id = $destino_estoque_local->estoque_id;
-
-            if ($estoque_id == 1) {
-                $material_situacao_id = 1; // ATIVO - permite movimentação
-            } else if ($estoque_id == 2) {
-                $material_situacao_id = 2; // EM USO - permite movimentação
-            } else {
-                $material_situacao_id = 1; // ATIVO - permite movimentação
-            }
+            // Material Situação
+            $material_situacao_id = 1; // ATIVO - permite movimentação
 
             // Edições
             if (isset($material_entrada_itens)) {

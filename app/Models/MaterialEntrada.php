@@ -33,12 +33,24 @@ class MaterialEntrada extends Model
         'fornecedor_cidade',
         'fornecedor_uf',
         'nf_pdf_caminho',
-        'estoque_local_id'
+        'estoque_local_id',
+        'executada'
     ];
 
     protected $dates = [
         'data_emissao'
     ];
+
+    public function materiais_entradas_itens()
+    {
+        return $this->hasMany(MaterialEntradaItem::class, 'material_entrada_id')
+        ->join('materiais', 'materiais.id', '=', 'materiais_entradas_itens.material_id')
+        ->select(
+            'materiais_entradas_itens.*',
+            'materiais.name as material_name',
+            'materiais.fotografia as material_fotografia'
+        );
+}
 
     public function setDataEmissaoAttribute($value) {if ($value != '') {$this->attributes['data_emissao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
 

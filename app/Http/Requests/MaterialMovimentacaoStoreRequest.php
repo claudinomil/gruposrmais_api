@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\DB;
 
 class MaterialMovimentacaoStoreRequest extends FormRequest
 {
@@ -38,7 +39,36 @@ class MaterialMovimentacaoStoreRequest extends FormRequest
         ];
     }
 
-    // Se precisar customizar a resposta JSON (para API requests)
+    /**
+     * Validação customizada: verifica se todos os materiais pertencem ao estoque de origem.
+     */
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $origemId = $this->input('origem_estoque_local_id');
+            $materiais = $this->input('materiais_entradas_itens', []);
+
+            if (!empty($materiais) && $origemId) {
+                // Busca todos os materiais que NÃO pertencem ao estoque de origem
+                $invalidos = DB::table('materiais_entradas_itens')
+                    ->whereIn('id', $materiais)
+                    ->where('estoque_local_id', '!=', $origemId)
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($invalidos)) {
+                    $validator->errors()->add(
+                        'materiais_entradas_itens',
+                        'Alguns materiais não pertencem ao Estoque de Origem informado.'
+                    );
+                }
+            }
+        });
+    }
+
+    /**
+     * Customiza resposta JSON da validação.
+     */
     public function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
         throw new \Illuminate\Validation\ValidationException($validator, response()->json([

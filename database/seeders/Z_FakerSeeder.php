@@ -7,6 +7,7 @@ use App\Models\Cliente;
 use App\Models\ClienteExecutivo;
 use App\Models\Fornecedor;
 use App\Models\Funcionario;
+use App\Models\MaterialEntrada;
 use App\Models\OrdemServico;
 use App\Models\Proposta;
 use App\Models\User;

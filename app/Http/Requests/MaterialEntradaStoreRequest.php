@@ -16,7 +16,7 @@ class MaterialEntradaStoreRequest extends FormRequest
     public function rules()
     {
         // IDs de fornecedores que não exigem NF
-        $fornecedoresSemNF = [1, 2, 3];
+        $fornecedoresSemNF = [888, 777, 999];
 
         $rules = [
             'fornecedor_id'     => ['required'],
