@@ -21,7 +21,7 @@ class MaterialEntradaStoreRequest extends FormRequest
         $rules = [
             'fornecedor_id'     => ['required'],
             'fornecedor_nome'   => ['required'],
-            'data_emissao'      => ['required', 'date'],
+            'data_emissao'      => ['required', 'date_format:d/m/Y'],
             'estoque_local_id'  => ['required'],
             'valor_total'       => ['required'],
             'valor_desconto'    => ['required'],
@@ -44,7 +44,7 @@ class MaterialEntradaStoreRequest extends FormRequest
             'nf_numero.required'         => 'O número da Nota Fiscal é requerido.',
             'nf_serie.required'          => 'A série da Nota Fiscal é requerida.',
             'data_emissao.required'      => 'A Data de Emissão é requerida.',
-            'data_emissao.date'          => 'A Data de Emissão é inválida.',
+            'data_emissao.date_format'   => 'A Data de Emissão é inválida.',
             'estoque_local_id.required'  => 'O Local de Estoque é requerido.',
             'valor_total.required'       => 'O Valor Total é requerido.',
             'valor_desconto.required'    => 'O Valor de Desconto é requerido.',
