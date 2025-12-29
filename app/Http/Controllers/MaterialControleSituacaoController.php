@@ -48,7 +48,7 @@ class MaterialControleSituacaoController extends Controller
                 'clientes.name as material_local_cliente'
             )
             ->whereNotIn('material_situacoes.id', [10]) // NÃO COLOCAR O PATRIMÔNIO EM AQUISIÇÃO
-            ->orderby('materiais.name')
+            ->orderby('materiais_entradas_itens.material_numero_patrimonio')
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
