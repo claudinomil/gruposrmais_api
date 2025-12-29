@@ -154,6 +154,7 @@ class MaterialControleSituacaoController extends Controller
 
             // Criar registro na tabela materiais_controle_situacoes_itens
             $request['data_alteracao'] = date('d/m/Y');
+            $request['hora_alteracao'] = date('H:i:s');
             $mcsi = MaterialControleSituacaoItem::create($request->all());
 
             // Buscar registro na tabela materiais_entradas_itens

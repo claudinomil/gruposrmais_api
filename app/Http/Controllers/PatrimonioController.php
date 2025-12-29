@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MaterialControleSituacaoItem;
 use App\Models\MaterialEntrada;
 use App\Models\MaterialEntradaItem;
 use App\Models\MaterialMovimentacao;
@@ -113,6 +114,31 @@ class PatrimonioController extends Controller
                 'clientes.name as local_cliente'
             )
             ->orderby('materiais.name')
+            ->get();
+
+        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $dados);
+    }
+
+    public function patrimonio_situacoes($material_entrada_item_id)
+    {
+        $dados = array();
+
+        $dados['patrimonio_situacoes'] = MaterialControleSituacaoItem
+            ::join('materiais_entradas_itens', 'materiais_entradas_itens.id', 'materiais_controle_situacoes_itens.material_entrada_item_id')
+            ->join('material_situacoes as anterior_material_situacoes', 'anterior_material_situacoes.id', 'materiais_controle_situacoes_itens.anterior_material_situacao_id')
+            ->join('material_situacoes as atual_material_situacoes', 'atual_material_situacoes.id', 'materiais_controle_situacoes_itens.atual_material_situacao_id')
+            ->join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
+            ->join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
+            ->select(
+                'materiais_controle_situacoes_itens.*',
+                'anterior_material_situacoes.name as anteriorMaterialSituacaoName',
+                'atual_material_situacoes.name as atualMaterialSituacaoName',
+                'materiais.name as materialName',
+                'material_categorias.name as materialCategoriaName'
+            )
+            ->where('materiais_entradas_itens.id', $material_entrada_item_id)
+            ->orderby('materiais_controle_situacoes_itens.data_alteracao')
+            ->orderby('materiais_controle_situacoes_itens.hora_alteracao')
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $dados);

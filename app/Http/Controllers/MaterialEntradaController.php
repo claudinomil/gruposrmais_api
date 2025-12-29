@@ -321,6 +321,18 @@ class MaterialEntradaController extends Controller
 
                     // Alterar tabela materiais_entradas_itens
                     MaterialEntradaItem::where('id', $material_entrada_item['id'])->update(['estoque_local_id' => $destino_estoque_local_id, 'material_situacao_id' => $material_situacao_id]);
+
+                    // Criar registro na tabela materiais_controle_situacoes_itens
+                    SuporteFacade::gravarRegistroControleSituacao(
+                        $material_entrada_item['id'],
+                        $material_entrada_item['material_situacao_id'],
+                        $material_situacao_id,
+                        $material_entrada_item['estoque_local_id'],
+                        $destino_estoque_local_id,
+                        'Registro criado ao Executar Entrada',
+                        date('d/m/Y'),
+                        date('H:i:s')
+                    );
                 }
             }
 

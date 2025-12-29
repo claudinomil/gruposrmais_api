@@ -31,6 +31,7 @@ class Z_Faker3Seeder extends Seeder
                 'estoque_local_id' => 1
             ]);
 
+            //xxxyyywww
             $numero_patrimonio++;
             MaterialEntradaItem::create([
                 'material_entrada_id' => $i,
@@ -43,6 +44,7 @@ class Z_Faker3Seeder extends Seeder
                 'material_situacao_id' => 10
             ]);
 
+            //xxxyyywww
             $numero_patrimonio++;
             MaterialEntradaItem::create([
                 'material_entrada_id' => $i,
@@ -55,6 +57,7 @@ class Z_Faker3Seeder extends Seeder
                 'material_situacao_id' => 10
             ]);
 
+            //xxxyyywww
             $numero_patrimonio++;
             MaterialEntradaItem::create([
                 'material_entrada_id' => $i,
@@ -67,6 +70,7 @@ class Z_Faker3Seeder extends Seeder
                 'material_situacao_id' => 10
             ]);
 
+            //xxxyyywww
             $numero_patrimonio++;
             MaterialEntradaItem::create([
                 'material_entrada_id' => $i,
@@ -79,6 +83,7 @@ class Z_Faker3Seeder extends Seeder
                 'material_situacao_id' => 10
             ]);
 
+            //xxxyyywww
             $numero_patrimonio++;
             MaterialEntradaItem::create([
                 'material_entrada_id' => $i,
@@ -91,6 +96,7 @@ class Z_Faker3Seeder extends Seeder
                 'material_situacao_id' => 10
             ]);
 
+            //xxxyyywww
             $numero_patrimonio++;
             MaterialEntradaItem::create([
                 'material_entrada_id' => $i,
@@ -103,6 +109,7 @@ class Z_Faker3Seeder extends Seeder
                 'material_situacao_id' => 10
             ]);
 
+            //xxxyyywww
             $numero_patrimonio++;
             MaterialEntradaItem::create([
                 'material_entrada_id' => $i,
@@ -115,6 +122,7 @@ class Z_Faker3Seeder extends Seeder
                 'material_situacao_id' => 10
             ]);
 
+            //xxxyyywww
             $numero_patrimonio++;
             MaterialEntradaItem::create([
                 'material_entrada_id' => $i,

@@ -19,7 +19,8 @@ class MaterialControleSituacaoItem extends Model
         'anterior_estoque_local_id',
         'atual_estoque_local_id',
         'observacao',
-        'data_alteracao'
+        'data_alteracao',
+        'hora_alteracao'
     ];
 
     protected $dates = [

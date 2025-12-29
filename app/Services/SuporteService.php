@@ -9,6 +9,7 @@ use App\Models\BrigadaIncendioEscalaBrigadista;
 use App\Models\BrigadaIncendioMaterial;
 use App\Models\ClienteSegurancaMedida;
 use App\Models\Especialidade;
+use App\Models\MaterialControleSituacaoItem;
 use App\Models\MaterialEntradaItem;
 use App\Models\OrdemServicoDestino;
 use App\Models\OrdemServicoEquipe;
@@ -1070,5 +1071,20 @@ class SuporteService
             ->where('user_id', $userId)
             ->where('session_hash', $sessionHash)
             ->delete();
+    }
+
+    // Criar registro na tabela materiais_controle_situacoes_itens
+    public static function gravarRegistroControleSituacao($material_entrada_item_id, $anterior_material_situacao_id, $atual_material_situacao_id, $anterior_estoque_local_id, $atual_estoque_local_id, $observacao, $data_alteracao, $hora_alteracao)
+    {
+        MaterialControleSituacaoItem::create([
+            'material_entrada_item_id' => $material_entrada_item_id,
+            'anterior_material_situacao_id' => $anterior_material_situacao_id,
+            'atual_material_situacao_id' => $atual_material_situacao_id,
+            'anterior_estoque_local_id' => $anterior_estoque_local_id,
+            'atual_estoque_local_id' => $atual_estoque_local_id,
+            'observacao' => $observacao,
+            'data_alteracao' => $data_alteracao,
+            'hora_alteracao' => $hora_alteracao
+        ]);
     }
 }

@@ -142,8 +142,33 @@ class MaterialMovimentacaoController extends Controller
                     // Incluir na tabela materiais_movimentacoes_itens
                     MaterialMovimentacaoItem::create(['material_movimentacao_id' => $registro['id'], 'material_entrada_item_id' => $materialEntradaItemId]);
 
+                    // Pegar registro
+                    $materialEntradaItem = MaterialEntradaItem::find($materialEntradaItemId);
+
+                    // Pegar dados para criar registro de Controle de Situações
+                    $d_material_entrada_item_id = $materialEntradaItemId;
+                    $d_anterior_material_situacao_id = $materialEntradaItem->material_situacao_id;
+                    $d_atual_material_situacao_id = $material_situacao_id;
+                    $d_anterior_estoque_local_id = $materialEntradaItem->estoque_local_id;
+                    $d_atual_estoque_local_id = $destino_estoque_local_id;
+                    $d_observacao = 'Registro criado ao Fazer Movimentação';
+                    $d_data_alteracao = $request['data_movimentacao'];
+                    $d_hora_alteracao = $request['hora_movimentacao'];
+
                     // Alterar tabela materiais_entradas_itens
-                    MaterialEntradaItem::where('id', $materialEntradaItemId)->update(['estoque_local_id' => $destino_estoque_local_id, 'material_situacao_id' => $material_situacao_id]);
+                    $materialEntradaItem->update(['estoque_local_id' => $destino_estoque_local_id, 'material_situacao_id' => $material_situacao_id]);
+
+                    // Criar registro na tabela materiais_controle_situacoes_itens
+                    SuporteFacade::gravarRegistroControleSituacao(
+                        $d_material_entrada_item_id,
+                        $d_anterior_material_situacao_id,
+                        $d_atual_material_situacao_id,
+                        $d_anterior_estoque_local_id,
+                        $d_atual_estoque_local_id,
+                        $d_observacao,
+                        $d_data_alteracao,
+                        $d_hora_alteracao
+                    );
                 }
             }
 

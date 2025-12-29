@@ -46,7 +46,7 @@ class MaterialListagemGeralController extends Controller
                 'clientes.name as material_local_cliente'
             )
             //->where('materiais_entradas.empresa_id', $empresa_id)
-            ->orderby('materiais.name')
+            ->orderby('materiais_entradas_itens.material_numero_patrimonio')
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
