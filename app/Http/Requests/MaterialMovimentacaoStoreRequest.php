@@ -17,8 +17,7 @@ class MaterialMovimentacaoStoreRequest extends FormRequest
         return [
             'origem_estoque_local_id' => ['required', 'integer', 'different:destino_estoque_local_id'],
             'destino_estoque_local_id' => ['required', 'integer', 'different:origem_estoque_local_id'],
-            'materiais_entradas_itens' => ['required', 'array', 'min:1'],
-            'materiais_entradas_itens.*' => ['integer', 'exists:materiais,id']
+            'materiais_entradas_itens' => ['required', 'array', 'min:1']
         ];
     }
 
@@ -34,8 +33,7 @@ class MaterialMovimentacaoStoreRequest extends FormRequest
             'materiais_entradas_itens.required' => 'Nenhum Material foi selecionado para Movimentação.',
             'materiais_entradas_itens.array' => 'O formato de Materiais selecionados é inválido.',
             'materiais_entradas_itens.min' => 'Selecione pelo menos um Material.',
-            'materiais_entradas_itens.*.integer' => 'Material selecionado inválido.',
-            'materiais_entradas_itens.*.exists' => 'Material selecionado não existe no banco de dados.'
+            'materiais_entradas_itens.*.integer' => 'Material selecionado inválido.'
         ];
     }
 
