@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\MaterialEntrada;
+use App\Models\ProdutoEntrada;
 use App\Models\PontoInteresse;
 use App\Models\PontoInteresseEspecialidade;
 use Illuminate\Database\Seeder;

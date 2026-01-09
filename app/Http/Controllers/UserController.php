@@ -483,4 +483,52 @@ class UserController extends Controller
             return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
         }
     }
+
+    // Função para retornar dados do Usuário Logado no App (User, Permissões e Configurações)
+    public function appUserPermissoesSettings()
+    {
+        try {
+            if (!Auth::check()) {
+                return $this->sendResponse('Usuário não está logado.', 4040, null, null);
+            } else {
+                //Cria array
+                $registros = array();
+
+
+
+                // TESTE
+                $registros['data_hora'] = date('d/m/Y H:i:s');
+
+
+
+                //Dados Usuário Logado
+                $registros['userData'] = Auth::user();
+
+                //Empresas Usuário Logado
+                $registros['userEmpresas'] = Empresa::all();
+
+                //Permissões Usuário Logado
+                $registros['userPermissoes'] = DB::table('grupos_permissoes')
+                    ->join('grupos', 'grupos_permissoes.grupo_id', '=', 'grupos.id')
+                    ->join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
+                    ->select('permissoes.name as permissao')
+                    ->where('grupos_permissoes.grupo_id', Auth::user()->grupo_id)
+                    ->get();
+
+                //Menu Módulos
+                $registros['menuModulos'] = Modulo::where('viewing_order', '>', '0')->orderBy('viewing_order', 'asc')->orderBy('name', 'asc')->get();
+
+                //Menu Submódulos
+                $registros['menuSubmodulos'] = Submodulo::where('viewing_order', '>', '0')->orderBy('viewing_order', 'asc')->orderBy('name', 'asc')->get();
+
+                return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+            }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
 }

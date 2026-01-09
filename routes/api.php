@@ -103,19 +103,19 @@ require __DIR__ . '/routes_pontos_interesse.php';
 require __DIR__ . '/routes_visitas_tecnicas.php';
 
 //Materiais
-require __DIR__ . '/routes_materiais.php';
+require __DIR__ . '/routes_produtos.php';
 
 //Materiais Entradas
-require __DIR__ . '/routes_materiais_entradas.php';
+require __DIR__ . '/routes_produtos_entradas.php';
 
 //Materiais Movimentações
-require __DIR__ . '/routes_materiais_movimentacoes.php';
+require __DIR__ . '/routes_produtos_movimentacoes.php';
 
 // Materiais Controle Situações
-require __DIR__ . '/routes_materiais_controle_situacoes.php';
+require __DIR__ . '/routes_produtos_controle_situacoes.php';
 
 // Materiais Listagem Geral
-require __DIR__ . '/routes_materiais_listagem_geral.php';
+require __DIR__ . '/routes_produtos_listagem_geral.php';
 
 //Brigadas Incendios
 require __DIR__ . '/routes_brigadas_incendios.php';

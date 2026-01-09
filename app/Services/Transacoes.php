@@ -43,10 +43,11 @@ use App\Models\Estado;
 use App\Models\Estoque;
 use App\Models\EstoqueLocal;
 use App\Models\Fornecedor;
-use App\Models\Material;
-use App\Models\MaterialCategoria;
-use App\Models\MaterialEntrada;
-use App\Models\MaterialEntradaItem;
+use App\Models\Produto;
+use App\Models\ProdutoCategoria;
+use App\Models\ProdutoEntrada;
+use App\Models\ProdutoEntradaItem;
+use App\Models\ProdutoTipo;
 use App\Models\Transacao;
 use App\Models\User;
 
@@ -196,14 +197,14 @@ class Transacoes
             }
         }
 
-        //Opção para o campo material_entrada_id
+        //Opção para o campo produto_entrada_id
         if ($op == 13) {
             if (($dadoAtual != "") and ($dadoAtual != 0)) {
-                $material_entrada = MaterialEntrada::where('id', $dadoAtual)->get()[0];
-                $search_nf_numero_material_entrada = $material_entrada['nf_numero'];
-                $search_nf_serie_material_entrada = $material_entrada['nf_serie'];
+                $produto_entrada = ProdutoEntrada::where('id', $dadoAtual)->get()[0];
+                $search_nf_numero_produto_entrada = $produto_entrada['nf_numero'];
+                $search_nf_serie_produto_entrada = $produto_entrada['nf_serie'];
 
-                $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $search_nf_numero_material_entrada . "/" . $search_nf_serie_material_entrada . "<br>";
+                $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $search_nf_numero_produto_entrada . "/" . $search_nf_serie_produto_entrada . "<br>";
             }
         }
 
@@ -811,11 +812,11 @@ class Transacoes
                 }
             }
 
-            //materiais
+            //produtos
             if ($submodulo_id == 32) {
                 if ($op == 1) {
                     $dados .= '<b>:: Materiais</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['material_categoria_id'], $dadosAtual['material_categoria_id'], 'Categoria', MaterialCategoria::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['produto_categoria_id'], $dadosAtual['produto_categoria_id'], 'Categoria', ProdutoCategoria::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');
                     $dados .= $this->retornaDado(2, $dadosAnterior['cor_id'], $dadosAtual['cor_id'], 'Cor', Cor::class, 'name');
@@ -844,14 +845,14 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['cliente_email'], $dadosAtual['cliente_email'], 'Cliente E-mail', '', '');
                 }
 
-                //Tabela brigadas_incendios_materiais
+                //Tabela brigadas_incendios_produtos
                 if ($op == 2) {
                     $dados .= '<b>:: Brigadas Incêndios Materiais</b>'.'<br><br>';
                     $dados .= $this->retornaDado(11, $dadosAnterior['brigada_incendio_id'], $dadosAtual['brigada_incendio_id'], 'Brigada Incêndio', '', '');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['material_id'], $dadosAtual['material_id'], 'Material', Material::class, 'name');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['material_categoria_name'], $dadosAtual['material_categoria_name'], 'Material Categoria Nome', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['material_name'], $dadosAtual['material_name'], 'Material Nome', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['material_quantidade'], $dadosAtual['material_quantidade'], 'Material Quantidade', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['produto_id'], $dadosAtual['produto_id'], 'Produto', Produto::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['produto_categoria_name'], $dadosAtual['produto_categoria_name'], 'Produto Categoria Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['produto_name'], $dadosAtual['produto_name'], 'Produto Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['produto_quantidade'], $dadosAtual['produto_quantidade'], 'Produto Quantidade', '', '');
                 }
 
                 //Tabela brigadas_incendios_escalas
@@ -904,15 +905,17 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['fornecedor_uf'], $dadosAtual['fornecedor_uf'], 'Fornecedor UF', '', '');
                 }
 
-                //Tabela materiais_entradas_itens
+                //Tabela produtos_entradas_itens
                 if ($op == 2) {
                     $dados .= '<b>:: Materiais Entradas Itens</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(13, $dadosAnterior['material_entrada_id'], $dadosAtual['material_entrada_id'], 'Material Entrada', '', '');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['material_id'], $dadosAtual['material_id'], 'Material', Material::class, 'name');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['material_categoria_name'], $dadosAtual['material_categoria_name'], 'Categoria', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['material_name'], $dadosAtual['material_name'], 'Nome', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['material_numero_patrimonio'], $dadosAtual['material_numero_patrimonio'], 'Número Patrimônio', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['material_valor_unitario'], $dadosAtual['material_valor_unitario'], 'Valor Unitário', '', '');
+                    $dados .= $this->retornaDado(13, $dadosAnterior['produto_entrada_id'], $dadosAtual['produto_entrada_id'], 'Produto Entrada', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['produto_id'], $dadosAtual['produto_id'], 'Produto', Produto::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['produto_categoria_name'], $dadosAtual['produto_categoria_name'], 'Categoria', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['produto_name'], $dadosAtual['produto_name'], 'Nome', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['produto_tipo_id'], $dadosAtual['produto_tipo_id'], 'Produto Tipo', ProdutoTipo::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['produto_tipo_name'], $dadosAtual['produto_tipo_name'], 'Tipo Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['produto_numero_patrimonio'], $dadosAtual['produto_numero_patrimonio'], 'Número Patrimônio', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['produto_valor_unitario'], $dadosAtual['produto_valor_unitario'], 'Valor Unitário', '', '');
                 }
             }
 

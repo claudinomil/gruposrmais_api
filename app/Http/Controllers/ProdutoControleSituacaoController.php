@@ -2,53 +2,53 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\MaterialControleSituacaoUpdateRequest;
+use App\Http\Requests\ProdutoControleSituacaoUpdateRequest;
 use App\Models\EstoqueLocal;
 use Illuminate\Http\Request;
-use App\Models\MaterialEntradaItem;
-use App\Models\MaterialSituacao;
+use App\Models\ProdutoEntradaItem;
+use App\Models\ProdutoSituacao;
 use App\Facades\SuporteFacade;
-use App\Models\MaterialControleSituacaoItem;
-use App\Models\MaterialMovimentacao;
-use App\Models\MaterialMovimentacaoItem;
+use App\Models\ProdutoControleSituacaoItem;
+use App\Models\ProdutoMovimentacao;
+use App\Models\ProdutoMovimentacaoItem;
 
-class MaterialControleSituacaoController extends Controller
+class ProdutoControleSituacaoController extends Controller
 {
     public function index()
     {
-        $registros = MaterialEntradaItem
-            ::join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
-            ->join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
-            ->join('material_situacoes', 'material_situacoes.id', 'materiais_entradas_itens.material_situacao_id')
-            ->join('estoques_locais', 'estoques_locais.id', 'materiais_entradas_itens.estoque_local_id')
+        $registros = ProdutoEntradaItem
+            ::join('produtos', 'produtos.id', 'produtos_entradas_itens.produto_id')
+            ->join('produto_categorias', 'produto_categorias.id', 'produtos.produto_categoria_id')
+            ->join('produto_situacoes', 'produto_situacoes.id', 'produtos_entradas_itens.produto_situacao_id')
+            ->join('estoques_locais', 'estoques_locais.id', 'produtos_entradas_itens.estoque_local_id')
             ->join('estoques', 'estoques.id', 'estoques_locais.estoque_id')
             ->leftjoin('empresas', 'empresas.id', 'estoques_locais.empresa_id')
             ->leftjoin('clientes', 'clientes.id', 'estoques_locais.cliente_id')
             ->select(
-                'materiais.name as material_nome',
-                'materiais.descricao as material_descricao',
-                'materiais.fotografia',
-                'materiais.ca',
+                'produtos.name as produto_nome',
+                'produtos.descricao as produto_descricao',
+                'produtos.fotografia',
+                'produtos.ca',
 
-                'material_categorias.name as material_categoria',
+                'produto_categorias.name as produto_categoria',
 
-                'materiais_entradas_itens.id',
-                'materiais_entradas_itens.material_numero_patrimonio as numero_patrimonio',
+                'produtos_entradas_itens.id',
+                'produtos_entradas_itens.produto_numero_patrimonio as numero_patrimonio',
 
-                'estoques.id as material_estoque_id',
-                'estoques.name as material_estoque_nome',
+                'estoques.id as produto_estoque_id',
+                'estoques.name as produto_estoque_nome',
 
-                'estoques_locais.name as material_local',
+                'estoques_locais.name as produto_local',
                 'estoques_locais.estoque_id',
 
-                'material_situacoes.id as material_situacao_id',
-                'material_situacoes.name as material_situacao',
+                'produto_situacoes.id as produto_situacao_id',
+                'produto_situacoes.name as produto_situacao',
 
-                'empresas.name as material_local_empresa',
-                'clientes.name as material_local_cliente'
+                'empresas.name as produto_local_empresa',
+                'clientes.name as produto_local_cliente'
             )
-            ->whereNotIn('material_situacoes.id', [10]) // NÃO COLOCAR O PATRIMÔNIO EM AQUISIÇÃO
-            ->orderby('materiais_entradas_itens.material_numero_patrimonio')
+            ->whereNotIn('produto_situacoes.id', [10]) // NÃO COLOCAR O PATRIMÔNIO EM AQUISIÇÃO
+            ->orderby('produtos_entradas_itens.produto_numero_patrimonio')
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
@@ -57,32 +57,32 @@ class MaterialControleSituacaoController extends Controller
     public function show($id)
     {
         try {
-            $registro = MaterialEntradaItem
-                ::join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
-                ->join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
-                ->join('material_situacoes', 'material_situacoes.id', 'materiais_entradas_itens.material_situacao_id')
-                ->join('estoques_locais', 'estoques_locais.id', 'materiais_entradas_itens.estoque_local_id')
+            $registro = ProdutoEntradaItem
+                ::join('produtos', 'produtos.id', 'produtos_entradas_itens.produto_id')
+                ->join('produto_categorias', 'produto_categorias.id', 'produtos.produto_categoria_id')
+                ->join('produto_situacoes', 'produto_situacoes.id', 'produtos_entradas_itens.produto_situacao_id')
+                ->join('estoques_locais', 'estoques_locais.id', 'produtos_entradas_itens.estoque_local_id')
                 ->join('estoques', 'estoques.id', 'estoques_locais.estoque_id')
                 ->leftjoin('empresas', 'empresas.id', 'estoques_locais.empresa_id')
                 ->leftjoin('clientes', 'clientes.id', 'estoques_locais.cliente_id')
                 ->select(
-                    'materiais_entradas_itens.id',
-                    'materiais_entradas_itens.id as material_entrada_item_id',
-                    'materiais_entradas_itens.estoque_local_id',
-                    'materiais_entradas_itens.material_situacao_id',
-                    'materiais.fotografia as material_fotografia',
-                    'materiais_entradas_itens.material_numero_patrimonio',
-                    'materiais.name as material_nome',
-                    'material_categorias.name as material_categoria',
-                    'estoques.id as material_estoque_id',
-                    'estoques.name as material_estoque_nome',
-                    'estoques_locais.name as material_local',
-                    'empresas.name as material_local_empresa',
-                    'clientes.name as material_local_cliente',
-                    'material_situacoes.name as material_situacao'
+                    'produtos_entradas_itens.id',
+                    'produtos_entradas_itens.id as produto_entrada_item_id',
+                    'produtos_entradas_itens.estoque_local_id',
+                    'produtos_entradas_itens.produto_situacao_id',
+                    'produtos.fotografia as produto_fotografia',
+                    'produtos_entradas_itens.produto_numero_patrimonio',
+                    'produtos.name as produto_nome',
+                    'produto_categorias.name as produto_categoria',
+                    'estoques.id as produto_estoque_id',
+                    'estoques.name as produto_estoque_nome',
+                    'estoques_locais.name as produto_local',
+                    'empresas.name as produto_local_empresa',
+                    'clientes.name as produto_local_cliente',
+                    'produto_situacoes.name as produto_situacao'
                 )
-                ->where('materiais_entradas_itens.id', $id)
-                ->orderby('materiais.name')
+                ->where('produtos_entradas_itens.id', $id)
+                ->orderby('produtos.name')
                 ->first();
 
                 if (!$registro) {
@@ -105,7 +105,7 @@ class MaterialControleSituacaoController extends Controller
             $registros = array();
 
             // Situações
-            $registros['material_situacoes'] = MaterialSituacao::orderby('name')->get();
+            $registros['produto_situacoes'] = ProdutoSituacao::orderby('name')->get();
 
             // Estoques Locais
             $registros['estoques_locais'] = EstoqueLocal
@@ -125,25 +125,25 @@ class MaterialControleSituacaoController extends Controller
         }
     }
 
-    public function update(MaterialControleSituacaoUpdateRequest $request, $id)
+    public function update(ProdutoControleSituacaoUpdateRequest $request, $id)
     {
         try {
             // Bloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            $lock = SuporteFacade::bloquearTabelaRegistro('materiais_movimentacoes');
+            $lock = SuporteFacade::bloquearTabelaRegistro('produtos_movimentacoes');
 
             if ($lock['status'] === 'locked') {
                 return $this->sendResponse($lock['message'], 4423, null, null);
             }
 
             // Bloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            $lock = SuporteFacade::bloquearTabelaRegistro('materiais_entradas');
+            $lock = SuporteFacade::bloquearTabelaRegistro('produtos_entradas');
 
             if ($lock['status'] === 'locked') {
                 return $this->sendResponse($lock['message'], 4423, null, null);
             }
 
             // Bloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            $lock = SuporteFacade::bloquearTabelaRegistro('materiais_entradas_itens');
+            $lock = SuporteFacade::bloquearTabelaRegistro('produtos_entradas_itens');
 
             if ($lock['status'] === 'locked') {
                 return $this->sendResponse($lock['message'], 4423, null, null);
@@ -152,29 +152,29 @@ class MaterialControleSituacaoController extends Controller
             // Processo - Início''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
             // Processo - Início''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-            // Criar registro na tabela materiais_controle_situacoes_itens
+            // Criar registro na tabela produtos_controle_situacoes_itens
             $request['data_alteracao'] = date('d/m/Y');
             $request['hora_alteracao'] = date('H:i:s');
-            $mcsi = MaterialControleSituacaoItem::create($request->all());
+            $mcsi = ProdutoControleSituacaoItem::create($request->all());
 
-            // Buscar registro na tabela materiais_entradas_itens
+            // Buscar registro na tabela produtos_entradas_itens
             $data = array();
-            $data['material_situacao_id'] = $request['atual_material_situacao_id'];
+            $data['produto_situacao_id'] = $request['atual_produto_situacao_id'];
 
             if ($request['atual_estoque_local_id'] != '') {
                 $data['estoque_local_id'] = $request['atual_estoque_local_id'];
             }
 
-            $registro = MaterialEntradaItem::find($request['material_entrada_item_id']);
+            $registro = ProdutoEntradaItem::find($request['produto_entrada_item_id']);
 
             if (!$registro) {
-                // Deletar registro na tabela materiais_controle_situacoes_itens
-                MaterialControleSituacaoItem::where('id', $mcsi['id'])->delete();
+                // Deletar registro na tabela produtos_controle_situacoes_itens
+                ProdutoControleSituacaoItem::where('id', $mcsi['id'])->delete();
 
                 // Retorno
                 $retorno = 1;
             } else {
-                // Alterando registro na tabela materiais_entradas_itens
+                // Alterando registro na tabela produtos_entradas_itens
                 $registro->update($data);
 
                 // Criar Movimentação
@@ -189,10 +189,10 @@ class MaterialControleSituacaoController extends Controller
                     $dados['observacoes'] = 'Movimentação realizada pelo Submódulo Controle Situações';
 
                     // Incluindo registro
-                    $regMov = MaterialMovimentacao::create($dados);
+                    $regMov = ProdutoMovimentacao::create($dados);
 
-                    // Incluir na tabela materiais_movimentacoes_itens
-                    MaterialMovimentacaoItem::create(['material_movimentacao_id' => $regMov['id'], 'material_entrada_item_id' => $request['material_entrada_item_id']]);
+                    // Incluir na tabela produtos_movimentacoes_itens
+                    ProdutoMovimentacaoItem::create(['produto_movimentacao_id' => $regMov['id'], 'produto_entrada_item_id' => $request['produto_entrada_item_id']]);
                 }
 
                 // Retorno
@@ -202,13 +202,13 @@ class MaterialControleSituacaoController extends Controller
             // Processo - Fim'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
             // Desbloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            SuporteFacade::desbloquearTabelaRegistro('materiais_movimentacoes');
+            SuporteFacade::desbloquearTabelaRegistro('produtos_movimentacoes');
 
             // Desbloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            SuporteFacade::desbloquearTabelaRegistro('materiais_entradas');
+            SuporteFacade::desbloquearTabelaRegistro('produtos_entradas');
 
             // Desbloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            SuporteFacade::desbloquearTabelaRegistro('materiais_entradas_itens');
+            SuporteFacade::desbloquearTabelaRegistro('produtos_entradas_itens');
 
             // Retorno
             if ($retorno == 1) {return $this->sendResponse('Registro não encontrado.', 4040, null, null);}
@@ -234,36 +234,36 @@ class MaterialControleSituacaoController extends Controller
 
 
         //Registros
-        $registros = MaterialEntradaItem
-            ::join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
-            ->join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
-            ->join('material_situacoes', 'material_situacoes.id', 'materiais_entradas_itens.material_situacao_id')
-            ->join('estoques_locais', 'estoques_locais.id', 'materiais_entradas_itens.estoque_local_id')
+        $registros = ProdutoEntradaItem
+            ::join('produtos', 'produtos.id', 'produtos_entradas_itens.produto_id')
+            ->join('produto_categorias', 'produto_categorias.id', 'produtos.produto_categoria_id')
+            ->join('produto_situacoes', 'produto_situacoes.id', 'produtos_entradas_itens.produto_situacao_id')
+            ->join('estoques_locais', 'estoques_locais.id', 'produtos_entradas_itens.estoque_local_id')
             ->join('estoques', 'estoques.id', 'estoques_locais.estoque_id')
             ->leftjoin('empresas', 'empresas.id', 'estoques_locais.empresa_id')
             ->leftjoin('clientes', 'clientes.id', 'estoques_locais.cliente_id')
             ->select(
-                'materiais.name as material_nome',
-                'materiais.descricao as material_descricao',
-                'materiais.fotografia',
-                'materiais.ca',
+                'produtos.name as produto_nome',
+                'produtos.descricao as produto_descricao',
+                'produtos.fotografia',
+                'produtos.ca',
 
-                'material_categorias.name as material_categoria',
+                'produto_categorias.name as produto_categoria',
 
-                'materiais_entradas_itens.id',
-                'materiais_entradas_itens.material_numero_patrimonio as numero_patrimonio',
+                'produtos_entradas_itens.id',
+                'produtos_entradas_itens.produto_numero_patrimonio as numero_patrimonio',
 
-                'estoques.id as material_estoque_id',
-                'estoques.name as material_estoque_nome',
+                'estoques.id as produto_estoque_id',
+                'estoques.name as produto_estoque_nome',
 
-                'estoques_locais.name as material_local',
+                'estoques_locais.name as produto_local',
                 'estoques_locais.estoque_id',
 
-                'material_situacoes.id as material_situacao_id',
-                'material_situacoes.name as material_situacao',
+                'produto_situacoes.id as produto_situacao_id',
+                'produto_situacoes.name as produto_situacao',
 
-                'empresas.name as material_local_empresa',
-                'clientes.name as material_local_cliente'
+                'empresas.name as produto_local_empresa',
+                'clientes.name as produto_local_cliente'
             )
             ->where(function($query) use($filtros) {
                 //Variavel para controle
@@ -307,7 +307,7 @@ class MaterialControleSituacaoController extends Controller
                     $indexCampo = $indexCampo + 4;
                 }
             })
-            ->orderby('materiais.name')
+            ->orderby('produtos.name')
             ->get();
 
         //Código SQL Bruto

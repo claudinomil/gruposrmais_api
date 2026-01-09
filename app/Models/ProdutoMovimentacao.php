@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
-class MaterialMovimentacao extends Model
+class ProdutoMovimentacao extends Model
 {
     use HasFactory;
 
-    protected $table = 'materiais_movimentacoes';
+    protected $table = 'produtos_movimentacoes';
 
     protected $fillable = [
         'origem_estoque_local_id',

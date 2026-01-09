@@ -2,36 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Facades\SuporteFacade;
-use App\Http\Requests\MaterialEntradaStoreRequest;
-use App\Http\Requests\MaterialEntradaUpdateRequest;
-use App\Models\EstoqueLocal;
-use App\Models\Fornecedor;
-use App\Models\Material;
-use App\Models\MaterialEntrada;
-use App\Models\MaterialEntradaItem;
-use App\Models\MaterialMovimentacao;
-use App\Models\MaterialMovimentacaoItem;
+use App\Http\Requests\ProdutoStoreRequest;
+use App\Http\Requests\ProdutoUpdateRequest;
+use App\Models\Cor;
+use App\Models\Produto;
+use App\Models\ProdutoCategoria;
 use Illuminate\Http\Request;
 
-class MaterialEntradaController extends Controller
+class ProdutoController extends Controller
 {
-    private $material_entrada;
+    private $produto;
 
-    public function __construct(MaterialEntrada $material_entrada)
+    public function __construct(Produto $produto)
     {
-        $this->material_entrada = $material_entrada;
+        $this->produto = $produto;
     }
 
-    public function index(Request $request)
+    public function index()
     {
-        $empresa_id = $request->header('X-Empresa-Id');
-
-        $registros = $this->material_entrada
-        ->with('materiais_entradas_itens') // carrega todos os itens relacionados
-        ->join('fornecedores', 'fornecedores.id', 'materiais_entradas.fornecedor_id')
-        ->select('materiais_entradas.*', 'fornecedores.name as fornecedorName')
-        ->where('materiais_entradas.empresa_id', $empresa_id)
+        $registros = $this->produto
+        ->join('produto_categorias', 'produto_categorias.id', 'produtos.produto_categoria_id')
+        ->select('produtos.*', 'produto_categorias.name as produtoCategoriaName')
+        ->orderby('name')
         ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
@@ -40,14 +32,11 @@ class MaterialEntradaController extends Controller
     public function show($id)
     {
         try {
-            $registro = $this->material_entrada->find($id);
+            $registro = $this->produto->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, []);
             } else {
-                // Materiais Entradas Itens
-                $registro['material_entrada_itens'] = MaterialEntradaItem::where('material_entrada_id', '=', $id)->get();
-
                 return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
             }
         } catch (\Exception $e) {
@@ -59,32 +48,16 @@ class MaterialEntradaController extends Controller
         }
     }
 
-    public function auxiliary(Request $request)
+    public function auxiliary()
     {
         try {
             $registros = array();
 
-            // Empresa ID no $request
-            $empresa_id = $request->header('X-Empresa-Id');
+            //Categorias
+            $registros['produto_categorias'] = ProdutoCategoria::orderby('name')->get();
 
-            // Fornecedores
-            $registros['fornecedores'] = Fornecedor::orderby('name')->get();
-
-            //Materiais (com Categorias)
-            $registros['materiais'] = Material
-                ::join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
-                ->select('materiais.*', 'material_categorias.name as materialCategoriaName')
-                ->orderby('material_categorias.name')
-                ->orderby('materiais.name')
-                ->get();
-
-            // Estoques Locais
-            $registros['estoques_locais'] = EstoqueLocal
-                ::leftjoin('empresas', 'empresas.id', 'estoques_locais.empresa_id')
-                ->select('estoques_locais.*', 'empresas.name as empresaName')
-                ->where('estoques_locais.empresa_id', $empresa_id)
-                ->orderby('estoques_locais.name')
-                ->get();
+            // Cores
+            $registros['cores'] = Cor::orderby('name')->get();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -96,25 +69,13 @@ class MaterialEntradaController extends Controller
         }
     }
 
-    public function store(MaterialEntradaStoreRequest $request)
+    public function store(ProdutoStoreRequest $request)
     {
         try {
-            // Empresa ID no $request
-            $empresa_id = $request->header('X-Empresa-Id');
-
-            // Merge no request
-            $request->merge(['empresa_id' => $empresa_id]);
-
-            // Dispara validação customizada (lança ValidationException se houver erro)
-            SuporteFacade::validarPatrimoniosDuplicados($request);
-
             //Incluindo registro
-            $registro = $this->material_entrada->create($request->all());
+            $this->produto->create($request->all());
 
-            //Editar dados na tabela materiais_entradas_itens
-            SuporteFacade::editMaterialEntradaItem(1, $registro['id'], $request);
-
-            return $this->sendResponse('Registro criado com sucesso.', 2010, null, 'null');
+            return $this->sendResponse('Registro criado com sucesso.', 2010, null, null);
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return $this->sendResponse($e->getMessage(), 5000, null, null);
@@ -124,19 +85,16 @@ class MaterialEntradaController extends Controller
         }
     }
 
-    public function update(MaterialEntradaUpdateRequest $request, $id)
+    public function update(ProdutoUpdateRequest $request, $id)
     {
         try {
-            $registro = $this->material_entrada->find($id);
+            $registro = $this->produto->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
                 //Alterando registro
                 $registro->update($request->all());
-
-                //Editar dados na tabela materiais_entradas_itens
-                SuporteFacade::editMaterialEntradaItem(3, $registro['id'], $request);
 
                 return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
             }
@@ -152,16 +110,13 @@ class MaterialEntradaController extends Controller
     public function destroy($id)
     {
         try {
-            $registro = $this->material_entrada->find($id);
+            $registro = $this->produto->find($id);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-                //Editar dados na tabela materiais_entradas_itens
-                SuporteFacade::editMaterialEntradaItem(2, $registro['id'], '');
 
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 $registro->delete();
@@ -188,8 +143,8 @@ class MaterialEntradaController extends Controller
 
 
         //Registros
-        $registros = $this->material_entrada
-            ->select(['materiais_entradas.*'])
+        $registros = $this->produto
+            ->select(['produtos.*'])
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;
@@ -245,14 +200,15 @@ class MaterialEntradaController extends Controller
         try {
             $registro = array();
 
-            // Material Entrada
-            $material_entrada = MaterialEntrada
-                ::join('empresas', 'empresas.id', '=', 'materiais_entradas.empresa_id')
-                ->select(['materiais_entradas.*', 'empresas.name as empresaName'])
-                ->where('materiais_entradas.id', '=', $id)
+            // Produto
+            $produto = Produto
+                ::Join('produto_categorias', 'produto_categorias.id', '=', 'produtos.produto_categoria_id')
+                ->leftJoin('cores', 'cores.id', '=', 'produtos.cor_id')
+                ->select(['produtos.*', 'produto_categorias.name as produtoCategoriaName', 'cores.name as corName'])
+                ->where('produtos.id', '=', $id)
                 ->get();
 
-            $registro['material_entrada'] = $material_entrada[0];
+            $registro['produto'] = $produto[0];
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
         } catch (\Exception $e) {
@@ -264,82 +220,20 @@ class MaterialEntradaController extends Controller
         }
     }
 
-    public function upload_nota_fiscal(Request $request)
+    public function upload_fotografia(Request $request)
     {
         try {
-            $registro = $this->material_entrada->find($request['material_entrada_id']);
+            $registro = $this->produto->find($request['produto_id']);
 
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
                 //Alterando registro
-                $registro->nf_pdf_caminho = $request['nf_pdf_caminho'];
+                $registro->fotografia = $request['fotografia'];
                 $registro->save();
 
                 return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
             }
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return $this->sendResponse($e->getMessage(), 5000, null, null);
-            }
-
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-        }
-    }
-
-    public function executar_entrada($id)
-    {
-        try {
-            // Material Entrada
-            $material_entrada = MaterialEntrada::find($id);
-
-            // Material Entrada Itens
-            $material_entrada_itens = MaterialEntradaItem::where('material_entrada_id', $id)->get();
-
-            // Dados
-            $data = array();
-            $data['origem_estoque_local_id'] = $material_entrada->estoque_local_id;
-            $data['destino_estoque_local_id'] = $material_entrada->estoque_local_id;
-            $data['data_movimentacao'] = date('d/m/Y');
-            $data['hora_movimentacao'] = date('H:i:s');
-            $data['tipo'] = 'entrada';
-
-            // Incluir na tabela materiais_movimentacoes
-            $registro = MaterialMovimentacao::create($data);
-
-            // Estoque Local de Destino
-            $destino_estoque_local_id = $material_entrada->estoque_local_id;
-
-            // Material Situação
-            $material_situacao_id = 1; // ATIVO - permite movimentação
-
-            // Edições
-            if (isset($material_entrada_itens)) {
-                foreach ($material_entrada_itens as $material_entrada_item) {
-                    // Incluir na tabela materiais_movimentacoes_itens
-                    MaterialMovimentacaoItem::create(['material_movimentacao_id' => $registro['id'], 'material_entrada_item_id' => $material_entrada_item['id']]);
-
-                    // Alterar tabela materiais_entradas_itens
-                    MaterialEntradaItem::where('id', $material_entrada_item['id'])->update(['estoque_local_id' => $destino_estoque_local_id, 'material_situacao_id' => $material_situacao_id]);
-
-                    // Criar registro na tabela materiais_controle_situacoes_itens
-                    SuporteFacade::gravarRegistroControleSituacao(
-                        $material_entrada_item['id'],
-                        $material_entrada_item['material_situacao_id'],
-                        $material_situacao_id,
-                        $material_entrada_item['estoque_local_id'],
-                        $destino_estoque_local_id,
-                        'Registro criado ao Executar Entrada',
-                        date('d/m/Y'),
-                        date('H:i:s')
-                    );
-                }
-            }
-
-            // Alterar tabela materiais_entradas
-            MaterialEntrada::where('id', $id)->update(['executada' => 1]);
-
-            return $this->sendResponse('Registro criado com sucesso.', 2010, null, null);
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return $this->sendResponse($e->getMessage(), 5000, null, null);

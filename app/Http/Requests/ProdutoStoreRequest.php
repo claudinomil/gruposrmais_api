@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class MaterialUpdateRequest extends FormRequest
+class ProdutoStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,19 +24,15 @@ class MaterialUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'material_categoria_id' => ['required'],
-            'name' => [
-                'required',
-                'min:3',
-                Rule::unique('materiais')->ignore($this->id),
-                ]
+            'produto_categoria_id' => ['required'],
+            'name' => ['required', 'min:3', 'unique:produtos']
         ];
     }
 
     public function messages()
     {
         return [
-            'material_categoria_id.required' => 'A Categoria é requerido.',
+            'produto_categoria_id.required' => 'A Categoria é requerido.',
             'name.required' => 'O Nome é requerido.',
             'name.min' => 'O Nome deve ter pelo menos 3 caracteres.',
             'name.unique' => 'O Nome já existe.'

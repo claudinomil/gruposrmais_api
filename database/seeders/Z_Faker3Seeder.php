@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\MaterialEntrada;
-use App\Models\MaterialEntradaItem;
+use App\Models\ProdutoEntrada;
+use App\Models\ProdutoEntradaItem;
 use App\Models\PontoInteresse;
 use App\Models\PontoInteresseEspecialidade;
 use Illuminate\Database\Seeder;
@@ -14,11 +14,11 @@ class Z_Faker3Seeder extends Seeder
     {
         $faker = \Faker\Factory::create('pt_BR');
 
-        // Dar entradas em materiais (Entradas / Movimentações)'''''''''''''''''''''''''''''''''''''''''''''''''''
+        // Dar entradas em produtos (Entradas / Movimentações)'''''''''''''''''''''''''''''''''''''''''''''''''''
         $numero_patrimonio = 1234;
 
         for($i=1; $i<=5; $i++) {
-            MaterialEntrada::create([
+            ProdutoEntrada::create([
                 'id' => $i,
                 'empresa_id' => 1,
                 'fornecedor_id' => $i,
@@ -33,106 +33,106 @@ class Z_Faker3Seeder extends Seeder
 
             //xxxyyywww
             $numero_patrimonio++;
-            MaterialEntradaItem::create([
-                'material_entrada_id' => $i,
-                'material_id' => 1,
-                'material_categoria_name' => 'Equipamentos de Proteção Individual',
-                'material_name' => 'Capacete',
-                'material_numero_patrimonio' => '0'.$numero_patrimonio,
-                'material_valor_unitario' => 40,
+            ProdutoEntradaItem::create([
+                'produto_entrada_id' => $i,
+                'produto_id' => 1,
+                'produto_categoria_name' => 'Equipamentos de Proteção Individual',
+                'produto_name' => 'Capacete',
+                'produto_numero_patrimonio' => '0'.$numero_patrimonio,
+                'produto_valor_unitario' => 40,
                 'estoque_local_id' => 1,
-                'material_situacao_id' => 10
+                'produto_situacao_id' => 10
             ]);
 
             //xxxyyywww
             $numero_patrimonio++;
-            MaterialEntradaItem::create([
-                'material_entrada_id' => $i,
-                'material_id' => 2,
-                'material_categoria_name' => 'Equipamentos de Proteção Individual',
-                'material_name' => 'Luvas',
-                'material_numero_patrimonio' => '0'.$numero_patrimonio,
-                'material_valor_unitario' => 40,
+            ProdutoEntradaItem::create([
+                'produto_entrada_id' => $i,
+                'produto_id' => 2,
+                'produto_categoria_name' => 'Equipamentos de Proteção Individual',
+                'produto_name' => 'Luvas',
+                'produto_numero_patrimonio' => '0'.$numero_patrimonio,
+                'produto_valor_unitario' => 40,
                 'estoque_local_id' => 1,
-                'material_situacao_id' => 10
+                'produto_situacao_id' => 10
             ]);
 
             //xxxyyywww
             $numero_patrimonio++;
-            MaterialEntradaItem::create([
-                'material_entrada_id' => $i,
-                'material_id' => 3,
-                'material_categoria_name' => 'Equipamentos de Proteção Individual',
-                'material_name' => 'Coturno',
-                'material_numero_patrimonio' => '0'.$numero_patrimonio,
-                'material_valor_unitario' => 40,
+            ProdutoEntradaItem::create([
+                'produto_entrada_id' => $i,
+                'produto_id' => 3,
+                'produto_categoria_name' => 'Equipamentos de Proteção Individual',
+                'produto_name' => 'Coturno',
+                'produto_numero_patrimonio' => '0'.$numero_patrimonio,
+                'produto_valor_unitario' => 40,
                 'estoque_local_id' => 1,
-                'material_situacao_id' => 10
+                'produto_situacao_id' => 10
             ]);
 
             //xxxyyywww
             $numero_patrimonio++;
-            MaterialEntradaItem::create([
-                'material_entrada_id' => $i,
-                'material_id' => 4,
-                'material_categoria_name' => 'Equipamentos de Proteção Individual',
-                'material_name' => 'Máscara',
-                'material_numero_patrimonio' => '0'.$numero_patrimonio,
-                'material_valor_unitario' => 40,
+            ProdutoEntradaItem::create([
+                'produto_entrada_id' => $i,
+                'produto_id' => 4,
+                'produto_categoria_name' => 'Equipamentos de Proteção Individual',
+                'produto_name' => 'Máscara',
+                'produto_numero_patrimonio' => '0'.$numero_patrimonio,
+                'produto_valor_unitario' => 40,
                 'estoque_local_id' => 1,
-                'material_situacao_id' => 10
+                'produto_situacao_id' => 10
             ]);
 
             //xxxyyywww
             $numero_patrimonio++;
-            MaterialEntradaItem::create([
-                'material_entrada_id' => $i,
-                'material_id' => 5,
-                'material_categoria_name' => 'Equipamentos de Proteção Individual',
-                'material_name' => 'Óculos',
-                'material_numero_patrimonio' => '0'.$numero_patrimonio,
-                'material_valor_unitario' => 40,
+            ProdutoEntradaItem::create([
+                'produto_entrada_id' => $i,
+                'produto_id' => 5,
+                'produto_categoria_name' => 'Equipamentos de Proteção Individual',
+                'produto_name' => 'Óculos',
+                'produto_numero_patrimonio' => '0'.$numero_patrimonio,
+                'produto_valor_unitario' => 40,
                 'estoque_local_id' => 1,
-                'material_situacao_id' => 10
+                'produto_situacao_id' => 10
             ]);
 
             //xxxyyywww
             $numero_patrimonio++;
-            MaterialEntradaItem::create([
-                'material_entrada_id' => $i,
-                'material_id' => 6,
-                'material_categoria_name' => 'Equipamentos de Proteção Individual',
-                'material_name' => 'Extintor (PQS)',
-                'material_numero_patrimonio' => '0'.$numero_patrimonio,
-                'material_valor_unitario' => 40,
+            ProdutoEntradaItem::create([
+                'produto_entrada_id' => $i,
+                'produto_id' => 6,
+                'produto_categoria_name' => 'Equipamentos de Proteção Individual',
+                'produto_name' => 'Extintor (PQS)',
+                'produto_numero_patrimonio' => '0'.$numero_patrimonio,
+                'produto_valor_unitario' => 40,
                 'estoque_local_id' => 1,
-                'material_situacao_id' => 10
+                'produto_situacao_id' => 10
             ]);
 
             //xxxyyywww
             $numero_patrimonio++;
-            MaterialEntradaItem::create([
-                'material_entrada_id' => $i,
-                'material_id' => 7,
-                'material_categoria_name' => 'Equipamentos de Combate a Incêndio',
-                'material_name' => 'Extintor (CO₂)',
-                'material_numero_patrimonio' => '0'.$numero_patrimonio,
-                'material_valor_unitario' => 40,
+            ProdutoEntradaItem::create([
+                'produto_entrada_id' => $i,
+                'produto_id' => 7,
+                'produto_categoria_name' => 'Equipamentos de Combate a Incêndio',
+                'produto_name' => 'Extintor (CO₂)',
+                'produto_numero_patrimonio' => '0'.$numero_patrimonio,
+                'produto_valor_unitario' => 40,
                 'estoque_local_id' => 1,
-                'material_situacao_id' => 10
+                'produto_situacao_id' => 10
             ]);
 
             //xxxyyywww
             $numero_patrimonio++;
-            MaterialEntradaItem::create([
-                'material_entrada_id' => $i,
-                'material_id' => 8,
-                'material_categoria_name' => 'Equipamentos de Combate a Incêndio',
-                'material_name' => 'Extintor (água)',
-                'material_numero_patrimonio' => '0'.$numero_patrimonio,
-                'material_valor_unitario' => 40,
+            ProdutoEntradaItem::create([
+                'produto_entrada_id' => $i,
+                'produto_id' => 8,
+                'produto_categoria_name' => 'Equipamentos de Combate a Incêndio',
+                'produto_name' => 'Extintor (água)',
+                'produto_numero_patrimonio' => '0'.$numero_patrimonio,
+                'produto_valor_unitario' => 40,
                 'estoque_local_id' => 1,
-                'material_situacao_id' => 10
+                'produto_situacao_id' => 10
             ]);
         }
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

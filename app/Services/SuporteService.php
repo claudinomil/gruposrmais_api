@@ -6,11 +6,11 @@ use App\Facades\Transacoes;
 use App\Models\BlockTableOrRecord;
 use App\Models\BrigadaIncendioEscala;
 use App\Models\BrigadaIncendioEscalaBrigadista;
-use App\Models\BrigadaIncendioMaterial;
+use App\Models\BrigadaIncendioProduto;
 use App\Models\ClienteSegurancaMedida;
 use App\Models\Especialidade;
-use App\Models\MaterialControleSituacaoItem;
-use App\Models\MaterialEntradaItem;
+use App\Models\ProdutoControleSituacaoItem;
+use App\Models\ProdutoEntradaItem;
 use App\Models\OrdemServicoDestino;
 use App\Models\OrdemServicoEquipe;
 use App\Models\OrdemServicoExecutivo;
@@ -187,33 +187,33 @@ class SuporteService
     }
 
     /*
-     * Editar dados na tabela brigadasIncendios_materiais
+     * Editar dados na tabela brigadasIncendios_produtos
      *
      * @PARAM op : 1(Incluir)  2(Excluir)  3(Alterar)
      */
-    public function editBrigadaIncendioMaterial($op, $brigada_incendio_id, $request)
+    public function editBrigadaIncendioProduto($op, $brigada_incendio_id, $request)
     {
-        // Array de Materiais Atuais ()chave pelo material_id para facilitar comparação)
-        $materiaisAtuais = BrigadaIncendioMaterial::where('brigada_incendio_id', $brigada_incendio_id)->get()->keyBy('material_id');
+        // Array de Materiais Atuais ()chave pelo produto_id para facilitar comparação)
+        $produtosAtuais = BrigadaIncendioProduto::where('brigada_incendio_id', $brigada_incendio_id)->get()->keyBy('produto_id');
 
         // Array de Materiais Recebidos
-        $materiaisRecebidos = [];
+        $produtosRecebidos = [];
 
         if ($op == 1 || $op == 3) {
-            foreach ($request['mat_material_id'] ?? [] as $i => $material_id) {
-                $materiaisRecebidos[$material_id] = [
+            foreach ($request['pro_produto_id'] ?? [] as $i => $produto_id) {
+                $produtosRecebidos[$produto_id] = [
                     'brigada_incendio_id'    => $brigada_incendio_id,
-                    'material_id'            => $material_id,
-                    'material_categoria_name'=> $request['mat_material_categoria_name'][$i] ?? null,
-                    'material_name'          => $request['mat_material_name'][$i] ?? null,
-                    'material_quantidade'    => $request['mat_material_quantidade'][$i] ?? null,
+                    'produto_id'            => $produto_id,
+                    'produto_categoria_name'=> $request['pro_produto_categoria_name'][$i] ?? null,
+                    'produto_name'          => $request['pro_produto_name'][$i] ?? null,
+                    'produto_quantidade'    => $request['pro_produto_quantidade'][$i] ?? null,
                 ];
             }
         }
 
         // Varrer Materiais Atuais e excluir os que não existem mais
-        foreach ($materiaisAtuais as $material_id => $registro) {
-            if (!isset($materiaisRecebidos[$material_id]) && ($op == 2 || $op == 3)) {
+        foreach ($produtosAtuais as $produto_id => $registro) {
+            if (!isset($produtosRecebidos[$produto_id]) && ($op == 2 || $op == 3)) {
                 $dadosAnterior = $registro->toArray();
                 $registro->delete();
                 Transacoes::transacaoRecord(2, 3, 'brigadas_incendios', $dadosAnterior, $dadosAnterior);
@@ -221,10 +221,10 @@ class SuporteService
         }
 
         // Varrer Materiais Recebidos e inserir ou atualizar os que chegaram
-        foreach ($materiaisRecebidos as $material_id => $dadosAtual) {
-            if (isset($materiaisAtuais[$material_id])) {
+        foreach ($produtosRecebidos as $produto_id => $dadosAtual) {
+            if (isset($produtosAtuais[$produto_id])) {
                 // Atualizar somente se houve mudança
-                $registro = $materiaisAtuais[$material_id];
+                $registro = $produtosAtuais[$produto_id];
                 $dadosAnterior = $registro->toArray();
 
                 $registro->update($dadosAtual);
@@ -232,7 +232,7 @@ class SuporteService
                 Transacoes::transacaoRecord(2, 2, 'brigadas_incendios', $dadosAnterior, $dadosAtual);
             } else {
                 // Inserir novo
-                BrigadaIncendioMaterial::create($dadosAtual);
+                BrigadaIncendioProduto::create($dadosAtual);
 
                 Transacoes::transacaoRecord(2, 1, 'brigadas_incendios', $dadosAtual, $dadosAtual);
             }
@@ -460,70 +460,72 @@ class SuporteService
     }
 
     /*
-     * Editar dados na tabela materiais_entradas_itens
+     * Editar dados na tabela produtos_entradas_itens
      *
      * @PARAM op : 1(Incluir)  2(Excluir)  3(Alterar)
      */
-    public function editMaterialEntradaItem($op, $material_entrada_id, $request)
+    public function editProdutoEntradaItem($op, $produto_entrada_id, $request)
     {
         // Buscar todos os itens atuais da entrada
-        $materiaisAtuais = MaterialEntradaItem::where('material_entrada_id', $material_entrada_id)->get();
-        $materiaisAtuaisPorId = $materiaisAtuais->keyBy('id');
+        $produtosAtuais = ProdutoEntradaItem::where('produto_entrada_id', $produto_entrada_id)->get();
+        $produtosAtuaisPorId = $produtosAtuais->keyBy('id');
 
         // Montar array de itens recebidos do request
-        $materiaisRecebidos = [];
+        $produtosRecebidos = [];
 
         if (in_array($op, [1, 3])) {
-            foreach ($request['mat_material_id'] ?? [] as $i => $material_id) {
-                $materiaisRecebidos[] = [
-                    'id'                            => $request['mat_material_item_id'][$i] ?? null, // ID real do item (ou null se novo)
-                    'material_entrada_id'           => $material_entrada_id,
-                    'material_id'                   => $material_id,
-                    'material_categoria_name'       => $request['mat_material_categoria_name'][$i] ?? null,
-                    'material_name'                 => $request['mat_material_name'][$i] ?? null,
-                    'material_numero_patrimonio'    => $request['mat_material_numero_patrimonio'][$i] ?? null,
-                    'material_valor_unitario'       => $request['mat_material_valor_unitario'][$i] ?? null,
-                    'estoque_local_id'              => $request['estoque_local_id'],
+            foreach ($request['pro_produto_id'] ?? [] as $i => $produto_id) {
+                $produtosRecebidos[] = [
+                    'id'                        => $request['pro_produto_item_id'][$i] ?? null, // ID real do item (ou null se novo)
+                    'produto_entrada_id'        => $produto_entrada_id,
+                    'produto_id'                => $produto_id,
+                    'produto_categoria_name'    => $request['pro_produto_categoria_name'][$i] ?? null,
+                    'produto_name'              => $request['pro_produto_name'][$i] ?? null,
+                    'produto_tipo_id'           => $request['pro_produto_tipo_id'][$i] ?? null,
+                    'produto_tipo_name'         => $request['pro_produto_tipo_name'][$i] ?? null,
+                    'produto_numero_patrimonio' => $request['pro_produto_numero_patrimonio'][$i] ?? null,
+                    'produto_valor_unitario'    => $request['pro_produto_valor_unitario'][$i] ?? null,
+                    'estoque_local_id'          => $request['estoque_local_id'],
                 ];
             }
         }
 
         // IDs recebidos do frontend
-        $idsRecebidos = collect($materiaisRecebidos)
+        $idsRecebidos = collect($produtosRecebidos)
             ->pluck('id')
             ->filter()
             ->toArray();
 
         // 1. Excluir registros que foram removidos da tela
         if (in_array($op, [2, 3])) {
-            foreach ($materiaisAtuais as $registro) {
+            foreach ($produtosAtuais as $registro) {
                 if (!in_array($registro->id, $idsRecebidos)) {
                     $dadosAnterior = $registro->toArray();
                     $registro->delete();
 
-                    Transacoes::transacaoRecord(2, 3, 'materiais_entradas', $dadosAnterior, $dadosAnterior);
+                    Transacoes::transacaoRecord(2, 3, 'produtos_entradas', $dadosAnterior, $dadosAnterior);
                 }
             }
         }
 
         // 2. Inserir ou atualizar registros recebidos
-        foreach ($materiaisRecebidos as $dadosAtual) {
+        foreach ($produtosRecebidos as $dadosAtual) {
             // UPDATE — manter o mesmo ID
-            if (!empty($dadosAtual['id']) && isset($materiaisAtuaisPorId[$dadosAtual['id']])) {
-                $registro = $materiaisAtuaisPorId[$dadosAtual['id']];
+            if (!empty($dadosAtual['id']) && isset($produtosAtuaisPorId[$dadosAtual['id']])) {
+                $registro = $produtosAtuaisPorId[$dadosAtual['id']];
                 $dadosAnterior = $registro->toArray();
 
                 // Atualiza apenas se algo mudou
-                if ($this->editMaterialEntradaItemDadosDiferentes($registro, $dadosAtual)) {
+                if ($this->editProdutoEntradaItemDadosDiferentes($registro, $dadosAtual)) {
                     $registro->update($dadosAtual);
-                    Transacoes::transacaoRecord(2, 2, 'materiais_entradas', $dadosAnterior, $dadosAtual);
+                    Transacoes::transacaoRecord(2, 2, 'produtos_entradas', $dadosAnterior, $dadosAtual);
                 }
             }
 
             // INSERT — novo item sem ID
             else {
-                $novo = MaterialEntradaItem::create($dadosAtual);
-                Transacoes::transacaoRecord(2, 1, 'materiais_entradas', $dadosAtual, $novo->toArray());
+                $novo = ProdutoEntradaItem::create($dadosAtual);
+                Transacoes::transacaoRecord(2, 1, 'produtos_entradas', $dadosAtual, $novo->toArray());
             }
         }
     }
@@ -532,7 +534,7 @@ class SuporteService
      * Função auxiliar para detectar alterações entre o registro e o array atual.
      * Evita update desnecessário.
      */
-    private function editMaterialEntradaItemDadosDiferentes($registro, $dados)
+    private function editProdutoEntradaItemDadosDiferentes($registro, $dados)
     {
         foreach ($dados as $campo => $valor) {
             if ($campo === 'id') {
@@ -546,30 +548,30 @@ class SuporteService
     }
 
     /*
-     * Verificar se existe numero_patrimonio antes de editar dados na tabela materiais_entradas_itens
+     * Verificar se existe numero_patrimonio antes de editar dados na tabela produtos_entradas_itens
      */
-    public function validarPatrimoniosDuplicados($request, $material_entrada_id = null)
+    public function validarPatrimoniosDuplicados($request, $produto_entrada_id = null)
     {
-        $patrimonios = array_filter($request['mat_material_numero_patrimonio'] ?? []);
+        $patrimonios = array_filter($request['pro_produto_numero_patrimonio'] ?? []);
 
         if (empty($patrimonios)) {
             return; // nada a validar
         }
 
         // Buscar duplicados já existentes em outras entradas
-        $query = MaterialEntradaItem::whereIn('material_numero_patrimonio', $patrimonios);
+        $query = ProdutoEntradaItem::whereIn('produto_numero_patrimonio', $patrimonios);
 
-        if ($material_entrada_id) {
-            $query->where('material_entrada_id', '!=', $material_entrada_id);
+        if ($produto_entrada_id) {
+            $query->where('produto_entrada_id', '!=', $produto_entrada_id);
         }
 
-        $duplicados = $query->pluck('material_numero_patrimonio')->toArray();
+        $duplicados = $query->pluck('produto_numero_patrimonio')->toArray();
 
         if (!empty($duplicados)) {
             // Monta mensagem de validação no formato do Laravel
             $mensagem = [];
             foreach ($duplicados as $pat) {
-                $mensagem["mat_material_numero_patrimonio"][] = "O número de patrimônio '{$pat}' já está cadastrado.";
+                $mensagem["pro_produto_numero_patrimonio"][] = "O número de patrimônio '{$pat}' já está cadastrado.";
             }
 
             // Lança ValidationException (Laravel trata automaticamente)
@@ -1073,13 +1075,13 @@ class SuporteService
             ->delete();
     }
 
-    // Criar registro na tabela materiais_controle_situacoes_itens
-    public static function gravarRegistroControleSituacao($material_entrada_item_id, $anterior_material_situacao_id, $atual_material_situacao_id, $anterior_estoque_local_id, $atual_estoque_local_id, $observacao, $data_alteracao, $hora_alteracao)
+    // Criar registro na tabela produtos_controle_situacoes_itens
+    public static function gravarRegistroControleSituacao($produto_entrada_item_id, $anterior_produto_situacao_id, $atual_produto_situacao_id, $anterior_estoque_local_id, $atual_estoque_local_id, $observacao, $data_alteracao, $hora_alteracao)
     {
-        MaterialControleSituacaoItem::create([
-            'material_entrada_item_id' => $material_entrada_item_id,
-            'anterior_material_situacao_id' => $anterior_material_situacao_id,
-            'atual_material_situacao_id' => $atual_material_situacao_id,
+        ProdutoControleSituacaoItem::create([
+            'produto_entrada_item_id' => $produto_entrada_item_id,
+            'anterior_produto_situacao_id' => $anterior_produto_situacao_id,
+            'atual_produto_situacao_id' => $atual_produto_situacao_id,
             'anterior_estoque_local_id' => $anterior_estoque_local_id,
             'atual_estoque_local_id' => $atual_estoque_local_id,
             'observacao' => $observacao,

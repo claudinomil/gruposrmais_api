@@ -5,19 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Material extends Model
+class ProdutoCategoria extends Model
 {
     use HasFactory;
 
-    protected $table = 'materiais';
+    protected $table = 'produto_categorias';
 
     protected $fillable = [
-        'material_categoria_id',
-        'name',
-        'descricao',
-        'fotografia',
-        'cor_id',
-        'ca'
+        'name'
     ];
 
     public function setNameAttribute($value) {$this->attributes['name'] = mb_strtoupper($value);}

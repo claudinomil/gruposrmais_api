@@ -9,7 +9,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('materiais', function (Blueprint $table) {
-            $table->string('fotografia')->default('build/assets/images/materiais/material-0.png');
+            $table->string('fotografia')->default('build/assets/images/produtos/produto-0.png');
             $table->foreignId('cor_id')->nullable()->constrained('cores');
             $table->string('ca', 20)->nullable();
         });

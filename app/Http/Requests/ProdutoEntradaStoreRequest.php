@@ -3,11 +3,10 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use App\Models\MaterialEntradaItem;
+use App\Models\ProdutoEntradaItem;
 
-class MaterialEntradaUpdateRequest extends FormRequest
+class ProdutoEntradaStoreRequest extends FormRequest
 {
     public function authorize()
     {
@@ -45,7 +44,7 @@ class MaterialEntradaUpdateRequest extends FormRequest
             'nf_numero.required'         => 'O número da Nota Fiscal é requerido.',
             'nf_serie.required'          => 'A série da Nota Fiscal é requerida.',
             'data_emissao.required'      => 'A Data de Emissão é requerida.',
-            'data_emissao.date_format'          => 'A Data de Emissão é inválida.',
+            'data_emissao.date_format'   => 'A Data de Emissão é inválida.',
             'estoque_local_id.required'  => 'O Local de Estoque é requerido.',
             'valor_total.required'       => 'O Valor Total é requerido.',
             'valor_desconto.required'    => 'O Valor de Desconto é requerido.',
@@ -53,43 +52,43 @@ class MaterialEntradaUpdateRequest extends FormRequest
     }
 
     /**
-     * Verificação de patrimônios duplicados (internos e no banco)
+     * Validação adicional: verificar patrimônios duplicados
      */
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
             // Extrai todos os patrimônios enviados
-            $patrimonios = array_filter($this->input('mat_material_numero_patrimonio', []));
+            $patrimonios = array_filter($this->input('pro_produto_numero_patrimonio', []));
 
             if (empty($patrimonios)) {
                 return;
             }
 
-            // Verifica se algum patrimônio já existe em outra entrada (exceto a atual)
-            $query = MaterialEntradaItem::whereIn('material_numero_patrimonio', $patrimonios);
+            // Verifica se algum patrimônio já existe em outra entrada
+            $query = ProdutoEntradaItem::whereIn('produto_numero_patrimonio', $patrimonios);
 
-            // Ignora registros da própria entrada (para não acusar falso positivo)
-            $materialEntradaId = $this->route('id') ?? $this->input('id');
-            if ($materialEntradaId) {
-                $query->where('material_entrada_id', '!=', $materialEntradaId);
+            // Se for update, ignora os registros da mesma entrada
+            if ($this->route('id') ?? false) {
+                $query->where('produto_entrada_id', '!=', $this->route('id'));
             }
 
-            $duplicados = $query->pluck('material_numero_patrimonio')->toArray();
+            $duplicados = $query->pluck('produto_numero_patrimonio')->toArray();
 
-            // Verifica duplicados dentro do próprio request (itens repetidos no formulário)
+            // Verifica duplicados dentro do próprio request
             $internos = array_diff_assoc($patrimonios, array_unique($patrimonios));
 
             // Combina duplicados do banco e internos
             $todosDuplicados = array_unique(array_merge($duplicados, $internos));
 
             if (!empty($todosDuplicados)) {
-                // Monta uma mensagem única com quebras de linha
+                // Monta uma única mensagem com quebra de linha entre os patrimônios
                 $mensagem = "Os seguintes números de patrimônio já estão cadastrados:" . PHP_EOL;
                 foreach ($todosDuplicados as $pat) {
                     $mensagem .= "- {$pat}" . PHP_EOL;
                 }
 
-                $validator->errors()->add('mat_material_numero_patrimonio', trim($mensagem));
+                // Adiciona uma única entrada de erro com múltiplas linhas
+                $validator->errors()->add('pro_produto_numero_patrimonio', trim($mensagem));
             }
         });
     }

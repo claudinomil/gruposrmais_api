@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\GrupoPermissao;
 use Illuminate\Database\Seeder;
-use App\Models\MaterialSituacao;
+use App\Models\ProdutoSituacao;
 use App\Models\Permissao;
 use App\Models\Submodulo;
 

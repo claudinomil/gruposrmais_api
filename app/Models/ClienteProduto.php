@@ -6,16 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
-class ClienteMaterial extends Model
+class ClienteProduto extends Model
 {
     use HasFactory;
 
-    protected $table = 'clientes_materiais';
+    protected $table = 'clientes_produtos';
 
     protected $fillable = [
         'cliente_id',
         'cliente_local_id',
-        'material_id',
+        'produto_id',
         'quantidade',
         'data_entrada'
     ];

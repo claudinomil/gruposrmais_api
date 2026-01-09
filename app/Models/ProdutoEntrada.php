@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
-class MaterialEntrada extends Model
+class ProdutoEntrada extends Model
 {
     use HasFactory;
 
-    protected $table = 'materiais_entradas';
+    protected $table = 'produtos_entradas';
 
     protected $fillable = [
         'empresa_id',
@@ -41,14 +41,14 @@ class MaterialEntrada extends Model
         'data_emissao'
     ];
 
-    public function materiais_entradas_itens()
+    public function produtos_entradas_itens()
     {
-        return $this->hasMany(MaterialEntradaItem::class, 'material_entrada_id')
-        ->join('materiais', 'materiais.id', '=', 'materiais_entradas_itens.material_id')
+        return $this->hasMany(ProdutoEntradaItem::class, 'produto_entrada_id')
+        ->join('produtos', 'produtos.id', '=', 'produtos_entradas_itens.produto_id')
         ->select(
-            'materiais_entradas_itens.*',
-            'materiais.name as material_name',
-            'materiais.fotografia as material_fotografia'
+            'produtos_entradas_itens.*',
+            'produtos.name as produto_name',
+            'produtos.fotografia as produto_fotografia'
         );
 }
 

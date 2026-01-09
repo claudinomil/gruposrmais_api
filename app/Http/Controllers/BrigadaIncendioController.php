@@ -9,11 +9,11 @@ use App\Models\BrigadaIncendio;
 use App\Models\BrigadaIncendioEscala;
 use App\Models\BrigadaIncendioEscalaBrigadista;
 use App\Models\BrigadaIncendioEscalaGerada;
-use App\Models\BrigadaIncendioMaterial;
+use App\Models\BrigadaIncendioProduto;
 use App\Models\Cliente;
 use App\Models\EscalaTipo;
 use App\Models\Funcionario;
-use App\Models\Material;
+use App\Models\Produto;
 use Illuminate\Http\Request;
 
 class BrigadaIncendioController extends Controller
@@ -28,7 +28,7 @@ class BrigadaIncendioController extends Controller
     public function index(Request $request)
     {
         $empresa_id = $request->header('X-Empresa-Id');
-        
+
         $registros = $this->brigada_incendio
         ->join('clientes', 'clientes.id', 'brigadas_incendios.cliente_id')
         ->select('brigadas_incendios.*', 'clientes.name as clienteName')
@@ -47,7 +47,7 @@ class BrigadaIncendioController extends Controller
                 return $this->sendResponse('Registro não encontrado.', 4040, null, []);
             } else {
                 // Materiais da Brigada de Incêndio
-                $registro['brigada_incendio_materiais'] = BrigadaIncendioMaterial::where('brigada_incendio_id', '=', $id)->get();
+                $registro['brigada_incendio_produtos'] = BrigadaIncendioProduto::where('brigada_incendio_id', '=', $id)->get();
 
                 // Escalas da Brigada de Incêndio
                 $registro['brigada_incendio_escalas'] = BrigadaIncendioEscala::where('brigada_incendio_id', '=', $id)->get();
@@ -62,7 +62,7 @@ class BrigadaIncendioController extends Controller
 
                 // Escalas Geradas da Brigada de Incêndio
                 $registro['brigada_incendio_escalas_geradas'] = BrigadaIncendioEscalaGerada::where('brigada_incendio_id', '=', $id)->get();
-                
+
                 return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
             }
         } catch (\Exception $e) {
@@ -73,7 +73,7 @@ class BrigadaIncendioController extends Controller
             return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
         }
     }
-    
+
     public function auxiliary()
     {
         try {
@@ -83,11 +83,11 @@ class BrigadaIncendioController extends Controller
             $registros['clientes'] = Cliente::orderby('name')->get();
 
             //Materiais (com Categorias)
-            $registros['materiais'] = Material
-                ::join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
-                ->select('materiais.*', 'material_categorias.name as materialCategoriaName')
-                ->orderby('material_categorias.name')
-                ->orderby('materiais.name')
+            $registros['produtos'] = Produto
+                ::join('produto_categorias', 'produto_categorias.id', 'produtos.produto_categoria_id')
+                ->select('produtos.*', 'produto_categorias.name as produtoCategoriaName')
+                ->orderby('produto_categorias.name')
+                ->orderby('produtos.name')
                 ->get();
 
             // Escalas Tipos
@@ -102,7 +102,7 @@ class BrigadaIncendioController extends Controller
             return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
         }
     }
-    
+
     public function dados($op)
     {
         try {
@@ -112,7 +112,7 @@ class BrigadaIncendioController extends Controller
                 // Funcionários
                 $registros['funcionarios'] = Funcionario::select('id', 'name')->orderby('name')->get();
             }
-            
+
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -143,12 +143,12 @@ class BrigadaIncendioController extends Controller
                 'data_prevista' => date('d/m/Y'),
                 'hora_prevista' => date('H:i:s')
             ]);
-            
+
             //Incluindo registro
             $registro = $this->brigada_incendio->create($request->all());
 
-            //Editar dados na tabela brigadas_incendios_materiais
-            SuporteFacade::editBrigadaIncendioMaterial(1, $registro['id'], $request);
+            //Editar dados na tabela brigadas_incendios_produtos
+            SuporteFacade::editBrigadaIncendioProduto(1, $registro['id'], $request);
 
             //Editar dados na tabela brigadas_incendios_escalas
             SuporteFacade::editBrigadaIncendioEscala(1, $registro['id'], $request);
@@ -165,7 +165,7 @@ class BrigadaIncendioController extends Controller
             return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
         }
     }
-    
+
     public function update(BrigadaIncendioUpdateRequest $request, $id)
     {
         try {
@@ -177,8 +177,8 @@ class BrigadaIncendioController extends Controller
                 //Alterando registro
                 $registro->update($request->all());
 
-                //Editar dados na tabela brigadas_incendios_materiais
-                SuporteFacade::editBrigadaIncendioMaterial(3, $registro['id'], $request);
+                //Editar dados na tabela brigadas_incendios_produtos
+                SuporteFacade::editBrigadaIncendioProduto(3, $registro['id'], $request);
 
                 //Editar dados na tabela brigadas_incendios_escalas
                 SuporteFacade::editBrigadaIncendioEscala(3, $registro['id'], $request);
@@ -208,8 +208,8 @@ class BrigadaIncendioController extends Controller
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-                //Editar dados na tabela brigadas_incendios_materiais
-                SuporteFacade::editBrigadaIncendioMaterial(2, $registro['id'], '');
+                //Editar dados na tabela brigadas_incendios_produtos
+                SuporteFacade::editBrigadaIncendioProduto(2, $registro['id'], '');
 
                 //Editar dados na tabela brigadas_incendios_escalas
                 SuporteFacade::editBrigadaIncendioEscala(2, $registro['id'], '');

@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 
-class MaterialMovimentacaoStoreRequest extends FormRequest
+class ProdutoMovimentacaoStoreRequest extends FormRequest
 {
     public function authorize()
     {
@@ -17,7 +17,7 @@ class MaterialMovimentacaoStoreRequest extends FormRequest
         return [
             'origem_estoque_local_id' => ['required', 'integer', 'different:destino_estoque_local_id'],
             'destino_estoque_local_id' => ['required', 'integer', 'different:origem_estoque_local_id'],
-            'materiais_entradas_itens' => ['required', 'array', 'min:1']
+            'produtos_entradas_itens' => ['required', 'array', 'min:1']
         ];
     }
 
@@ -30,34 +30,34 @@ class MaterialMovimentacaoStoreRequest extends FormRequest
             'destino_estoque_local_id.required' => 'Destino Local é obrigatório.',
             'destino_estoque_local_id.different' => 'Destino Local não pode ser igual à Origem Local.',
 
-            'materiais_entradas_itens.required' => 'Nenhum Material foi selecionado para Movimentação.',
-            'materiais_entradas_itens.array' => 'O formato de Materiais selecionados é inválido.',
-            'materiais_entradas_itens.min' => 'Selecione pelo menos um Material.',
-            'materiais_entradas_itens.*.integer' => 'Material selecionado inválido.'
+            'produtos_entradas_itens.required' => 'Nenhum Produto foi selecionado para Movimentação.',
+            'produtos_entradas_itens.array' => 'O formato de Materiais selecionados é inválido.',
+            'produtos_entradas_itens.min' => 'Selecione pelo menos um Produto.',
+            'produtos_entradas_itens.*.integer' => 'Produto selecionado inválido.'
         ];
     }
 
     /**
-     * Validação customizada: verifica se todos os materiais pertencem ao estoque de origem.
+     * Validação customizada: verifica se todos os produtos pertencem ao estoque de origem.
      */
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
             $origemId = $this->input('origem_estoque_local_id');
-            $materiais = $this->input('materiais_entradas_itens', []);
+            $produtos = $this->input('produtos_entradas_itens', []);
 
-            if (!empty($materiais) && $origemId) {
-                // Busca todos os materiais que NÃO pertencem ao estoque de origem
-                $invalidos = DB::table('materiais_entradas_itens')
-                    ->whereIn('id', $materiais)
+            if (!empty($produtos) && $origemId) {
+                // Busca todos os produtos que NÃO pertencem ao estoque de origem
+                $invalidos = DB::table('produtos_entradas_itens')
+                    ->whereIn('id', $produtos)
                     ->where('estoque_local_id', '!=', $origemId)
                     ->pluck('id')
                     ->toArray();
 
                 if (!empty($invalidos)) {
                     $validator->errors()->add(
-                        'materiais_entradas_itens',
-                        'Alguns materiais não pertencem ao Estoque de Origem informado.'
+                        'produtos_entradas_itens',
+                        'Alguns produtos não pertencem ao Estoque de Origem informado.'
                     );
                 }
             }

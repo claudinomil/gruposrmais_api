@@ -2,60 +2,60 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MaterialControleSituacaoItem;
-use App\Models\MaterialEntrada;
-use App\Models\MaterialEntradaItem;
-use App\Models\MaterialMovimentacao;
+use App\Models\ProdutoControleSituacaoItem;
+use App\Models\ProdutoEntrada;
+use App\Models\ProdutoEntradaItem;
+use App\Models\ProdutoMovimentacao;
 
 class PatrimonioController extends Controller
 {
-    public function informacao($material_numero_patrimonio)
+    public function informacao($produto_numero_patrimonio)
     {
         $dados = array();
 
-        $dados['material'] = MaterialEntradaItem
-            ::join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
-            ->join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
-            ->join('material_situacoes', 'material_situacoes.id', 'materiais_entradas_itens.material_situacao_id')
-            ->join('estoques_locais', 'estoques_locais.id', 'materiais_entradas_itens.estoque_local_id')
+        $dados['produto'] = ProdutoEntradaItem
+            ::join('produtos', 'produtos.id', 'produtos_entradas_itens.produto_id')
+            ->join('produto_categorias', 'produto_categorias.id', 'produtos.produto_categoria_id')
+            ->join('produto_situacoes', 'produto_situacoes.id', 'produtos_entradas_itens.produto_situacao_id')
+            ->join('estoques_locais', 'estoques_locais.id', 'produtos_entradas_itens.estoque_local_id')
             ->leftjoin('empresas', 'empresas.id', 'estoques_locais.empresa_id')
             ->leftjoin('clientes', 'clientes.id', 'estoques_locais.cliente_id')
             ->select(
-                'materiais.name as nome',
-                'materiais.descricao',
-                'materiais.fotografia',
-                'materiais.ca',
+                'produtos.name as nome',
+                'produtos.descricao',
+                'produtos.fotografia',
+                'produtos.ca',
 
-                'material_categorias.name as categoria',
+                'produto_categorias.name as categoria',
 
-                'materiais_entradas_itens.material_numero_patrimonio as numero_patrimonio',
+                'produtos_entradas_itens.produto_numero_patrimonio as numero_patrimonio',
 
                 'estoques_locais.name as local',
                 'estoques_locais.estoque_id',
 
-                'material_situacoes.name as situacao',
+                'produto_situacoes.name as situacao',
 
                 'empresas.name as local_empresa',
                 'clientes.name as local_cliente'
             )
-            ->where('materiais_entradas_itens.material_numero_patrimonio', $material_numero_patrimonio)
+            ->where('produtos_entradas_itens.produto_numero_patrimonio', $produto_numero_patrimonio)
             ->first();
 
-        $dados['movimentacoes'] = MaterialMovimentacao
-            ::join('materiais_movimentacoes_itens', 'materiais_movimentacoes_itens.material_movimentacao_id', 'materiais_movimentacoes.id')
-            ->join('materiais_entradas_itens', 'materiais_entradas_itens.id', 'materiais_movimentacoes_itens.material_entrada_item_id')
-            ->join('estoques_locais as origens_estoques_locais', 'origens_estoques_locais.id', 'materiais_movimentacoes.origem_estoque_local_id')
+        $dados['movimentacoes'] = ProdutoMovimentacao
+            ::join('produtos_movimentacoes_itens', 'produtos_movimentacoes_itens.produto_movimentacao_id', 'produtos_movimentacoes.id')
+            ->join('produtos_entradas_itens', 'produtos_entradas_itens.id', 'produtos_movimentacoes_itens.produto_entrada_item_id')
+            ->join('estoques_locais as origens_estoques_locais', 'origens_estoques_locais.id', 'produtos_movimentacoes.origem_estoque_local_id')
             ->join('estoques as origens_estoques', 'origens_estoques.id', 'origens_estoques_locais.estoque_id')
             ->leftjoin('empresas as origens_empresas', 'origens_empresas.id', 'origens_estoques_locais.empresa_id')
             ->leftjoin('clientes as origens_clientes', 'origens_clientes.id', 'origens_estoques_locais.cliente_id')
 
-            ->join('estoques_locais as destinos_estoques_locais', 'destinos_estoques_locais.id', 'materiais_movimentacoes.destino_estoque_local_id')
+            ->join('estoques_locais as destinos_estoques_locais', 'destinos_estoques_locais.id', 'produtos_movimentacoes.destino_estoque_local_id')
             ->join('estoques as destinos_estoques', 'destinos_estoques.id', 'destinos_estoques_locais.estoque_id')
             ->leftjoin('empresas as destinos_empresas', 'destinos_empresas.id', 'destinos_estoques_locais.empresa_id')
             ->leftjoin('clientes as destinos_clientes', 'destinos_clientes.id', 'destinos_estoques_locais.cliente_id')
 
             ->select(
-                'materiais_movimentacoes.*',
+                'produtos_movimentacoes.*',
 
                 'origens_estoques.id as origemEstoqueId',
                 'origens_estoques_locais.name as origemEstoqueLocalName',
@@ -68,9 +68,9 @@ class PatrimonioController extends Controller
                 'destinos_estoques.name as destinoEstoqueName',
                 'destinos_empresas.name as destinoEmpresaName',
                 'destinos_clientes.name as destinoClienteName'
-            )->orderby('materiais_movimentacoes.data_movimentacao')
-            ->orderby('materiais_movimentacoes.hora_movimentacao')
-            ->where('materiais_entradas_itens.material_numero_patrimonio', $material_numero_patrimonio)
+            )->orderby('produtos_movimentacoes.data_movimentacao')
+            ->orderby('produtos_movimentacoes.hora_movimentacao')
+            ->where('produtos_entradas_itens.produto_numero_patrimonio', $produto_numero_patrimonio)
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $dados);
@@ -80,65 +80,65 @@ class PatrimonioController extends Controller
     {
         $dados = array();
 
-        $dados['materiais'] = MaterialEntrada
-            ::join('materiais_entradas_itens', 'materiais_entradas_itens.material_entrada_id', 'materiais_entradas.id')
-            ->join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
-            ->join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
-            ->join('material_situacoes', 'material_situacoes.id', 'materiais_entradas_itens.material_situacao_id')
-            ->join('estoques_locais', 'estoques_locais.id', 'materiais_entradas_itens.estoque_local_id')
+        $dados['produtos'] = ProdutoEntrada
+            ::join('produtos_entradas_itens', 'produtos_entradas_itens.produto_entrada_id', 'produtos_entradas.id')
+            ->join('produtos', 'produtos.id', 'produtos_entradas_itens.produto_id')
+            ->join('produto_categorias', 'produto_categorias.id', 'produtos.produto_categoria_id')
+            ->join('produto_situacoes', 'produto_situacoes.id', 'produtos_entradas_itens.produto_situacao_id')
+            ->join('estoques_locais', 'estoques_locais.id', 'produtos_entradas_itens.estoque_local_id')
             ->join('estoques', 'estoques.id', 'estoques_locais.estoque_id')
             ->leftjoin('empresas', 'empresas.id', 'estoques_locais.empresa_id')
             ->leftjoin('clientes', 'clientes.id', 'estoques_locais.cliente_id')
             ->select(
-                'materiais.name as nome',
-                'materiais.descricao',
-                'materiais.fotografia',
-                'materiais.ca',
+                'produtos.name as nome',
+                'produtos.descricao',
+                'produtos.fotografia',
+                'produtos.ca',
 
-                'material_categorias.name as categoria',
+                'produto_categorias.name as categoria',
 
-                'materiais_entradas.data_emissao as data_emissao',
+                'produtos_entradas.data_emissao as data_emissao',
 
-                'materiais_entradas_itens.material_numero_patrimonio as numero_patrimonio',
-                'materiais_entradas_itens.material_valor_unitario as valor_unitario',
+                'produtos_entradas_itens.produto_numero_patrimonio as numero_patrimonio',
+                'produtos_entradas_itens.produto_valor_unitario as valor_unitario',
 
                 'estoques.name as estoque',
 
                 'estoques_locais.name as local',
                 'estoques_locais.estoque_id',
 
-                'material_situacoes.id as situacao_id',
-                'material_situacoes.name as situacao',
+                'produto_situacoes.id as situacao_id',
+                'produto_situacoes.name as situacao',
 
                 'empresas.name as local_empresa',
                 'clientes.name as local_cliente'
             )
-            ->orderby('materiais.name')
+            ->orderby('produtos.name')
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $dados);
     }
 
-    public function patrimonio_situacoes($material_entrada_item_id)
+    public function patrimonio_situacoes($produto_entrada_item_id)
     {
         $dados = array();
 
-        $dados['patrimonio_situacoes'] = MaterialControleSituacaoItem
-            ::join('materiais_entradas_itens', 'materiais_entradas_itens.id', 'materiais_controle_situacoes_itens.material_entrada_item_id')
-            ->join('material_situacoes as anterior_material_situacoes', 'anterior_material_situacoes.id', 'materiais_controle_situacoes_itens.anterior_material_situacao_id')
-            ->join('material_situacoes as atual_material_situacoes', 'atual_material_situacoes.id', 'materiais_controle_situacoes_itens.atual_material_situacao_id')
-            ->join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
-            ->join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
+        $dados['patrimonio_situacoes'] = ProdutoControleSituacaoItem
+            ::join('produtos_entradas_itens', 'produtos_entradas_itens.id', 'produtos_controle_situacoes_itens.produto_entrada_item_id')
+            ->join('produto_situacoes as anterior_produto_situacoes', 'anterior_produto_situacoes.id', 'produtos_controle_situacoes_itens.anterior_produto_situacao_id')
+            ->join('produto_situacoes as atual_produto_situacoes', 'atual_produto_situacoes.id', 'produtos_controle_situacoes_itens.atual_produto_situacao_id')
+            ->join('produtos', 'produtos.id', 'produtos_entradas_itens.produto_id')
+            ->join('produto_categorias', 'produto_categorias.id', 'produtos.produto_categoria_id')
             ->select(
-                'materiais_controle_situacoes_itens.*',
-                'anterior_material_situacoes.name as anteriorMaterialSituacaoName',
-                'atual_material_situacoes.name as atualMaterialSituacaoName',
-                'materiais.name as materialName',
-                'material_categorias.name as materialCategoriaName'
+                'produtos_controle_situacoes_itens.*',
+                'anterior_produto_situacoes.name as anteriorProdutoSituacaoName',
+                'atual_produto_situacoes.name as atualProdutoSituacaoName',
+                'produtos.name as produtoName',
+                'produto_categorias.name as produtoCategoriaName'
             )
-            ->where('materiais_entradas_itens.id', $material_entrada_item_id)
-            ->orderby('materiais_controle_situacoes_itens.data_alteracao')
-            ->orderby('materiais_controle_situacoes_itens.hora_alteracao')
+            ->where('produtos_entradas_itens.id', $produto_entrada_item_id)
+            ->orderby('produtos_controle_situacoes_itens.data_alteracao')
+            ->orderby('produtos_controle_situacoes_itens.hora_alteracao')
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $dados);

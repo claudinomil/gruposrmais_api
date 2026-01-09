@@ -21,6 +21,9 @@ Route::prefix('users')->group(function () {
     //Usuário - retorna dados e permissões
     Route::get('/user/permissoes/settings/{searchSubmodulo}', [UserController::class, 'userPermissoesSettings'])->middleware(['auth:api']);
 
+    //Usuário - retorna dados e permissões (App)
+    Route::get('/app/user/permissoes/settings', [UserController::class, 'appUserPermissoesSettings'])->middleware(['auth:api']);
+
     //Logout
     //Route::post('logout', [UserController::class, 'logout'])->middleware(['auth:api']);
 });

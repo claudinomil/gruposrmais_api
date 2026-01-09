@@ -6,16 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
-class MaterialControleSituacaoItem extends Model
+class ProdutoControleSituacaoItem extends Model
 {
     use HasFactory;
 
-    protected $table = 'materiais_controle_situacoes_itens';
+    protected $table = 'produtos_controle_situacoes_itens';
 
     protected $fillable = [
-        'material_entrada_item_id',
-        'anterior_material_situacao_id',
-        'atual_material_situacao_id',
+        'produto_entrada_item_id',
+        'anterior_produto_situacao_id',
+        'atual_produto_situacao_id',
         'anterior_estoque_local_id',
         'atual_estoque_local_id',
         'observacao',

@@ -2,51 +2,51 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MaterialEntrada;
+use App\Models\ProdutoEntrada;
 use Illuminate\Http\Request;
 
-class MaterialListagemGeralController extends Controller
+class ProdutoListagemGeralController extends Controller
 {
     public function index(Request $request)
     {
         $empresa_id = $request->header('X-Empresa-Id');
 
-        $registros = MaterialEntrada
-            ::join('materiais_entradas_itens', 'materiais_entradas_itens.material_entrada_id', 'materiais_entradas.id')
-            ->join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
-            ->join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
-            ->join('material_situacoes', 'material_situacoes.id', 'materiais_entradas_itens.material_situacao_id')
-            ->join('estoques_locais', 'estoques_locais.id', 'materiais_entradas_itens.estoque_local_id')
+        $registros = ProdutoEntrada
+            ::join('produtos_entradas_itens', 'produtos_entradas_itens.produto_entrada_id', 'produtos_entradas.id')
+            ->join('produtos', 'produtos.id', 'produtos_entradas_itens.produto_id')
+            ->join('produto_categorias', 'produto_categorias.id', 'produtos.produto_categoria_id')
+            ->join('produto_situacoes', 'produto_situacoes.id', 'produtos_entradas_itens.produto_situacao_id')
+            ->join('estoques_locais', 'estoques_locais.id', 'produtos_entradas_itens.estoque_local_id')
             ->join('estoques', 'estoques.id', 'estoques_locais.estoque_id')
             ->leftjoin('empresas', 'empresas.id', 'estoques_locais.empresa_id')
             ->leftjoin('clientes', 'clientes.id', 'estoques_locais.cliente_id')
             ->select(
-                'materiais.name as material_nome',
-                'materiais.descricao as material_descricao',
-                'materiais.fotografia as material_fotografia',
-                'materiais.ca as material_ca',
+                'produtos.name as produto_nome',
+                'produtos.descricao as produto_descricao',
+                'produtos.fotografia as produto_fotografia',
+                'produtos.ca as produto_ca',
 
-                'material_categorias.name as material_categoria',
+                'produto_categorias.name as produto_categoria',
 
-                'materiais_entradas.data_emissao as material_data_aquisicao',
+                'produtos_entradas.data_emissao as produto_data_aquisicao',
 
-                'materiais_entradas_itens.id',
-                'materiais_entradas_itens.material_numero_patrimonio as material_numero_patrimonio',
-                'materiais_entradas_itens.material_valor_unitario as material_valor_unitario',
+                'produtos_entradas_itens.id',
+                'produtos_entradas_itens.produto_numero_patrimonio as produto_numero_patrimonio',
+                'produtos_entradas_itens.produto_valor_unitario as produto_valor_unitario',
 
-                'estoques.name as material_estoque_nome',
+                'estoques.name as produto_estoque_nome',
 
-                'estoques_locais.name as material_local',
-                'estoques_locais.estoque_id as material_estoque_id',
+                'estoques_locais.name as produto_local',
+                'estoques_locais.estoque_id as produto_estoque_id',
 
-                'material_situacoes.id as material_situacao_id',
-                'material_situacoes.name as material_situacao',
+                'produto_situacoes.id as produto_situacao_id',
+                'produto_situacoes.name as produto_situacao',
 
-                'empresas.name as material_local_empresa',
-                'clientes.name as material_local_cliente'
+                'empresas.name as produto_local_empresa',
+                'clientes.name as produto_local_cliente'
             )
-            //->where('materiais_entradas.empresa_id', $empresa_id)
-            ->orderby('materiais_entradas_itens.material_numero_patrimonio')
+            //->where('produtos_entradas.empresa_id', $empresa_id)
+            ->orderby('produtos_entradas_itens.produto_numero_patrimonio')
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
@@ -61,39 +61,39 @@ class MaterialListagemGeralController extends Controller
         //DB::enableQueryLog();
 
         //Registros
-        $registros = MaterialEntrada
-            ::join('materiais_entradas_itens', 'materiais_entradas_itens.material_entrada_id', 'materiais_entradas.id')
-            ->join('materiais', 'materiais.id', 'materiais_entradas_itens.material_id')
-            ->join('material_categorias', 'material_categorias.id', 'materiais.material_categoria_id')
-            ->join('material_situacoes', 'material_situacoes.id', 'materiais_entradas_itens.material_situacao_id')
-            ->join('estoques_locais', 'estoques_locais.id', 'materiais_entradas_itens.estoque_local_id')
+        $registros = ProdutoEntrada
+            ::join('produtos_entradas_itens', 'produtos_entradas_itens.produto_entrada_id', 'produtos_entradas.id')
+            ->join('produtos', 'produtos.id', 'produtos_entradas_itens.produto_id')
+            ->join('produto_categorias', 'produto_categorias.id', 'produtos.produto_categoria_id')
+            ->join('produto_situacoes', 'produto_situacoes.id', 'produtos_entradas_itens.produto_situacao_id')
+            ->join('estoques_locais', 'estoques_locais.id', 'produtos_entradas_itens.estoque_local_id')
             ->join('estoques', 'estoques.id', 'estoques_locais.estoque_id')
             ->leftjoin('empresas', 'empresas.id', 'estoques_locais.empresa_id')
             ->leftjoin('clientes', 'clientes.id', 'estoques_locais.cliente_id')
             ->select(
-                'materiais.name as material_nome',
-                'materiais.descricao as material_descricao',
-                'materiais.fotografia as material_fotografia',
-                'materiais.ca as material_ca',
+                'produtos.name as produto_nome',
+                'produtos.descricao as produto_descricao',
+                'produtos.fotografia as produto_fotografia',
+                'produtos.ca as produto_ca',
 
-                'material_categorias.name as material_categoria',
+                'produto_categorias.name as produto_categoria',
 
-                'materiais_entradas.data_emissao as material_data_aquisicao',
+                'produtos_entradas.data_emissao as produto_data_aquisicao',
 
-                'materiais_entradas_itens.id',
-                'materiais_entradas_itens.material_numero_patrimonio as material_numero_patrimonio',
-                'materiais_entradas_itens.material_valor_unitario as material_valor_unitario',
+                'produtos_entradas_itens.id',
+                'produtos_entradas_itens.produto_numero_patrimonio as produto_numero_patrimonio',
+                'produtos_entradas_itens.produto_valor_unitario as produto_valor_unitario',
 
-                'estoques.name as material_estoque_nome',
+                'estoques.name as produto_estoque_nome',
 
-                'estoques_locais.name as material_local',
-                'estoques_locais.estoque_id as material_estoque_id',
+                'estoques_locais.name as produto_local',
+                'estoques_locais.estoque_id as produto_estoque_id',
 
-                'material_situacoes.id as material_situacao_id',
-                'material_situacoes.name as material_situacao',
+                'produto_situacoes.id as produto_situacao_id',
+                'produto_situacoes.name as produto_situacao',
 
-                'empresas.name as material_local_empresa',
-                'clientes.name as material_local_cliente'
+                'empresas.name as produto_local_empresa',
+                'clientes.name as produto_local_cliente'
             )
             ->where(function($query) use($filtros) {
                 //Variavel para controle

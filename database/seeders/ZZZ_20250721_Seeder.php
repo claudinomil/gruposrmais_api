@@ -10,8 +10,8 @@ use App\Models\Funcionario;
 use App\Models\Grupo;
 use App\Models\GrupoPermissao;
 use App\Models\GrupoRelatorio;
-use App\Models\Material;
-use App\Models\MaterialCategoria;
+use App\Models\Produto;
+use App\Models\ProdutoCategoria;
 use App\Models\Modulo;
 use App\Models\MotivoAfastamento;
 use App\Models\MotivoDemissao;
@@ -517,45 +517,45 @@ class ZZZ_20250721_Seeder extends Seeder
         Submodulo::where('id', 25)->delete();
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-        //Material Categorias'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        MaterialCategoria::create(['id' => 1, 'name' => 'Equipamentos de Proteção Individual']);
-        MaterialCategoria::create(['id' => 2, 'name' => 'Equipamentos de Combate a Incêndio']);
-        MaterialCategoria::create(['id' => 3, 'name' => 'Equipamentos de Detecção e Alarme']);
-        MaterialCategoria::create(['id' => 4, 'name' => 'Equipamentos de Primeiros Socorros']);
-        MaterialCategoria::create(['id' => 5, 'name' => 'Equipamentos de Resgate']);
-        MaterialCategoria::create(['id' => 6, 'name' => 'Comunicação e Sinalização']);
-        MaterialCategoria::create(['id' => 7, 'name' => 'Veículos e Sistemas Fixos']);
+        //Produto Categorias'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        ProdutoCategoria::create(['id' => 1, 'name' => 'Equipamentos de Proteção Individual']);
+        ProdutoCategoria::create(['id' => 2, 'name' => 'Equipamentos de Combate a Incêndio']);
+        ProdutoCategoria::create(['id' => 3, 'name' => 'Equipamentos de Detecção e Alarme']);
+        ProdutoCategoria::create(['id' => 4, 'name' => 'Equipamentos de Primeiros Socorros']);
+        ProdutoCategoria::create(['id' => 5, 'name' => 'Equipamentos de Resgate']);
+        ProdutoCategoria::create(['id' => 6, 'name' => 'Comunicação e Sinalização']);
+        ProdutoCategoria::create(['id' => 7, 'name' => 'Veículos e Sistemas Fixos']);
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-        //Materiais'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        Material::create(['id' => 1, 'name' => 'Capacete', 'material_categoria_id' => 1]);
-        Material::create(['id' => 2, 'name' => 'Luvas', 'material_categoria_id' => 1]);
-        Material::create(['id' => 3, 'name' => 'Coturno', 'material_categoria_id' => 1]);
-        Material::create(['id' => 4, 'name' => 'Máscara', 'material_categoria_id' => 1]);
-        Material::create(['id' => 5, 'name' => 'Óculos', 'material_categoria_id' => 1]);
-        Material::create(['id' => 6, 'name' => 'Extintor (PQS)', 'material_categoria_id' => 2]);
-        Material::create(['id' => 7, 'name' => 'Extintor (CO₂)', 'material_categoria_id' => 2]);
-        Material::create(['id' => 8, 'name' => 'Extintor (água)', 'material_categoria_id' => 2]);
-        Material::create(['id' => 9, 'name' => 'Extintor (espuma)', 'material_categoria_id' => 2]);
-        Material::create(['id' => 10, 'name' => 'Mangueira', 'material_categoria_id' => 2]);
-        Material::create(['id' => 11, 'name' => 'Esguicho', 'material_categoria_id' => 2]);
-        Material::create(['id' => 12, 'name' => 'Chave de mangueira', 'material_categoria_id' => 2]);
-        Material::create(['id' => 13, 'name' => 'Detectore de fumaça', 'material_categoria_id' => 3]);
-        Material::create(['id' => 14, 'name' => 'Detectore de calor', 'material_categoria_id' => 3]);
-        Material::create(['id' => 15, 'name' => 'Kit de primeiros socorros', 'material_categoria_id' => 4]);
-        Material::create(['id' => 16, 'name' => 'Maca', 'material_categoria_id' => 4]);
-        Material::create(['id' => 17, 'name' => 'Colar cervical', 'material_categoria_id' => 4]);
-        Material::create(['id' => 18, 'name' => 'Máscara de RCP', 'material_categoria_id' => 4]);
-        Material::create(['id' => 19, 'name' => 'Lanterna', 'material_categoria_id' => 5]);
-        Material::create(['id' => 20, 'name' => 'Sinalizador', 'material_categoria_id' => 5]);
-        Material::create(['id' => 21, 'name' => 'Corda', 'material_categoria_id' => 5]);
-        Material::create(['id' => 22, 'name' => 'Mosquetão', 'material_categoria_id' => 5]);
-        Material::create(['id' => 23, 'name' => 'Rádio comunicador', 'material_categoria_id' => 6]);
-        Material::create(['id' => 24, 'name' => 'Cone', 'material_categoria_id' => 6]);
-        Material::create(['id' => 25, 'name' => 'Fita de isolamento', 'material_categoria_id' => 6]);
-        Material::create(['id' => 26, 'name' => 'Placa de sinalização', 'material_categoria_id' => 6]);
-        Material::create(['id' => 27, 'name' => 'Hidrante', 'material_categoria_id' => 7]);
-        Material::create(['id' => 28, 'name' => 'Sprinkler', 'material_categoria_id' => 7]);
+        //Produtos''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        Produto::create(['id' => 1, 'name' => 'Capacete', 'produto_categoria_id' => 1]);
+        Produto::create(['id' => 2, 'name' => 'Luvas', 'produto_categoria_id' => 1]);
+        Produto::create(['id' => 3, 'name' => 'Coturno', 'produto_categoria_id' => 1]);
+        Produto::create(['id' => 4, 'name' => 'Máscara', 'produto_categoria_id' => 1]);
+        Produto::create(['id' => 5, 'name' => 'Óculos', 'produto_categoria_id' => 1]);
+        Produto::create(['id' => 6, 'name' => 'Extintor (PQS)', 'produto_categoria_id' => 2]);
+        Produto::create(['id' => 7, 'name' => 'Extintor (CO₂)', 'produto_categoria_id' => 2]);
+        Produto::create(['id' => 8, 'name' => 'Extintor (água)', 'produto_categoria_id' => 2]);
+        Produto::create(['id' => 9, 'name' => 'Extintor (espuma)', 'produto_categoria_id' => 2]);
+        Produto::create(['id' => 10, 'name' => 'Mangueira', 'produto_categoria_id' => 2]);
+        Produto::create(['id' => 11, 'name' => 'Esguicho', 'produto_categoria_id' => 2]);
+        Produto::create(['id' => 12, 'name' => 'Chave de mangueira', 'produto_categoria_id' => 2]);
+        Produto::create(['id' => 13, 'name' => 'Detectore de fumaça', 'produto_categoria_id' => 3]);
+        Produto::create(['id' => 14, 'name' => 'Detectore de calor', 'produto_categoria_id' => 3]);
+        Produto::create(['id' => 15, 'name' => 'Kit de primeiros socorros', 'produto_categoria_id' => 4]);
+        Produto::create(['id' => 16, 'name' => 'Maca', 'produto_categoria_id' => 4]);
+        Produto::create(['id' => 17, 'name' => 'Colar cervical', 'produto_categoria_id' => 4]);
+        Produto::create(['id' => 18, 'name' => 'Máscara de RCP', 'produto_categoria_id' => 4]);
+        Produto::create(['id' => 19, 'name' => 'Lanterna', 'produto_categoria_id' => 5]);
+        Produto::create(['id' => 20, 'name' => 'Sinalizador', 'produto_categoria_id' => 5]);
+        Produto::create(['id' => 21, 'name' => 'Corda', 'produto_categoria_id' => 5]);
+        Produto::create(['id' => 22, 'name' => 'Mosquetão', 'produto_categoria_id' => 5]);
+        Produto::create(['id' => 23, 'name' => 'Rádio comunicador', 'produto_categoria_id' => 6]);
+        Produto::create(['id' => 24, 'name' => 'Cone', 'produto_categoria_id' => 6]);
+        Produto::create(['id' => 25, 'name' => 'Fita de isolamento', 'produto_categoria_id' => 6]);
+        Produto::create(['id' => 26, 'name' => 'Placa de sinalização', 'produto_categoria_id' => 6]);
+        Produto::create(['id' => 27, 'name' => 'Hidrante', 'produto_categoria_id' => 7]);
+        Produto::create(['id' => 28, 'name' => 'Sprinkler', 'produto_categoria_id' => 7]);
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
         //Submódulo Materiais'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
