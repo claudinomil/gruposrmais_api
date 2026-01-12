@@ -334,7 +334,10 @@ class VisitaTecnicaController extends Controller
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
-    
+
+    // Funções VTT1 - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    // Funções VTT1 - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
     public function vtt1_updatePergunta(Request $request, $visita_tecnica_dado_id)
     {
         try {
@@ -437,4 +440,114 @@ class VisitaTecnicaController extends Controller
             return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
         }
     }
+    // Funções VTT1 - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    // Funções VTT1 - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    // Funções VTT2 - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    // Funções VTT2 - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    public function vtt2_updatePergunta(Request $request, $visita_tecnica_dado_id)
+    {
+        try {
+            $registro = VisitaTecnicaDado::find($visita_tecnica_dado_id);
+
+            if (!$registro) {
+                return $this->sendResponse('Registro não encontrado.', 2040, null, null);
+            } else {
+                //Acertar fotografia_x'''''''''''''''''''''''''''''''''''''''''''''''
+                //fotografia_1
+                $path = parse_url($request['fotografia_1'], PHP_URL_PATH);
+                $path = ltrim($path, '/');
+                $request['fotografia_1'] = $path;
+
+                //fotografia_2
+                $path = parse_url($request['fotografia_2'], PHP_URL_PATH);
+                $path = ltrim($path, '/');
+                $request['fotografia_2'] = $path;
+
+                //fotografia_3
+                $path = parse_url($request['fotografia_3'], PHP_URL_PATH);
+                $path = ltrim($path, '/');
+                $request['fotografia_3'] = $path;
+                //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                //Acertar pdf_x''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                //pdf_1
+                $path = parse_url($request['pdf_1'], PHP_URL_PATH);
+                $path = ltrim($path, '/');
+                $request['pdf_1'] = $path;
+
+                //pdf_2
+                $path = parse_url($request['pdf_2'], PHP_URL_PATH);
+                $path = ltrim($path, '/');
+                $request['pdf_2'] = $path;
+
+                //pdf_3
+                $path = parse_url($request['pdf_3'], PHP_URL_PATH);
+                $path = ltrim($path, '/');
+                $request['pdf_3'] = $path;
+                //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                //Gravar transação
+                $dadosAnterior = VisitaTecnicaDado::find($visita_tecnica_dado_id);
+
+                //Alterando registro
+                $registro->update($request->all());
+
+                //Gravar transação
+                Transacoes::transacaoRecord(2, 2, 'visitas_tecnicas', $dadosAnterior, $request);
+
+                //Return
+                return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $request);
+            }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function vtt2_atualizar_pergunta(Request $request, $id)
+    {
+        try {
+            $registro = VisitaTecnicaPergunta::find($id);
+
+            if (!$registro) {
+                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
+            } else {
+                //Alterando registro
+                $registro->update($request->all());
+
+                return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
+            }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function vtt2_perguntas_completa_sintetica($vt_cs)
+    {
+        try {
+            $registros = array();
+
+            $registros['perguntas_completa'] = VisitaTecnicaPergunta::where('completa', '=', 1)->orderby('completa_ordem')->get();
+            $registros['perguntas_sintetica'] = VisitaTecnicaPergunta::where('sintetica', '=', 1)->orderby('sintetica_ordem')->get();
+
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+    // Funções VTT2 - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    // Funções VTT2 - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 }

@@ -12,6 +12,8 @@ Route::prefix('visitas_tecnicas')->group(function () {
 
     Route::get('/auxiliary/tables', [VisitaTecnicaController::class, 'auxiliary'])->middleware(['auth:api']);
 
+    // Rotas VTT1'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
     //Rotas Perguntas individuais (VTT1)
     Route::put('/vtt1/pergunta/updatePergunta/{visita_tecnica_dado_id}', [VisitaTecnicaController::class, 'vtt1_updatePergunta'])->middleware(['auth:api']);
 
@@ -20,4 +22,17 @@ Route::prefix('visitas_tecnicas')->group(function () {
 
     //Visitas Técnicas Perguntas (Completa / Sintética) (VTT1)
     Route::get('/vtt1/visitas_tecnicas_perguntas/perguntas_completa_sintetica/{vt_cs}', [VisitaTecnicaController::class, 'vtt1_perguntas_completa_sintetica'])->middleware(['auth:api']);
+    //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    // Rotas VTT2'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    //Rotas Perguntas individuais (VTT2)
+    Route::put('/vtt2/pergunta/updatePergunta/{visita_tecnica_dado_id}', [VisitaTecnicaController::class, 'vtt2_updatePergunta'])->middleware(['auth:api']);
+
+    //Visitas Técnicas Perguntas (VTT2)
+    Route::put('/vtt2/visitas_tecnicas_perguntas/atualizar_pergunta/{id}', [VisitaTecnicaController::class, 'vtt2_atualizar_pergunta'])->middleware(['auth:api']);
+
+    //Visitas Técnicas Perguntas (Completa / Sintética) (VTT2)
+    Route::get('/vtt2/visitas_tecnicas_perguntas/perguntas_completa_sintetica/{vt_cs}', [VisitaTecnicaController::class, 'vtt2_perguntas_completa_sintetica'])->middleware(['auth:api']);
+    //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 });

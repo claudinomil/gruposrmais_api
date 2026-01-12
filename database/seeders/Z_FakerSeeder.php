@@ -293,21 +293,21 @@ class Z_FakerSeeder extends Seeder
         }
 
         //Visitas Técnicas
-        for($i=1; $i<=100; $i++) {
-            VisitaTecnica::create([
-                'empresa_id' => $faker->numberBetween(1, 2),
-                'visita_tecnica_tipo_id' => $faker->numberBetween(1, 2),
-                'numero_visita_tecnica' => $i,
-                'ano_visita_tecnica' => '2025',
-                'data_abertura' => '24/07/2025',
-                'hora_abertura' => '18:09',
-                'data_prevista' => '24/07/2025',
-                'hora_prevista' => '18:09',
-                'visita_tecnica_status_id' => $faker->numberBetween(1, 2),
-                'cliente_id' => $faker->numberBetween(1, 3),
-                'vt_cs' => $faker->numberBetween(1, 2)
-            ]);
-        }
+        // for($i=1; $i<=100; $i++) {
+        //     VisitaTecnica::create([
+        //         'empresa_id' => $faker->numberBetween(1, 2),
+        //         'visita_tecnica_tipo_id' => $faker->numberBetween(1, 2),
+        //         'numero_visita_tecnica' => $i,
+        //         'ano_visita_tecnica' => '2025',
+        //         'data_abertura' => '24/07/2025',
+        //         'hora_abertura' => '18:09',
+        //         'data_prevista' => '24/07/2025',
+        //         'hora_prevista' => '18:09',
+        //         'visita_tecnica_status_id' => $faker->numberBetween(1, 2),
+        //         'cliente_id' => $faker->numberBetween(1, 3),
+        //         'vt_cs' => $faker->numberBetween(1, 2)
+        //     ]);
+        // }
 
         //Ordens de Serviços
         for($i=1; $i<=100; $i++) {
