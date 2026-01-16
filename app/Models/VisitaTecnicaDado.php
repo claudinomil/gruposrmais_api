@@ -31,4 +31,6 @@ class VisitaTecnicaDado extends Model
         'sintetica_ordem',
         'opcoes'
     ];
+
+    public function setSubtituloAttribute($value) {if ($value == 'null') {$this->attributes['subtitulo'] = NULL;}}
 }

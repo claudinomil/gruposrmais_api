@@ -516,10 +516,20 @@ class UserController extends Controller
                     ->get();
 
                 //Menu Módulos
-                $registros['menuModulos'] = Modulo::where('viewing_order', '>', '0')->orderBy('viewing_order', 'asc')->orderBy('name', 'asc')->get();
+                $registros['menuModulos'] = Modulo
+                    ::where('mobile', 1)
+                    ->where('viewing_order', '>', '0')
+                    ->orderBy('viewing_order', 'asc')
+                    ->orderBy('name', 'asc')
+                    ->get();
 
                 //Menu Submódulos
-                $registros['menuSubmodulos'] = Submodulo::where('viewing_order', '>', '0')->orderBy('viewing_order', 'asc')->orderBy('name', 'asc')->get();
+                $registros['menuSubmodulos'] = Submodulo
+                    ::where('mobile', 1)
+                    ->where('viewing_order', '>', '0')
+                    ->orderBy('viewing_order', 'asc')
+                    ->orderBy('name', 'asc')
+                    ->get();
 
                 return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
             }

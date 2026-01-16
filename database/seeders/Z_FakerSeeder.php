@@ -7,9 +7,11 @@ use App\Models\Cliente;
 use App\Models\ClienteExecutivo;
 use App\Models\Fornecedor;
 use App\Models\Funcionario;
+use App\Models\Modulo;
 use App\Models\ProdutoEntrada;
 use App\Models\OrdemServico;
 use App\Models\Proposta;
+use App\Models\Submodulo;
 use App\Models\User;
 use App\Models\Veiculo;
 use App\Models\VisitaTecnica;
@@ -351,5 +353,16 @@ class Z_FakerSeeder extends Seeder
                 'created_at' => now()
             ]);
         }
+
+        // Mobile''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        Modulo::where('id', 6)->update(['mobile' => 1]); // Recursos Humanos
+        Submodulo::where('id', 14)->update(['mobile' => 1]); // Funcionários
+
+        Modulo::where('id', 7)->update(['mobile' => 1]); // Relacionamento
+        Submodulo::where('id', 16)->update(['mobile' => 1]); // Clientes
+
+        Modulo::where('id', 8)->update(['mobile' => 1]); // Operações
+        Submodulo::where('id', 22)->update(['mobile' => 1]); // Visitas Técnicas
+        //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     }
 }
