@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Facades\SuporteFacade;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
+use App\Models\Cliente;
 use App\Models\Empresa;
 use App\Models\Funcionario;
 use App\Models\Grupo;
@@ -77,6 +78,9 @@ class UserController extends Controller
 
             //Funcionários
             $registros['funcionarios'] = Funcionario::all();
+
+            // Clientes
+            $registros['clientes'] = Cliente::all();
 
             //Sistema Acessos
             $registros['sistema_acessos'] = SistemaAcesso::all();
@@ -418,7 +422,10 @@ class UserController extends Controller
                 //Submódulo variavel Nome
                 $registros['nameSubmodulo'] = Submodulo::select('name')->where('menu_route', '=', $searchSubmodulo)->get();
 
-                //Submódulo nome dos campos
+                //Submódulo nome dos campos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                // Acertos
+                if ($searchSubmodulo == 'clientes_funcionarios') {$searchSubmodulo = 'funcionarios';}
+
                 $registros['namesFieldsSubmodulo'] = Schema::getColumnListing($searchSubmodulo);
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -461,6 +468,17 @@ class UserController extends Controller
             }
         } else {
             return $this->sendResponse('Usuário não existe.', 2005, null, null);
+        }
+    }
+
+    public function email_pertence($email, $cliente_id)
+    {
+        $registro = $this->user->where('email', $email)->where('cliente_id', $cliente_id)->get();
+
+        if (count($registro) == 1) {
+            return $this->sendResponse('E-mail pertence a um Usuário do Cliente.', 2000, null, null);
+        } else {
+            return $this->sendResponse('E-mail não pertence a um Usuário do Cliente.', 2005, null, null);
         }
     }
 

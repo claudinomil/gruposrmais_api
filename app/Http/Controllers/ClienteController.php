@@ -189,7 +189,7 @@ class ClienteController extends Controller
                 ->get();
 
             $registro['cliente'] = $cliente[0];
-            
+
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -313,6 +313,29 @@ class ClienteController extends Controller
             } else {
                 //Alterando registro
                 $registro->logotipo_cartao_emergencial = $request['logotipo_cartao_emergencial'];
+                $registro->save();
+
+                return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
+            }
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function upload_logotipo_menu(Request $request)
+    {
+        try {
+            $registro = $this->cliente->find($request['cliente_id']);
+
+            if (!$registro) {
+                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
+            } else {
+                //Alterando registro
+                $registro->logotipo_menu = $request['logotipo_menu'];
                 $registro->save();
 
                 return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
@@ -538,7 +561,7 @@ class ClienteController extends Controller
                 if (SuporteFacade::verificarRelacionamento('propostas', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Propostas.', 2040, null, null);
                 }
-                
+
                 //Tabela clientes_executivos
                 if (SuporteFacade::verificarRelacionamento('clientes_executivos', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Executivos.', 2040, null, null);

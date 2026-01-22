@@ -62,6 +62,7 @@ class Cliente extends Model
         'logotipo_principal',
         'logotipo_relatorios',
         'logotipo_cartao_emergencial',
+        'logotipo_menu',
         'contato_1_nome',
         'contato_1_setor',
         'contato_1_cargo',
@@ -69,7 +70,8 @@ class Cliente extends Model
         'contato_2_nome',
         'contato_2_setor',
         'contato_2_cargo',
-        'contato_2_email'
+        'contato_2_email',
+        'dominio'
     ];
 
     protected $dates = [

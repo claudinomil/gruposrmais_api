@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CriarSubmodulos;
+use App\Models\Cliente;
 use Illuminate\Support\Facades\Route;
 use App\Models\Empresa;
 
@@ -15,6 +16,11 @@ Route::post('/criarsubmodulos', [CriarSubmodulos::class, 'store'])->name('criars
 //Rota para retornar todas as Empresas do Grupo SR+
 Route::get('empresas_grupo_srmais', function () {
     return Empresa::all();
+});
+
+// Rota para retornar os dados do cliente que se logou
+Route::get('cliente_grupo_srmais/{dominio}', function ($dominio) {
+    return Cliente::where('dominio', $dominio)->get();
 });
 
 //Limpar Caches via Navegador - Início''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

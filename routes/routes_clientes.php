@@ -17,6 +17,7 @@ Route::prefix('clientes')->group(function () {
     Route::post('/uploadLogotipo/upload_logotipo_principal', [ClienteController::class, 'upload_logotipo_principal'])->middleware(['auth:api']);
     Route::post('/uploadLogotipo/upload_logotipo_relatorios', [ClienteController::class, 'upload_logotipo_relatorios'])->middleware(['auth:api']);
     Route::post('/uploadLogotipo/upload_logotipo_cartao_emergencial', [ClienteController::class, 'upload_logotipo_cartao_emergencial'])->middleware(['auth:api']);
+    Route::post('/uploadLogotipo/upload_logotipo_menu', [ClienteController::class, 'upload_logotipo_menu'])->middleware(['auth:api']);
     Route::post('/uploadDocumento/upload_documento', [ClienteController::class, 'upload_documento'])->middleware(['auth:api']);
     Route::get('/modalInfo/documentos/{cliente_id}', [ClienteController::class, 'documentos'])->middleware(['auth:api']);
     Route::delete('/modalInfo/deletar_documento/destroy/{id}', [ClienteController::class, 'deletar_documento'])->middleware(['auth:api']);

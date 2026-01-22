@@ -128,3 +128,15 @@ require __DIR__ . '/routes_guests.php';
 
 // Patrimonio
 require __DIR__ . '/routes_patrimonio.php';
+
+// Rotas Domínio Clientes - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+// Rotas Domínio Clientes - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+// Clientes Dashboards
+require __DIR__ . '/routes_clientes_dashboards.php';
+
+// Clientes Funcionários
+require __DIR__ . '/routes_clientes_funcionarios.php';
+
+// Rotas Domínio Clientes - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+// Rotas Domínio Clientes - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
