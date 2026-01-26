@@ -24,6 +24,7 @@ class Dashboard3Controller extends Controller
             $content['grupos_graficos'] = GrupoGrafico
             ::join('graficos', 'graficos.id', 'grupos_graficos.grafico_id')
             ->select('graficos.id as grafico_id', 'graficos.name as grafico_name', 'graficos.tipo as grafico_tipo', 'graficos.ordem_visualizacao as grafico_ordem_visualizacao')
+            ->where('graficos.sistema', 1)
             ->where('grupos_graficos.grupo_id', Auth::user()->grupo_id)
             ->where('graficos.dashboard', 3)
             ->orderby('graficos.ordem_visualizacao', 'ASC')

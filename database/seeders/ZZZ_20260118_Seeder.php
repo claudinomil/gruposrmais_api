@@ -4,10 +4,12 @@ namespace Database\Seeders;
 
 use App\Models\Documento;
 use App\Models\DocumentoFonte;
+use App\Models\Grafico;
 use App\Models\Grupo;
 use App\Models\GrupoPermissao;
 use App\Models\Modulo;
 use App\Models\Permissao;
+use App\Models\Relatorio;
 use App\Models\Submodulo;
 use App\Models\VisitaTecnicaPergunta;
 use Illuminate\Database\Seeder;
@@ -25,8 +27,8 @@ class ZZZ_20260118_Seeder extends Seeder
         // Documento Fontes e Documentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
         // Documento Fontes
-        DocumentoFonte::create(['id' => 6, 'name' => 'ANOTAÇÕES DE RESPONSABILIDADE TÉCNICA (ARTS OBRIGATÓRIAS)  - INSTALAÇÃO, INSPEÇÃO, TESTES E MANUTENÇÃO', 'ordem' => 60]);
-        DocumentoFonte::create(['id' => 7, 'name' => 'ANOTAÇÕES DE RESPONSABILIDADE TÉCNICA (ARTS OBRIGATÓRIAS)  - SISTEMAS ELÉTRICOS, ENERGÉTICOS E COMPLEMENTARES', 'ordem' => 70]);
+        DocumentoFonte::create(['id' => 6, 'name' => 'ANOTAÇÕES DE RESPONSABILIDADE TÉCNICA - INSTALAÇÃO, INSPEÇÃO, TESTES E MANUTENÇÃO', 'ordem' => 60]);
+        DocumentoFonte::create(['id' => 7, 'name' => 'ANOTAÇÕES DE RESPONSABILIDADE TÉCNICA - SISTEMAS ELÉTRICOS, ENERGÉTICOS E COMPLEMENTARES', 'ordem' => 70]);
 
         // Documentos
         Documento::create(['id' => 65, 'name' => 'ART do sistema da rede de hidrantes da rede de hidrantes e mangotinhos (inspeção, testes e manutenção)', 'documento_submodulo_id' => 1, 'documento_fonte_id' => 6, 'ordem' => 240]);

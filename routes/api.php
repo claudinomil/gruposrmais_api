@@ -138,5 +138,8 @@ require __DIR__ . '/routes_clientes_dashboards.php';
 // Clientes Funcionários
 require __DIR__ . '/routes_clientes_funcionarios.php';
 
+// Clientes Relatórios
+require __DIR__ . '/routes_clientes_relatorios.php';
+
 // Rotas Domínio Clientes - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 // Rotas Domínio Clientes - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

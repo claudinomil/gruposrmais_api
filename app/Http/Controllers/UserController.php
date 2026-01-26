@@ -433,6 +433,7 @@ class UserController extends Controller
                 $registros['userDashboards'] = GrupoGrafico
                     ::join('graficos', 'graficos.id', '=', 'grupos_graficos.grafico_id')
                     ->select('graficos.dashboard')
+                    ->where('graficos.sistema', 1)
                     ->where('grupos_graficos.grupo_id', Auth::user()->grupo_id)
                     ->groupBy('graficos.dashboard')
                     ->get();

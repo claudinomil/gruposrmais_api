@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Cliente;
 use App\Models\Departamento;
 use App\Models\Funcao;
 use App\Models\Funcionario;
