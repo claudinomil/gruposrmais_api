@@ -33,7 +33,7 @@ class DatabaseSeeder extends Seeder
             SistemaAcessosSeeder::class,
             EstadosSeeder::class,
             UsersSeeder::class,
-            SegurancaMedidasSeeder::class,
+            MedidasSegurancaSeeder::class,
             EdificacaoClassificacoesSeeder::class,
             IncendioRiscosSeeder::class,
             BancosSeeder::class,
@@ -82,7 +82,9 @@ class DatabaseSeeder extends Seeder
             ZZZ_20260118_Seeder::class,
             ZZZ_20260125_Seeder::class,
 
-            Z_Faker4Seeder::class
+            Z_Faker4Seeder::class,
+
+            ZZZ_20260130_Seeder::class
         ]);
     }
 }

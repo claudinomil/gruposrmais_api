@@ -451,10 +451,12 @@ class FuncionarioController extends Controller
 
             $registro['documentos'] = $documentos;
 
-            //Tomadores de Serviços
-            $tomadores_servicos = 999;
+            // Documentos Mensais
+            $documentos_mensais = FuncionarioDocumentoMensal
+                ::where('funcionario_id', '=', $id)
+                ->count();
 
-            $registro['tomadores_servicos'] = $tomadores_servicos;
+            $registro['documentos_mensais'] = $documentos_mensais;
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
         } catch (\Exception $e) {
@@ -516,16 +518,13 @@ class FuncionarioController extends Controller
     {
         try {
             //Incluir Registro
-            if ($request['acao'] == 1) {
-                //Registro
-                FuncionarioDocumento::create($request->all());
+            FuncionarioDocumento::create($request->all());
 
-                //Transação
-                Transacoes::transacaoRecord(2, 1, 'funcionarios', $request, $request);
+            //Transação
+            Transacoes::transacaoRecord(2, 1, 'funcionarios', $request, $request);
 
-                //Return
-                return $this->sendResponse('Documento enviado com sucesso.', 2000, null, $request);
-            }
+            //Return
+            return $this->sendResponse('Documento enviado com sucesso.', 2000, null, $request);
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return $this->sendResponse($e->getMessage(), 5000, null, null);
@@ -590,38 +589,30 @@ class FuncionarioController extends Controller
     public function upload_documento_mensal(Request $request)
     {
         try {
-            // Verifica se é uma ação válida
-            if ($request['acao'] == 1) {
+            // Campos para identificar o registro
+            $where = [
+                'funcionario_id' => $request['funcionario_id'],
+                'mes' => $request['mes'],
+                'ano' => $request['ano'],
+                'documento_mensal_funcionario_id' => $request['documento_mensal_funcionario_id'],
+            ];
 
-                // Campos para identificar o registro
-                $where = [
-                    'funcionario_id' => $request['funcionario_id'],
-                    'mes' => $request['mes'],
-                    'ano' => $request['ano'],
-                    'documento_mensal_funcionario_id' => $request['documento_mensal_funcionario_id'],
-                ];
+            // Tenta encontrar registro existente
+            $registro = FuncionarioDocumentoMensal::where($where)->first();
 
-                // Tenta encontrar registro existente
-                $registro = FuncionarioDocumentoMensal::where($where)->first();
-
-                if ($registro) {
-                    // Atualiza o registro existente
-                    $registro->update($request->all());
-                } else {
-                    // Cria novo registro
-                    FuncionarioDocumentoMensal::create($request->all());
-                }
-
-                //Transação
-                Transacoes::transacaoRecord(4, 1, 'funcionarios', $request, $request);
-
-                //Return
-                return $this->sendResponse('Documento Mensal enviado com sucesso.', 2000, null, $request);
+            if ($registro) {
+                // Atualiza o registro existente
+                $registro->update($request->all());
+            } else {
+                // Cria novo registro
+                FuncionarioDocumentoMensal::create($request->all());
             }
 
-            // Caso a ação não seja válida
-            return $this->sendResponse('Ação inválida.', 4000, null, null);
+            //Transação
+            Transacoes::transacaoRecord(4, 1, 'funcionarios', $request, $request);
 
+            //Return
+            return $this->sendResponse('Documento Mensal enviado com sucesso.', 2000, null, $request);
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return $this->sendResponse($e->getMessage(), 5000, null, null);
@@ -703,24 +694,6 @@ class FuncionarioController extends Controller
 
             //Return
             return $this->sendResponse('Documento Mensal excluído com sucesso.', 2000, null, $registro['caminho']);
-        }
-    }
-
-    public function tomadores_servicos($funcionario_id)
-    {
-        try {
-            $registros = array();
-
-            //Tomadores de Serviços
-            $registros['tomadores_servicos'] = [];
-
-            return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return $this->sendResponse($e->getMessage(), 5000, null, null);
-            }
-
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
         }
     }
 }

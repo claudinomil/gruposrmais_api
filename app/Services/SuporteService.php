@@ -7,7 +7,8 @@ use App\Models\BlockTableOrRecord;
 use App\Models\BrigadaIncendioEscala;
 use App\Models\BrigadaIncendioEscalaBrigadista;
 use App\Models\BrigadaIncendioProduto;
-use App\Models\ClienteSegurancaMedida;
+use App\Models\EdificacaoNivel;
+use App\Models\EdificacaoMedidaSeguranca;
 use App\Models\Especialidade;
 use App\Models\ProdutoControleSituacaoItem;
 use App\Models\ProdutoEntradaItem;
@@ -18,11 +19,10 @@ use App\Models\OrdemServicoServico;
 use App\Models\OrdemServicoVeiculo;
 use App\Models\PontoInteresseEspecialidade;
 use App\Models\PropostaServico;
-use App\Models\SegurancaMedida;
-use Carbon\Carbon;
+use App\Models\MedidaSeguranca;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 
 class SuporteService
@@ -846,116 +846,6 @@ class SuporteService
     }
 
     /*
-     * Editar dados na tabela clientes_seguranca_medidas
-     *
-     * @PARAM op=1 : Edição (verifica se é para Incluir, Alterar ou Excluir de acordo com os dados da Edificação)
-     * @PARAM op=3 : Excluir (vai direto para Excluir todos os registros pertencentes ao Cliente)
-     */
-    public function editClienteSegurancaMedida($op, $cliente_id, $request)
-    {
-        //Editar
-        if ($op == 1) {
-            //Número de Pavimentos da Edificação (Colocar um valor hard code para poder executar a função corretamente)
-            $numero_pavimentos = 50;
-
-            //Buscar Segurança Medidas para percorrer
-            $seguranca_medidas = SegurancaMedida::all();
-
-            //Varrer os Pavimentos
-            for($pavimento=1; $pavimento<=$numero_pavimentos; $pavimento++) {
-                foreach ($seguranca_medidas as $seguranca_medida) {
-                    //Segurança Medida Id
-                    $seguranca_medida_id = $seguranca_medida['id'];
-
-                    //Verificar se o Cliente já tem essa segurança medida para o Pavimento gravado no banco de dados
-                    $clienteSegurancaMedida = ClienteSegurancaMedida::where('pavimento', $pavimento)->where('cliente_id', $cliente_id)->where('seguranca_medida_id', $seguranca_medida_id)->get();
-
-                    //Se tem no banco (Copiar como dados anterior)
-                    if ($clienteSegurancaMedida->count() == 1) {
-                        //Dados anterior (que está no banco de dados)
-                        $dadosAnterior = $clienteSegurancaMedida[0];
-                    }
-
-                    //Verificando se existe dados para a empresa (testando um campo qualquer. Ex.: seguranca_medida_id)
-                    if (isset($request['seguranca_medida_' . $pavimento . '_' . $seguranca_medida_id])) {
-                        //Dados Atual
-                        $dadosAtual = array();
-                        $dadosAtual['pavimento'] = $pavimento;
-                        $dadosAtual['cliente_id'] = $cliente_id;
-                        $dadosAtual['seguranca_medida_id'] = $seguranca_medida_id;
-                        $dadosAtual['quantidade'] = $request['quantidade_' . $pavimento . '_' . $seguranca_medida_id];
-                        $dadosAtual['tipo'] = $request['tipo_' . $pavimento . '_' . $seguranca_medida_id];
-                        $dadosAtual['observacao'] = $request['observacao_' . $pavimento . '_' . $seguranca_medida_id];
-
-                        //Variavel para controle de operação $operacao (1: incluir / 2: alterar / 3: excluir)
-                        $operacao = 0;
-
-                        //Se não tem no banco (Mudar operação para inclusão)
-                        if ($clienteSegurancaMedida->count() == 0) {$operacao = 1;}
-
-                        //Se tem no banco (Mudar operação para alteração)
-                        if ($clienteSegurancaMedida->count() == 1) {$operacao = 2;}
-
-                        //Verificar se dados recebidos estão ok
-                        if ($dadosAtual['pavimento'] == '') {$operacao = 0;}
-                        if ($dadosAtual['cliente_id'] == '') {$operacao = 0;}
-                        if ($dadosAtual['seguranca_medida_id'] == '') {$operacao = 0;}
-                        if ($dadosAtual['quantidade'] == '') {$operacao = 0;}
-                        if ($dadosAtual['tipo'] == '') {}
-                        if ($dadosAtual['observacao'] == '') {}
-
-                        //Se $operacao = 1
-                        if ($operacao == 1) {
-                            ClienteSegurancaMedida::create($dadosAtual);
-
-                            //gravar transacao
-                            Transacoes::transacaoRecord(2, 1, 'clientes', $dadosAtual, $dadosAtual);
-                        }
-
-                        //Se $operacao = 2
-                        if ($operacao == 2) {
-                            ClienteSegurancaMedida::where('pavimento', $pavimento)->where('cliente_id', $cliente_id)->where('seguranca_medida_id', $seguranca_medida_id)->update($dadosAtual);
-
-                            //gravar transacao
-                            Transacoes::transacaoRecord(2, 2, 'clientes', $dadosAnterior, $dadosAtual);
-                        }
-                    } else {
-                        //Se tem no banco e não tem no request (Mudar operação para exclusão)
-                        if ($clienteSegurancaMedida->count() == 1) {
-                            $operacao = 3;
-
-                            //Se $operacao = 3
-                            if ($operacao == 3) {
-                                ClienteSegurancaMedida::where('pavimento', $pavimento)->where('cliente_id', $cliente_id)->where('seguranca_medida_id', $seguranca_medida_id)->delete();
-
-                                //gravar transacao
-                                Transacoes::transacaoRecord(2, 3, 'clientes', $dadosAnterior, $dadosAnterior);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        //Excluir
-        if ($op == 3) {
-            //Verificar as segurança medidas do Cliente
-            $clienteSegurancaMedidas = ClienteSegurancaMedida::where('cliente_id', $cliente_id)->get();
-
-            foreach ($clienteSegurancaMedidas as $clienteSegurancaMedida) {
-                //Dados
-                $dadosAnterior = $clienteSegurancaMedida;
-
-                //Excluir
-                ClienteSegurancaMedida::where('pavimento', $clienteSegurancaMedida['pavimento'])->where('cliente_id', $cliente_id)->where('seguranca_medida_id', $clienteSegurancaMedida['seguranca_medida_id'])->delete();
-
-                //gravar transacao
-                Transacoes::transacaoRecord(2, 3, 'clientes', $dadosAnterior, $dadosAnterior);
-            }
-        }
-    }
-
-    /*
      * Editar dados na tabela propostas_servicos
      *
      * @PARAM op=1 : Incluir Serviços na Proposta
@@ -1005,74 +895,189 @@ class SuporteService
         }
     }
 
-    /*
-     * Bloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-     *
-     * @param   string      $tabela         : Nome da Tabela (ex: 'funcionarios')
-     * @param   int|null    $tabela_id      : ID do registro (opcional, para travar um item específico)
-     * @param   int         $timeOutMinutes : Tempo de expiração automática do lock (padrão: 3 min)
-     *
-     * @return  array                       : Retorna ['status' => 'ok'] ou ['status' => 'locked', 'message' => ...]
-    */
-    public static function bloquearTabelaRegistro($tabela, $tabela_id = null, $timeOutMinutes = 1)
+    public function editEdificacoesNiveis($edificacao_id, $request)
     {
-        // Usuário que está acessando
-        $userId = Auth::id();
+        // Mapeamento de grupos -> código numérico do campo_nivel
+        $mapaNiveis = [
+            'pavimentos' => 1,
+            'mezaninos' => 2,
+            'coberturas' => 3,
+            'areas_tecnicas' => 4,
+        ];
 
-        // Sessão Hash para identificar Usuário, IP e Máquina
-        $sessionHash = hash('sha256', $userId . '|' . session()->getId() . '|' . request()->ip());
+        foreach ($mapaNiveis as $grupo => $campo_nivel) {
 
-        // Limpa locks antigos (expirados)
-        BlockTableOrRecord::where('locked_at', '<', now()->subMinutes($timeOutMinutes))->delete();
+            // Obtém todos os níveis existentes do grupo (nivel numérico!)
+            $niveisExistentes = EdificacaoNivel::where('edificacao_id', $edificacao_id)
+                ->where('nivel', $campo_nivel)
+                ->get()
+                ->keyBy('ordem'); // chaveado pela ordem interna (1, 2, 3...)
 
-        // Verifica se já há lock ativo
-        $query = BlockTableOrRecord::where('tabela', $tabela);
-        if ($tabela_id) {
-            $query->where('tabela_id', $tabela_id);
+            $total = (int) $request->input($grupo, 0);
+            $idsMantidos = [];
+
+            for ($i = 1; $i <= $total; $i++) {
+                $campoNome = "nivel_nome_{$grupo}_{$i}";
+                $campoArea = "nivel_area_construida_{$grupo}_{$i}";
+
+                $nome = $request->input($campoNome);
+                $area = $request->input($campoArea);
+
+                // Ignora se não vier nome nem área
+                if (is_null($nome) && is_null($area)) {
+                    continue;
+                }
+
+                if ($niveisExistentes->has($i)) {
+                    // Atualiza o existente (ordem = $i)
+                    $nivel = $niveisExistentes->get($i);
+                    $nivel->update([
+                        'name' => $nome,
+                        'area_construida' => $area,
+                    ]);
+                } else {
+                    // Cria novo registro
+                    $nivel = EdificacaoNivel::create([
+                        'edificacao_id' => $edificacao_id,
+                        'ordem' => $i,
+                        'nivel' => $campo_nivel,
+                        'name' => $nome,
+                        'area_construida' => $area,
+                    ]);
+                }
+
+                $idsMantidos[] = $nivel->id;
+            }
+
+            // Busca os que precisam ser excluídos individualmente
+            $niveisParaExcluir = EdificacaoNivel::where('edificacao_id', $edificacao_id)
+                ->where('nivel', $campo_nivel)
+                ->whereNotIn('id', $idsMantidos)
+                ->get();
+
+            foreach ($niveisParaExcluir as $nivel) {
+                // Aqui você pode registrar log se desejar
+                $nivel->delete();
+            }
         }
+    }
 
-        $lock = $query->first();
+    public function editEdificacoesMedidasSeguranca($edificacao_id, $request)
+    {
+        // Mapeamento de grupos -> código numérico do campo_nivel
+        $mapaNiveis = [
+            'pavimentos' => 1,
+            'mezaninos' => 2,
+            'coberturas' => 3,
+            'areas_tecnicas' => 4,
+        ];
 
-        // Se existe lock e não é da mesma sessão, bloqueia
-        if ($lock && $lock->session_hash !== $sessionHash) {
-            return [
-                'status' => 'locked',
-                'message' => 'Este recurso está bloqueado por outro usuário ou sessão ativa.'
-            ];
+        foreach ($mapaNiveis as $grupo => $campo_nivel) {
+            // Busca os níveis existentes dessa edificação e grupo
+            $niveis = EdificacaoNivel::where('edificacao_id', $edificacao_id)
+                ->where('nivel', $campo_nivel)
+                ->get();
+
+            // Para cada nível (ordem = índice dentro do grupo)
+            foreach ($niveis as $nivel) {
+                $ordem = $nivel->ordem; // usado para montar o nome dos campos
+                $idsMantidos = [];
+
+                // Pega todos as medidas segurança disponíveis (IDs esperados no formulário)
+                $medidasSeguranca = MedidaSeguranca::all();
+
+                foreach ($medidasSeguranca as $medida) {
+                    $campoSistema = "nivel_medida_seguranca_id_{$medida->id}_{$grupo}_{$ordem}";
+                    $campoQuantidade = "nivel_quantidade_medida_seguranca_{$medida->id}_{$grupo}_{$ordem}";
+
+                    $medidaSegurancaId = $request->input($campoSistema);
+                    $quantidade = $request->input($campoQuantidade);
+                    if (is_null($quantidade)) {$quantidade = 0;}
+
+                    // Ignora se não houver dados
+                    if (empty($medidaSegurancaId) || is_null($quantidade)) {
+                        continue;
+                    }
+
+                    // Verifica se já existe esse sistema vinculado ao nível
+                    $registroExistente = EdificacaoMedidaSeguranca::where('edificacao_nivel_id', $nivel->id)
+                        ->where('medida_seguranca_id', $medidaSegurancaId)
+                        ->first();
+
+                    if ($registroExistente) {
+                        // Atualiza
+                        $registroExistente->update([
+                            'quantidade' => $quantidade,
+                        ]);
+
+                        $idsMantidos[] = $registroExistente->id;
+                    } else {
+                        // Cria novo
+                        $novo = EdificacaoMedidaSeguranca::create([
+                            'edificacao_nivel_id' => $nivel->id,
+                            'medida_seguranca_id' => $medidaSegurancaId,
+                            'quantidade' => $quantidade,
+                        ]);
+
+                        $idsMantidos[] = $novo->id;
+                    }
+                }
+
+                // Exclui os registros que não estão mais no formulário
+                $aExcluir = EdificacaoMedidaSeguranca::where('edificacao_nivel_id', $nivel->id)
+                    ->whereNotIn('id', $idsMantidos)
+                    ->get();
+
+                foreach ($aExcluir as $item) {
+                    // Log de exclusão, se necessário
+                    $item->delete();
+                }
+            }
         }
-
-        // Cria ou renova o lock para a sessão atual
-        BlockTableOrRecord::updateOrCreate(
-            ['tabela' => $tabela, 'tabela_id' => $tabela_id],
-            [
-                'user_id' => $userId,
-                'session_hash' => $sessionHash,
-                'locked_at' => now()
-            ]
-        );
-
-        return ['status' => 'unlocked'];
     }
 
     /*
-     * Desbloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
+     * Verificar/Bloquear/Desbloquear Tabela para Edição
      *
-     * @param   string      $tabela         : Nome da Tabela (ex: 'funcionarios')
-     * @param   int|null    $tabela_id      : ID do registro (opcional, para destravar um item específico)
+     * @param   int     $op             :   1 (Verificar)   2(Bloquear)   3(Desbloquear)
+     * @param   string  $tabela         :   Nome da Tabela (ex: 'funcionarios')
+     * @param   int     $timeOutMinutes :   Tempo de expiração automática do lock (padrão: 3 min)
+     *
+     * @return  array   : Retorna ['status' => 'ok'] ou ['status' => 'locked', 'message' => ...]
     */
-    public static function desbloquearTabelaRegistro($tabela, $tabela_id = null)
+    public static function bloquearTabela($op, $tabela, $timeOutMinutes=1)
     {
-        // Usuário que está acessando
-        $userId = Auth::id();
+        // Verificar/Bloquear
+        if ($op == 1 or $op == 2) {
+            // Remove bloqueios expirados (por tempo)
+            BlockTableOrRecord::where('locked_at', '<', now()->subMinutes($timeOutMinutes))->delete();
 
-        // Sessão Hash para identificar Usuário, IP e Máquina
-        $sessionHash = hash('sha256', $userId . '|' . session()->getId() . '|' . request()->ip());
+            // Verifica se já há bloqueio ativo para essa tabela
+            $lock = BlockTableOrRecord::where('tabela', $tabela)->first();
 
-        BlockTableOrRecord::where('tabela', $tabela)
-            ->when($tabela_id, fn($q) => $q->where('tabela_id', $tabela_id))
-            ->where('user_id', $userId)
-            ->where('session_hash', $sessionHash)
-            ->delete();
+            // Se existe bloqueio → impedir acesso
+            if ($lock) {
+                $user = User::where('id', $lock->user_id)->first();
+
+                return ['status' => 'locked', 'user_id' => $lock->user_id, 'message' => 'Esta tabela está bloqueada pelo usuário: '.$user->email.'.'];
+            }
+
+            // Bloquear
+            if ($op == 2) {
+                // Usuário autenticado
+                $userId = Auth::id();
+
+                // Criar bloqueio
+                BlockTableOrRecord::create(['tabela' => $tabela, 'user_id' => $userId, 'locked_at' => now()]);
+
+                return ['status' => 'unlocked'];
+            }
+        }
+
+        // Desbloquear
+        if ($op == 3) {
+            BlockTableOrRecord::where('tabela', $tabela)->delete();
+        }
     }
 
     // Criar registro na tabela produtos_controle_situacoes_itens

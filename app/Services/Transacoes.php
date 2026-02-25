@@ -7,18 +7,19 @@ use App\Models\BrigadaIncendio;
 use App\Models\BrigadaIncendioEscala;
 use App\Models\Cliente;
 use App\Models\ClienteExecutivo;
-use App\Models\ClienteServico;
 use App\Models\ContratacaoTipo;
 use App\Models\Cor;
 use App\Models\Departamento;
-use App\Models\EdificacaoClassificacao;
+use App\Models\Documento;
+use App\Models\EdificacaoLocal;
+use App\Models\EdificacaoNivel;
 use App\Models\Empresa;
+use App\Models\SistemaPreventivo;
 use App\Models\EscalaTipo;
 use App\Models\FormaPagamento;
 use App\Models\FormaPagamentoStatus;
 use App\Models\Funcionario;
 use App\Models\Genero;
-use App\Models\Grupo;
 use App\Models\IdentidadeOrgao;
 use App\Models\EstadoCivil;
 use App\Models\IncendioRisco;
@@ -32,13 +33,9 @@ use App\Models\OrdemServicoStatus;
 use App\Models\OrdemServicoTipo;
 use App\Models\PixTipo;
 use App\Models\Proposta;
-use App\Models\PropostaServico;
-use App\Models\SegurancaMedida;
+use App\Models\MedidaSeguranca;
 use App\Models\Servico;
-use App\Models\ServicoStatus;
 use App\Models\ServicoTipo;
-use App\Models\SistemaAcesso;
-use App\Models\Situacao;
 use App\Models\Estado;
 use App\Models\Estoque;
 use App\Models\EstoqueLocal;
@@ -46,11 +43,8 @@ use App\Models\Fornecedor;
 use App\Models\Produto;
 use App\Models\ProdutoCategoria;
 use App\Models\ProdutoEntrada;
-use App\Models\ProdutoEntradaItem;
 use App\Models\ProdutoTipo;
 use App\Models\Transacao;
-use App\Models\User;
-
 use App\Models\Veiculo;
 use App\Models\VeiculoCategoria;
 use App\Models\VeiculoCombustivel;
@@ -414,7 +408,9 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['caminho'], $dadosAtual['caminho'], 'Caminho', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['data_documento'], $dadosAtual['data_documento'], 'Data Documento', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_emissao'], $dadosAtual['data_emissao'], 'Data Emissão', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_vencimento'], $dadosAtual['data_vencimento'], 'Data Vencimento', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_ultimo_aviso'], $dadosAtual['data_ultimo_aviso'], 'Data Último Aviso', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['aviso'], $dadosAtual['aviso'], 'Aviso', '', '');
                 }
 
@@ -488,34 +484,29 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['telefone_2'], $dadosAtual['telefone_2'], 'Telefone 2', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['celular_1'], $dadosAtual['celular_1'], 'Celular 1', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['celular_2'], $dadosAtual['celular_2'], 'Celular 2', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['numero_pavimentos'], $dadosAtual['numero_pavimentos'], 'Número Pavimentos', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['altura'], $dadosAtual['altura'], 'Altura', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['area_total_construida'], $dadosAtual['area_total_construida'], 'Área Total Construida', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['lotacao'], $dadosAtual['lotacao'], 'Lotação', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['carga_incendio'], $dadosAtual['carga_incendio'], 'Carga Incêndio', '', '');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['incendio_risco_id'], $dadosAtual['incendio_risco_id'], 'Incêndio Risco', IncendioRisco::class, 'name');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['edificacao_classificacao_id'], $dadosAtual['edificacao_classificacao_id'], 'Edificação Classificação', EdificacaoClassificacao::class, 'divisao');
-                }
-
-                //Tabela clientes_seguranca_medidas
-                if ($op == 2) {
-                    $dados .= '<b>:: Clientes Segurança Medidas</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(1, $dadosAnterior['pavimento'], $dadosAtual['pavimento'], 'Pavimento', '', '');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Cliente', Cliente::class, 'name');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['seguranca_medida_id'], $dadosAtual['seguranca_medida_id'], 'Segurança Medida', SegurancaMedida::class, 'name');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['quantidade'], $dadosAtual['quantidade'], 'Quantidade', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['tipo'], $dadosAtual['tipo'], 'Tipo', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['observacao'], $dadosAtual['observacao'], 'Observação', '', '');
                 }
 
                 //Tabela clientes_documentos
                 if ($op == 3) {
-                    $dados .= '<b>:: Funcionários Documentos</b>'.'<br><br>';
+                    $dados .= '<b>:: Clientes Documentos</b>'.'<br><br>';
                     $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Funcionário', Cliente::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['caminho'], $dadosAtual['caminho'], 'Caminho', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['data_documento'], $dadosAtual['data_documento'], 'Data Documento', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_emissao'], $dadosAtual['data_emissao'], 'Data Emissão', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_vencimento'], $dadosAtual['data_vencimento'], 'Data Vencimento', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_ultimo_aviso'], $dadosAtual['data_ultimo_aviso'], 'Data Último Aviso', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['aviso'], $dadosAtual['aviso'], 'Aviso', '', '');
+                }
+
+                // Avisos
+                if ($op == 4) {
+                    $dados .= '<b>:: Clientes Avisos</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Funcionário', Cliente::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['documento_id'], $dadosAtual['documento_id'], 'Documento', Documento::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_emissao'], $dadosAtual['data_emissao'], 'Data Emissão', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_vencimento'], $dadosAtual['data_vencimento'], 'Data Vencimento', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['data_aviso'], $dadosAtual['data_aviso'], 'Data Aviso', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['cliente_email'], $dadosAtual['cliente_email'], 'E-mail envio', '', '');
                 }
             }
 
@@ -931,7 +922,66 @@ class Transacoes
                 }
             }
 
-            //Verificando se é uma alteração e pode gravar (caso nenhum campo tenha sido alterado não deixar gravar)''''
+            // Edificações
+            if ($submodulo_id == 44) {
+                if ($op == 1) {
+                    $dados .= '<b>:: Edificações</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Funcionário', Cliente::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['pavimentos'], $dadosAtual['pavimentos'], 'Pavimentos', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['mezaninos'], $dadosAtual['mezaninos'], 'Mezaninos', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['coberturas'], $dadosAtual['coberturas'], 'Coberturas', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['areas_tecnicas'], $dadosAtual['areas_tecnicas'], 'Áreas Técnicas', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['altura'], $dadosAtual['altura'], 'Altura', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['area_total_construida'], $dadosAtual['area_total_construida'], 'Área Total Construida', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['lotacao'], $dadosAtual['lotacao'], 'Lotação', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['carga_incendio'], $dadosAtual['carga_incendio'], 'Carga Incêndio', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['incendio_risco_id'], $dadosAtual['incendio_risco_id'], 'Risco Incêndio', IncendioRisco::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['grupo'], $dadosAtual['grupo'], 'Grupo', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['ocupacao_uso'], $dadosAtual['ocupacao_uso'], 'Ocupação Uso', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['divisao'], $dadosAtual['divisao'], 'Divisão', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['definicao'], $dadosAtual['definicao'], 'Definição', '', '');
+                }
+            }
+
+            // Edificações Locais
+            if ($submodulo_id == 46) {
+                if ($op == 1) {
+                    $dados .= '<b>:: Edificações Locais</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['edificacao_nivel_id'], $dadosAtual['edificacao_nivel_id'], 'Edificação Nível', EdificacaoNivel::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
+                }
+            }
+
+            // Mapas Preventivos
+            if ($submodulo_id == 47) {
+                if ($op == 1) {
+                    $dados .= '<b>:: Mapas Preventivos</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['edificacao_local_id'], $dadosAtual['edificacao_local_id'], 'Edificação Local', EdificacaoLocal::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['sistema_preventivo_id'], $dadosAtual['sistema_preventivo_id'], 'Sistema Preventivo', SistemaPreventivo::class, 'name');
+                }
+            }
+
+            // Medidas Segurança
+            if ($submodulo_id == 48) {
+                if ($op == 1) {
+                    $dados .= '<b>:: Medidas Segurança</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['ordem'], $dadosAtual['ordem'], 'Ordem', '', '');
+                }
+            }
+
+            // Sistemas Preventivos
+            if ($submodulo_id == 49) {
+                if ($op == 1) {
+                    $dados .= '<b>:: Sistemas Preventivos</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['medida_seguranca_id'], $dadosAtual['medida_seguranca_id'], 'Medida Segurança', MedidaSeguranca::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
+                }
+            }
+
+            // Verificando se é uma alteração e pode gravar (caso nenhum campo tenha sido alterado não deixar gravar)''''
             if ($operacao == 2 and $this->gravarAlteracao === false) {
                 $dados = '';
             } else {
@@ -939,7 +989,7 @@ class Transacoes
             }
             //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-            //gravar transacao''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+            // gravar transacao''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
             if ($dados != '') {
                 $trasaction = Array();
 

@@ -103,12 +103,10 @@ class ProdutoMovimentacaoController extends Controller
     public function store(ProdutoMovimentacaoStoreRequest $request)
     {
         try {
-            // Bloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            $lock = SuporteFacade::bloquearTabelaRegistro('produtos_movimentacoes');
-
-            if ($lock['status'] === 'locked') {
-                return $this->sendResponse($lock['message'], 4423, null, null);
-            }
+            // Verificar/Bloquear/Desbloquear Tabela''''''''''
+            $lock = SuporteFacade::bloquearTabela(2, 'produtos_movimentacoes');
+            if ($lock['status'] === 'locked') {return $this->sendResponse($lock['message'], 4423, null, null);}
+            //''''''''''''''''''''''''''''''''''''''''''''''''
 
             // Data, Hora e Tipo de Movimentação
             $request['data_movimentacao'] = date('d/m/Y');
@@ -172,8 +170,9 @@ class ProdutoMovimentacaoController extends Controller
                 }
             }
 
-            // Desbloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            SuporteFacade::desbloquearTabelaRegistro('produtos_movimentacoes');
+            // Verificar/Bloquear/Desbloquear Tabela''''''''''
+            SuporteFacade::bloquearTabela(3, 'produtos_movimentacoes');
+            //''''''''''''''''''''''''''''''''''''''''''''''''
 
             return $this->sendResponse('Registro criado com sucesso.', 2010, null, 'null');
         } catch (\Exception $e) {

@@ -86,7 +86,7 @@ class ClienteExecutivoController extends Controller
                 ->orderby('documento_fontes.ordem', 'ASC')
                 ->orderby('documentos.ordem', 'ASC')
                 ->get();
-                
+
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -238,119 +238,6 @@ class ClienteExecutivoController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
 
-    // public function modal_info($id)
-    // {
-    //     try {
-    //         $registro = array();
-
-    //         //ClienteExecutivo
-    //         $cliente_executivo = ClienteExecutivo
-    //             ::leftJoin('generos', 'clientes_executivos.genero_id', '=', 'generos.id')
-    //             ->select(['clientes_executivos.*', 'generos.name as generoName'])
-    //             ->where('clientes_executivos.id', '=', $id)
-    //             ->get();
-
-    //         $registro['cliente_executivo'] = $cliente_executivo[0];
-
-    //         return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
-    //     } catch (\Exception $e) {
-    //         if (config('app.debug')) {
-    //             return $this->sendResponse($e->getMessage(), 5000, null, null);
-    //         }
-
-    //         return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-    //     }
-    // }
-
-    // public function upload_foto(Request $request, $id)
-    // {
-    //     try {
-    //         $registro = $this->cliente_executivo->find($id);
-
-    //         if (!$registro) {
-    //             return $this->sendResponse('Registro não encontrado.', 4040, null, null);
-    //         } else {
-    //             //Alterando registro
-    //             $registro->update($request->all());
-
-    //             //Transação
-    //             $dadosAtual = array();
-    //             $dadosAtual['name'] = $request['name'];
-    //             $dadosAtual['foto'] = 'Foto atualizada';
-
-    //             Transacoes::transacaoRecord(3, 2, 'clientes_executivos', $request, $dadosAtual);
-
-    //             //Return
-    //             return $this->sendResponse('Foto atualizada com sucesso.', 2000, null, $registro);
-    //         }
-    //     } catch (\Exception $e) {
-    //         if (config('app.debug')) {
-    //             return $this->sendResponse($e->getMessage(), 5000, null, null);
-    //         }
-
-    //         return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-    //     }
-    // }
-
-    // public function upload_documento(Request $request)
-    // {
-    //     try {
-    //         //Incluir Registro
-    //         if ($request['acao'] == 1) {
-    //             //Registro
-    //             ClienteExecutivoDocumento::create($request->all());
-
-    //             //Transação
-    //             Transacoes::transacaoRecord(2, 1, 'clientes_executivos', $request, $request);
-
-    //             //Return
-    //             return $this->sendResponse('Documento enviado com sucesso.', 2000, null, $request);
-    //         }
-    //     } catch (\Exception $e) {
-    //         if (config('app.debug')) {
-    //             return $this->sendResponse($e->getMessage(), 5000, null, null);
-    //         }
-
-    //         return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-    //     }
-    // }
-
-    // public function documentos($cliente_executivo_id)
-    // {
-    //     try {
-    //         $registros = ClienteExecutivoDocumento
-    //             ::where('cliente_executivo_id', $cliente_executivo_id)
-    //             ->get();
-
-    //         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
-    //     } catch (\Exception $e) {
-    //         if (config('app.debug')) {
-    //             return $this->sendResponse($e->getMessage(), 5000, null, null);
-    //         }
-
-    //         return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-    //     }
-    // }
-
-    // public function deletar_documento($cliente_executivo_documento_id)
-    // {
-    //     $registro = ClienteExecutivoDocumento::find($cliente_executivo_documento_id);
-
-    //     if (!$registro) {
-    //         return $this->sendResponse('Documento não encontrado.', 4040, null, $registro);
-    //     } else {
-    //         //Deletar
-    //         $registro->delete();
-
-    //         //gravar transacao
-    //         Transacoes::transacaoRecord(2, 3, 'clientes_executivos', $registro, $registro);
-
-    //         //Return
-    //         return $this->sendResponse('Documento excluído com sucesso.', 2000, null, $registro['caminho']);
-    //     }
-    // }
-
-
     public function modal_info($id)
     {
         try {
@@ -363,9 +250,9 @@ class ClienteExecutivoController extends Controller
                 ->select(['clientes_executivos.*', 'generos.name as generoName', 'clientes.name as clienteName'])
                 ->where('clientes_executivos.id', '=', $id)
                 ->get();
-                
+
             $registro['cliente_executivo'] = $cliente_executivo[0];
-            
+
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -387,7 +274,7 @@ class ClienteExecutivoController extends Controller
                 ->count();
 
             $registro['documentos'] = $documentos;
-            
+
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -448,16 +335,13 @@ class ClienteExecutivoController extends Controller
     {
         try {
             //Incluir Registro
-            if ($request['acao'] == 1) {
-                //Registro
-                ClienteExecutivoDocumento::create($request->all());
+            ClienteExecutivoDocumento::create($request->all());
 
-                //Transação
-                Transacoes::transacaoRecord(2, 1, 'clientes_executivos', $request, $request);
+            //Transação
+            Transacoes::transacaoRecord(2, 1, 'clientes_executivos', $request, $request);
 
-                //Return
-                return $this->sendResponse('Documento enviado com sucesso.', 2000, null, $request);
-            }
+            //Return
+            return $this->sendResponse('Documento enviado com sucesso.', 2000, null, $request);
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return $this->sendResponse($e->getMessage(), 5000, null, null);
@@ -518,7 +402,7 @@ class ClienteExecutivoController extends Controller
             return $this->sendResponse('Documento excluído com sucesso.', 2000, null, $registro['caminho']);
         }
     }
-    
+
     public function cartoes_emergenciais_registros()
     {
         $registros = $this->cliente_executivo->orderby('id')->get(['id']);

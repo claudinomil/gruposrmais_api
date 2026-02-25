@@ -122,6 +122,7 @@ class Z_FakerSeeder extends Seeder
                 'name' => 'REDE '.$i,
                 'cnpj' => $faker->cnpj(false),
                 'email' => $faker->email,
+                'email_avisos' => 'claudinomilhomens@gmail.com',
                 'telefone_1' => '21'.$faker->numerify('########'),
                 'telefone_2' => '21'.$faker->numerify('########'),
                 'celular_1' => '21'.$faker->numerify('9########'),

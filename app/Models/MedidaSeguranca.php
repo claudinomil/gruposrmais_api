@@ -5,14 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SegurancaMedida extends Model
+class MedidaSeguranca extends Model
 {
     use HasFactory;
 
-    protected $table = 'seguranca_medidas';
+    protected $table = 'medidas_seguranca';
 
     protected $fillable = [
-        'name'
+        'name',
+        'ordem'
     ];
 
     public function setNameAttribute($value) {$this->attributes['name'] = mb_strtoupper($value);}

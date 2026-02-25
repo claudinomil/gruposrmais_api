@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Facades\SuporteFacade;
 use App\Http\Requests\EstoqueLocalStoreRequest;
 use App\Http\Requests\EstoqueLocalUpdateRequest;
 use App\Models\Cliente;
@@ -126,7 +127,37 @@ class EstoqueLocalController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                // Verificar Relacionamentos''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                // Tabela produtos_entradas
+                if (SuporteFacade::verificarRelacionamento('produtos_entradas', 'estoque_local_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Produtos Entradas.', 2040, null, null);
+                }
+
+                // Tabela produtos_entradas_itens
+                if (SuporteFacade::verificarRelacionamento('produtos_entradas_itens', 'estoque_local_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Produtos Entradas Itens.', 2040, null, null);
+                }
+
+                // Tabela produtos_movimentacoes
+                if (SuporteFacade::verificarRelacionamento('produtos_movimentacoes', 'origem_estoque_local_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Produtos Movimentações (Origem).', 2040, null, null);
+                }
+
+                // Tabela produtos_movimentacoes
+                if (SuporteFacade::verificarRelacionamento('produtos_movimentacoes', 'destino_estoque_local_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Produtos Movimentações (Destino).', 2040, null, null);
+                }
+
+                // Tabela produtos_controle_situacoes_itens
+                if (SuporteFacade::verificarRelacionamento('produtos_controle_situacoes_itens', 'anterior_estoque_local_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Produtos Controle Situações (Anterior).', 2040, null, null);
+                }
+
+                // Tabela produtos_controle_situacoes_itens
+                if (SuporteFacade::verificarRelacionamento('produtos_controle_situacoes_itens', 'atual_estoque_local_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Produtos Controle Situações (Atual).', 2040, null, null);
+                }
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

@@ -16,18 +16,20 @@ class FuncionarioDocumento extends Model
         'funcionario_id',
         'documento_id',
         'caminho',
-        'data_documento',
+        'descricao',
+        'data_emissao',
+        'data_vencimento',
+        'data_ultimo_aviso',
         'aviso'
     ];
 
     protected $dates = [
-        'data_documento'
+        'data_emissao',
+        'data_vencimento',
+        'data_ultimo_aviso'
     ];
 
-    public function setDataDocumentoAttribute($value)
-    {
-        if ($value != '') {
-            $this->attributes['data_documento'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');
-        }
-    }
+    public function setDataEmissaoAttribute($value) {if ($value != '') {$this->attributes['data_emissao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
+    public function setDataVencimentoAttribute($value) {if ($value != '') {$this->attributes['data_vencimento'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
+    public function setDataUltimoAvisoAttribute($value) {if ($value != '') {$this->attributes['data_ultimo_aviso'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
 }

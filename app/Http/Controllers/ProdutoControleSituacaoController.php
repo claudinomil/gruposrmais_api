@@ -128,26 +128,20 @@ class ProdutoControleSituacaoController extends Controller
     public function update(ProdutoControleSituacaoUpdateRequest $request, $id)
     {
         try {
-            // Bloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            $lock = SuporteFacade::bloquearTabelaRegistro('produtos_movimentacoes');
+            // Verificar/Bloquear/Desbloquear Tabela''''''''''
+            $lock = SuporteFacade::bloquearTabela(2, 'produtos_movimentacoes');
+            if ($lock['status'] === 'locked') {return $this->sendResponse($lock['message'], 4423, null, null);}
+            //''''''''''''''''''''''''''''''''''''''''''''''''
 
-            if ($lock['status'] === 'locked') {
-                return $this->sendResponse($lock['message'], 4423, null, null);
-            }
+            // Verificar/Bloquear/Desbloquear Tabela''''''''''
+            $lock = SuporteFacade::bloquearTabela(2, 'produtos_entradas');
+            if ($lock['status'] === 'locked') {return $this->sendResponse($lock['message'], 4423, null, null);}
+            //''''''''''''''''''''''''''''''''''''''''''''''''
 
-            // Bloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            $lock = SuporteFacade::bloquearTabelaRegistro('produtos_entradas');
-
-            if ($lock['status'] === 'locked') {
-                return $this->sendResponse($lock['message'], 4423, null, null);
-            }
-
-            // Bloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            $lock = SuporteFacade::bloquearTabelaRegistro('produtos_entradas_itens');
-
-            if ($lock['status'] === 'locked') {
-                return $this->sendResponse($lock['message'], 4423, null, null);
-            }
+            // Verificar/Bloquear/Desbloquear Tabela''''''''''
+            $lock = SuporteFacade::bloquearTabela(2, 'produtos_entradas_itens');
+            if ($lock['status'] === 'locked') {return $this->sendResponse($lock['message'], 4423, null, null);}
+            //''''''''''''''''''''''''''''''''''''''''''''''''
 
             // Processo - Início''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
             // Processo - Início''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -201,14 +195,17 @@ class ProdutoControleSituacaoController extends Controller
             // Processo - Fim'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
             // Processo - Fim'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-            // Desbloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            SuporteFacade::desbloquearTabelaRegistro('produtos_movimentacoes');
+            // Verificar/Bloquear/Desbloquear Tabela''''''''''
+            SuporteFacade::bloquearTabela(3, 'produtos_movimentacoes');
+            //''''''''''''''''''''''''''''''''''''''''''''''''
 
-            // Desbloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            SuporteFacade::desbloquearTabelaRegistro('produtos_entradas');
+            // Verificar/Bloquear/Desbloquear Tabela''''''''''
+            SuporteFacade::bloquearTabela(3, 'produtos_entradas');
+            //''''''''''''''''''''''''''''''''''''''''''''''''
 
-            // Desbloquear Tabela ou Registro para Edição (Incluir, Alterar e Excluir)
-            SuporteFacade::desbloquearTabelaRegistro('produtos_entradas_itens');
+            // Verificar/Bloquear/Desbloquear Tabela''''''''''
+            SuporteFacade::bloquearTabela(3, 'produtos_entradas_itens');
+            //''''''''''''''''''''''''''''''''''''''''''''''''
 
             // Retorno
             if ($retorno == 1) {return $this->sendResponse('Registro não encontrado.', 4040, null, null);}

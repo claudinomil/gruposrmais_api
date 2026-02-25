@@ -2,16 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\Documento;
-use App\Models\DocumentoFonte;
 use App\Models\Grafico;
-use App\Models\Grupo;
 use App\Models\GrupoPermissao;
-use App\Models\Modulo;
 use App\Models\Permissao;
 use App\Models\Relatorio;
 use App\Models\Submodulo;
-use App\Models\VisitaTecnicaPergunta;
 use Illuminate\Database\Seeder;
 
 class ZZZ_20260125_Seeder extends Seeder

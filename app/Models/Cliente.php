@@ -47,18 +47,12 @@ class Cliente extends Model
         'agencia',
         'conta',
         'email',
+        'email_avisos',
         'site',
         'telefone_1',
         'telefone_2',
         'celular_1',
         'celular_2',
-        'numero_pavimentos',
-        'altura',
-        'area_total_construida',
-        'lotacao',
-        'carga_incendio',
-        'incendio_risco_id',
-        'edificacao_classificacao_id',
         'logotipo_principal',
         'logotipo_relatorios',
         'logotipo_cartao_emergencial',
@@ -93,66 +87,8 @@ class Cliente extends Model
     public function setUfCobrancaAttribute($value) {$this->attributes['uf_cobranca'] = mb_strtoupper($value);}
     public function setEmailAttribute($value) {$this->attributes['email'] = mb_strtolower($value);}
     public function setSiteAttribute($value) {$this->attributes['site'] = mb_strtolower($value);}
+    public function setDominioAttribute($value) {$this->attributes['dominio'] = mb_strtolower($value);}
 
     public function setIdentidadeDataEmissaoAttribute($value) {if ($value != '') {$this->attributes['identidade_data_emissao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
     public function setDataNascimentoAttribute($value) {if ($value != '') {$this->attributes['data_nascimento'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
-
-    public function setNumeroPavimentosAttribute($value)
-    {
-        if ($value != '') {
-            $this->attributes['numero_pavimentos'] = $value;
-        } else {
-            $this->attributes['numero_pavimentos'] = 0;
-        }
-    }
-    public function setAlturaAttribute($value)
-    {
-        if ($value != '') {
-            $value = str_replace('.', '', $value);
-            $value = str_replace('.', '', $value);
-            $value = str_replace('.', '', $value);
-            $value = str_replace(',', '.', $value);
-
-            $this->attributes['altura'] = $value;
-        } else {
-            $this->attributes['altura'] = 0;
-        }
-    }
-    public function setAreaTotalConstruidaAttribute($value)
-    {
-        if ($value != '') {
-            $value = str_replace('.', '', $value);
-            $value = str_replace('.', '', $value);
-            $value = str_replace('.', '', $value);
-            $value = str_replace(',', '.', $value);
-
-            $this->attributes['area_total_construida'] = $value;
-        } else {
-            $this->attributes['area_total_construida'] = 0;
-        }
-    }
-    public function setLotacaoAttribute($value)
-    {
-        if ($value != '') {
-            $this->attributes['lotacao'] = $value;
-        } else {
-            $this->attributes['lotacao'] = 0;
-        }
-    }
-    public function setCargaIncendioAttribute($value)
-    {
-        if ($value != '') {
-            $this->attributes['carga_incendio'] = $value;
-        } else {
-            $this->attributes['carga_incendio'] = 0;
-        }
-    }
-//    public function setLaudoExigenciasAttribute($value)
-//    {
-//        $this->attributes['laudo_exigencias'] = 1;
-//    }
-//    public function setCertificadoAprovacaoAttribute($value)
-//    {
-//        $this->attributes['certificado_aprovacao'] = 1;
-//    }
 }

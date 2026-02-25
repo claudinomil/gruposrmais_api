@@ -21,9 +21,15 @@ Route::prefix('clientes')->group(function () {
     Route::post('/uploadDocumento/upload_documento', [ClienteController::class, 'upload_documento'])->middleware(['auth:api']);
     Route::get('/modalInfo/documentos/{cliente_id}', [ClienteController::class, 'documentos'])->middleware(['auth:api']);
     Route::delete('/modalInfo/deletar_documento/destroy/{id}', [ClienteController::class, 'deletar_documento'])->middleware(['auth:api']);
-    Route::get('/modalInfo/servicos/{cliente_id}', [ClienteController::class, 'servicos'])->middleware(['auth:api']);
-    Route::get('/modalInfo/clientes/{cliente_id}', [ClienteController::class, 'clientes'])->middleware(['auth:api']);
 
-    //Visita Técnica
-    Route::get('/visita_tecnica/{id}', [ClienteController::class, 'visita_tecnica'])->middleware(['auth:api']);
+    Route::get('/modalInfo/documentos_exigidos/{cliente_id}', [ClienteController::class, 'documentos_exigidos'])->middleware(['auth:api']);
+    Route::get('/modalInfo/documentos_exigidos_dados/{cliente_id}', [ClienteController::class, 'documentos_exigidos_dados'])->middleware(['auth:api']);
+    Route::post('/modalInfo/documentos_exigidos_save', [ClienteController::class, 'documentos_exigidos_save'])->middleware(['auth:api']);
+
+    Route::get('/modalInfo/propostas/{cliente_id}', [ClienteController::class, 'propostas'])->middleware(['auth:api']);
+    Route::get('/modalInfo/ordens_servicos/{cliente_id}', [ClienteController::class, 'ordens_servicos'])->middleware(['auth:api']);
+    Route::get('/modalInfo/visitas_tecnicas/{cliente_id}', [ClienteController::class, 'visitas_tecnicas'])->middleware(['auth:api']);
+    Route::get('/modalInfo/brigadas_incendios/{cliente_id}', [ClienteController::class, 'brigadas_incendios'])->middleware(['auth:api']);
+    Route::get('/modalInfo/clientes_rede/{cliente_id}', [ClienteController::class, 'clientes_rede'])->middleware(['auth:api']);
+    Route::get('/modalInfo/clientes_principal/{cliente_id}', [ClienteController::class, 'clientes_principal'])->middleware(['auth:api']);
 });
