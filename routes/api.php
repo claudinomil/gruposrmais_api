@@ -18,6 +18,9 @@ require __DIR__ . '/routes_grupos.php';
 //Users
 require __DIR__ . '/routes_users.php';
 
+// Users Submodulos Favoritos
+require __DIR__ . '/routes_users_submodulos_favoritos.php';
+
 //Bancos
 require __DIR__ . '/routes_bancos.php';
 

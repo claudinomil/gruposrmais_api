@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use App\Models\User;
+use App\Models\UserSubmoduloFavorito;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -510,23 +511,16 @@ class UserController extends Controller
             if (!Auth::check()) {
                 return $this->sendResponse('Usuário não está logado.', 4040, null, null);
             } else {
-                //Cria array
+                // Cria array
                 $registros = array();
 
-
-
-                // TESTE
-                $registros['data_hora'] = date('d/m/Y H:i:s');
-
-
-
-                //Dados Usuário Logado
+                // Dados Usuário Logado
                 $registros['userData'] = Auth::user();
 
-                //Empresas Usuário Logado
+                // Empresas Usuário Logado
                 $registros['userEmpresas'] = Empresa::all();
 
-                //Permissões Usuário Logado
+                // Permissões Usuário Logado
                 $registros['userPermissoes'] = DB::table('grupos_permissoes')
                     ->join('grupos', 'grupos_permissoes.grupo_id', '=', 'grupos.id')
                     ->join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
@@ -534,7 +528,7 @@ class UserController extends Controller
                     ->where('grupos_permissoes.grupo_id', Auth::user()->grupo_id)
                     ->get();
 
-                //Menu Módulos
+                // Menu Módulos
                 $registros['menuModulos'] = Modulo
                     ::where('mobile', 1)
                     ->where('viewing_order', '>', '0')
@@ -542,12 +536,17 @@ class UserController extends Controller
                     ->orderBy('name', 'asc')
                     ->get();
 
-                //Menu Submódulos
+                // Menu Submódulos
                 $registros['menuSubmodulos'] = Submodulo
                     ::where('mobile', 1)
                     ->where('viewing_order', '>', '0')
                     ->orderBy('viewing_order', 'asc')
                     ->orderBy('name', 'asc')
+                    ->get();
+
+                // Submódulos Favoritos
+                $registros['submodulosFavoritos'] = UserSubmoduloFavorito
+                    ::where('user_id', Auth::user()->id)
                     ->get();
 
                 return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
