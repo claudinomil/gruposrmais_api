@@ -35,6 +35,7 @@ use App\Models\User;
 use App\Models\Veiculo;
 use App\Models\VisitaTecnica;
 use App\Models\VisitaTecnicaStatus;
+use App\Models\VistoriaSistema;
 use App\Observers\BancoObserver;
 use App\Observers\BrigadaIncendioObserver;
 use App\Observers\ClienteExecutivoObserver;
@@ -67,6 +68,7 @@ use App\Observers\UserObserver;
 use App\Observers\VeiculoObserver;
 
 use App\Observers\VisitaTecnicaObserver;
+use App\Observers\VistoriaSistemaObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -112,6 +114,7 @@ class EventServiceProvider extends ServiceProvider
         Edificacao::observe(EdificacaoObserver::class);
         EdificacaoLocal::observe(EdificacaoLocalObserver::class);
         MapaPreventivo::observe(MapaPreventivoObserver::class);
+        VistoriaSistema::observe(VistoriaSistemaObserver::class);
     }
 
     public function shouldDiscoverEvents()

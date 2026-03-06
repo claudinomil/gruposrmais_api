@@ -74,6 +74,7 @@ class ClienteUpdateRequest extends FormRequest
             'telefone_2' => ['nullable', 'numeric', 'digits:10'],
             'celular_1' => ['nullable', 'numeric', 'digits:11'],
             'celular_2' => ['nullable', 'numeric', 'digits:11'],
+            'dominio' => ['nullable', 'unique:clientes,dominio']
         ];
     }
 
@@ -123,6 +124,7 @@ class ClienteUpdateRequest extends FormRequest
             'celular_1.digits' => 'O Celular 1 deve ser um número válido.',
             'celular_2.numeric' => 'O Celular 2 deve ser um número válido.',
             'celular_2.digits' => 'O Celular 2 deve ser um número válido.',
+            'dominio.unique' => 'O Domínio deve ser único.',
         ];
     }
 

@@ -21,6 +21,9 @@ use App\Models\Cliente;
 use App\Facades\Transacoes;
 use App\Models\BrigadaIncendio;
 use App\Models\ClienteDocumentoExigido;
+use App\Models\ClienteLoja;
+use App\Models\ClienteSistemaPreventivo;
+use App\Models\EdificacaoNivel;
 use App\Models\GrupoPermissao;
 use App\Models\VisitaTecnica;
 use http\Client;
@@ -93,23 +96,26 @@ class ClienteController extends Controller
 
             //Documentos
             $registros['documentos'] = Documento
-                ::join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
-                ->join('documento_fontes', 'documentos.documento_fonte_id', 'documento_fontes.id')
-                ->select('documentos.*', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
-                ->where('documentos.documento_submodulo_id', 1)
-                ->orderby('documento_fontes.ordem', 'ASC')
-                ->orderby('documentos.ordem', 'ASC')
-                ->get();
-
-            //Documentos Exigidos
-            $registros['documentos_exigidos'] = Documento
                 ::leftjoin('documento_submodulos', 'documento_submodulos.id', 'documentos.documento_submodulo_id')
                 ->leftjoin('documento_fontes', 'documento_fontes.id', 'documentos.documento_fonte_id')
-                ->select('documentos.*', 'documento_fontes.name as documentoFonteName')
+                ->select('documentos.*', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
                 ->where('documentos.documento_submodulo_id', 1)
                 ->orderby('documento_fontes.ordem')
                 ->orderby('documentos.ordem')
                 ->get();
+
+            // Edificações Níveis
+            $registros['edificacoes_niveis'] = EdificacaoNivel
+                ::Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
+                ->Join('clientes', 'clientes.id', '=', 'edificacoes.cliente_id')
+                ->select(['edificacoes_niveis.*', 'edificacoes.name as edificacaoName', 'clientes.id as clienteId', 'clientes.name as clienteName'])
+                ->orderby('clientes.name')
+                ->orderby('edificacoes.name')
+                ->orderby('edificacoes_niveis.name')
+                ->get();
+
+            // Medidas Segurança
+            $registros['medidas_seguranca'] = MedidaSeguranca::orderby('name')->get();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -229,48 +235,81 @@ class ClienteController extends Controller
             ->leftJoin('bancos', 'clientes.banco_id', '=', 'bancos.id')
             ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'rede_clientes.name as redeClienteName', 'bancos.name as bancoName'])
             ->orderby('clientes.name')
-            ->where(function($query) use($filtros) {
-                //Variavel para controle
-                $qtdFiltros = count($filtros) / 4;
-                $indexCampo = 0;
+            ->where(
+                function ($query) use ($filtros) {
+                    //Variavel para controle
+                    $qtdFiltros = count($filtros) / 4;
+                    $indexCampo = 0;
 
-                for($i=1; $i<=$qtdFiltros; $i++) {
-                    //Valores do Filtro
-                    $condicao = $filtros[$indexCampo];
-                    $campo = $filtros[$indexCampo+1];
-                    $operacao = $filtros[$indexCampo+2];
-                    $dado = $filtros[$indexCampo+3];
+                    for ($i = 1; $i <= $qtdFiltros; $i++) {
+                        //Valores do Filtro
+                        $condicao = $filtros[$indexCampo];
+                        $campo = $filtros[$indexCampo + 1];
+                        $operacao = $filtros[$indexCampo + 2];
+                        $dado = $filtros[$indexCampo + 3];
 
-                    //Operações
-                    if ($operacao == 1) {
-                        if ($condicao == 1) {$query->where($campo, 'like', '%'.$dado.'%');} else {$query->orwhere($campo, 'like', '%'.$dado.'%');}
-                    }
-                    if ($operacao == 2) {
-                        if ($condicao == 1) {$query->where($campo, '=', $dado);} else {$query->orwhere($campo, '=', $dado);}
-                    }
-                    if ($operacao == 3) {
-                        if ($condicao == 1) {$query->where($campo, '>', $dado);} else {$query->orwhere($campo, '>', $dado);}
-                    }
-                    if ($operacao == 4) {
-                        if ($condicao == 1) {$query->where($campo, '>=', $dado);} else {$query->orwhere($campo, '>=', $dado);}
-                    }
-                    if ($operacao == 5) {
-                        if ($condicao == 1) {$query->where($campo, '<', $dado);} else {$query->orwhere($campo, '<', $dado);}
-                    }
-                    if ($operacao == 6) {
-                        if ($condicao == 1) {$query->where($campo, '<=', $dado);} else {$query->orwhere($campo, '<=', $dado);}
-                    }
-                    if ($operacao == 7) {
-                        if ($condicao == 1) {$query->where($campo, 'like', $dado.'%');} else {$query->orwhere($campo, 'like', $dado.'%');}
-                    }
-                    if ($operacao == 8) {
-                        if ($condicao == 1) {$query->where($campo, 'like', '%'.$dado);} else {$query->orwhere($campo, 'like', '%'.$dado);}
-                    }
+                        //Operações
+                        if ($operacao == 1) {
+                            if ($condicao == 1) {
+                                $query->where($campo, 'like', '%' . $dado . '%');
+                            } else {
+                                $query->orwhere($campo, 'like', '%' . $dado . '%');
+                            }
+                        }
+                        if ($operacao == 2) {
+                            if ($condicao == 1) {
+                                $query->where($campo, '=', $dado);
+                            } else {
+                                $query->orwhere($campo, '=', $dado);
+                            }
+                        }
+                        if ($operacao == 3) {
+                            if ($condicao == 1) {
+                                $query->where($campo, '>', $dado);
+                            } else {
+                                $query->orwhere($campo, '>', $dado);
+                            }
+                        }
+                        if ($operacao == 4) {
+                            if ($condicao == 1) {
+                                $query->where($campo, '>=', $dado);
+                            } else {
+                                $query->orwhere($campo, '>=', $dado);
+                            }
+                        }
+                        if ($operacao == 5) {
+                            if ($condicao == 1) {
+                                $query->where($campo, '<', $dado);
+                            } else {
+                                $query->orwhere($campo, '<', $dado);
+                            }
+                        }
+                        if ($operacao == 6) {
+                            if ($condicao == 1) {
+                                $query->where($campo, '<=', $dado);
+                            } else {
+                                $query->orwhere($campo, '<=', $dado);
+                            }
+                        }
+                        if ($operacao == 7) {
+                            if ($condicao == 1) {
+                                $query->where($campo, 'like', $dado . '%');
+                            } else {
+                                $query->orwhere($campo, 'like', $dado . '%');
+                            }
+                        }
+                        if ($operacao == 8) {
+                            if ($condicao == 1) {
+                                $query->where($campo, 'like', '%' . $dado);
+                            } else {
+                                $query->orwhere($campo, 'like', '%' . $dado);
+                            }
+                        }
 
-                    //Atualizar indexCampo
-                    $indexCampo = $indexCampo + 4;
+                        //Atualizar indexCampo
+                        $indexCampo = $indexCampo + 4;
+                    }
                 }
-            }
             )->get();
 
         //Código SQL Bruto
@@ -314,21 +353,21 @@ class ClienteController extends Controller
         try {
             $registro = array();
 
-            //Documentos
+            // Documentos
             $documentos = ClienteDocumento
                 ::where('cliente_id', '=', $id)
                 ->count();
 
             $registro['documentos'] = $documentos;
 
-            //Visitas Técnicas
+            // Visitas Técnicas
             $visitas_tecnicas = VisitaTecnica
                 ::where('cliente_id', '=', $id)
                 ->count();
 
             $registro['visitas_tecnicas'] = $visitas_tecnicas;
 
-            //Ordens Serviços
+            // Ordens Serviços
             $ordens_servicos = OrdemServico
                 ::where('cliente_id', '=', $id)
                 ->count();
@@ -342,21 +381,21 @@ class ClienteController extends Controller
 
             $registro['brigadas_incendios'] = $brigadas_incendios;
 
-            //Propostas
+            // Propostas
             $propostas = Proposta
                 ::where('cliente_id', '=', $id)
                 ->count();
 
             $registro['propostas'] = $propostas;
 
-            //Clientes Rede
+            // Clientes Rede
             $clientes_rede = Cliente
                 ::where('rede_cliente_id', '=', $id)
                 ->count();
 
             $registro['clientes_rede'] = $clientes_rede;
 
-            //Clientes Principal
+            // Clientes Principal
             $clientes_principal = Cliente
                 ::where('principal_cliente_id', '=', $id)
                 ->count();
@@ -369,6 +408,22 @@ class ClienteController extends Controller
                 ->count();
 
             $registro['documentos_exigidos'] = $documentos_exigidos;
+
+            // Lojas
+            $lojas = ClienteLoja
+                ::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+                ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
+                ->where('edificacoes.cliente_id', '=', $id)
+                ->count();
+
+            $registro['lojas'] = $lojas;
+
+            // Sistemas Preventivos
+            $sistemas_preventivos = ClienteSistemaPreventivo
+                ::where('cliente_id', '=', $id)
+                ->count();
+
+            $registro['sistemas_preventivos'] = $sistemas_preventivos;
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
         } catch (\Exception $e) {
@@ -472,32 +527,35 @@ class ClienteController extends Controller
         }
     }
 
-    public function upload_documento(Request $request)
+    public function documentos_exigidos($cliente_id)
     {
         try {
-            //Incluir Registro
-            ClienteDocumento::create($request->all());
+            $registros = array();
 
-            //Transação
-            Transacoes::transacaoRecord(3, 1, 'clientes', $request, $request);
+            $registros['documento_fontes'] = DocumentoFonte::orderby('ordem', 'ASC')->get();
 
-            //Return
-            return $this->sendResponse('Documento enviado com sucesso.', 2000, null, $request);
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return $this->sendResponse($e->getMessage(), 5000, null, null);
-            }
+            $registros['clientes_documentos_exigidos'] = ClienteDocumentoExigido
+                ::join('documentos', 'documentos.id', '=', 'clientes_documentos_exigidos.documento_id')
+                ->join('documento_submodulos', 'documento_submodulos.id', '=', 'documentos.documento_submodulo_id')
+                ->join('documento_fontes', 'documento_fontes.id', '=', 'documentos.documento_fonte_id')
+                ->leftJoin('clientes_documentos', function ($join) {
+                    $join->on('clientes_documentos.documento_id', '=', 'clientes_documentos_exigidos.documento_id')
+                        ->on('clientes_documentos.cliente_id', '=', 'clientes_documentos_exigidos.cliente_id');
+                })
+                ->select(
+                    'clientes_documentos_exigidos.*',
+                    'documentos.documento_fonte_id',
+                    'documentos.name as documentoName',
+                    'documento_submodulos.name as documentoSubmoduloName',
+                    'documento_fontes.name as documentoFonteName',
+                    'clientes_documentos.caminho as clienteDocumentoCaminho'
+                )
+                ->where('clientes_documentos_exigidos.cliente_id', $cliente_id)
+                ->orderBy('documento_fontes.ordem')
+                ->orderBy('documentos.ordem')
+                ->get();
 
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-        }
-    }
-
-    public function documentos_exigidos_dados($cliente_id)
-    {
-        try {
-            $registro = ClienteDocumentoExigido::where('cliente_id', $cliente_id)->get();
-
-            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, []);
         }
@@ -507,13 +565,13 @@ class ClienteController extends Controller
     {
         try {
             $request->validate([
-                'documentos_exigidos_cliente_id' => 'required|integer',
-                'documentos_exigidos' => 'required|array',
-                'documentos_exigidos.*' => 'integer'
+                'editar_documentos_exigidos_cliente_id' => 'required|integer',
+                'editar_documentos_exigidos_documentos_exigidos' => 'required|array',
+                'editar_documentos_exigidos_documentos_exigidos.*' => 'integer'
             ]);
 
-            $clienteId = $request->input('documentos_exigidos_cliente_id');
-            $documentosIds = $request->input('documentos_exigidos');
+            $clienteId = $request->input('editar_documentos_exigidos_cliente_id');
+            $documentosIds = $request->input('editar_documentos_exigidos_documentos_exigidos');
 
             // IDs atualmente registrados
             $documentosExistentes = ClienteDocumentoExigido::where('cliente_id', $clienteId)->pluck('documento_id')->toArray();
@@ -549,6 +607,40 @@ class ClienteController extends Controller
         }
     }
 
+    public function editar_documento(Request $request)
+    {
+        try {
+            if ($request['operacao'] == 'create') {
+                // Incluir Registro
+                ClienteDocumento::create($request->all());
+
+                // Transação
+                Transacoes::transacaoRecord(3, 1, 'clientes', $request, $request);
+            } else if ($request['operacao'] == 'edit') {
+                // Buscando Registro
+                $registro = ClienteDocumento::find($request['cliente_documento_id']);
+
+                // Dados Anterior
+                $dadosAnterior = $registro;
+
+                // Alterando registro
+                $registro->update($request->all());
+
+                // Transação
+                Transacoes::transacaoRecord(3, 2, 'clientes', $dadosAnterior, $request);
+            }
+
+            // Return
+            return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $request);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
     public function documentos($cliente_id)
     {
         try {
@@ -560,7 +652,9 @@ class ClienteController extends Controller
                 ->where('grupos_permissoes.grupo_id', Auth::user()->grupo_id)
                 ->where(function ($query) {
                     $query->where('permissoes.name', 'like', 'clientes_list%')
-                    ->orWhere('permissoes.name', 'like', 'clientes_destroy%');
+                        ->orWhere('permissoes.name', 'like', 'clientes_show%')
+                        ->orWhere('permissoes.name', 'like', 'clientes_edit%')
+                        ->orWhere('permissoes.name', 'like', 'clientes_destroy%');
                 })
                 ->get();
 
@@ -601,6 +695,216 @@ class ClienteController extends Controller
 
             //Return
             return $this->sendResponse('Documento excluído com sucesso.', 2000, null, $registro['caminho']);
+        }
+    }
+
+    public function editar_loja(Request $request)
+    {
+        try {
+            if ($request['operacao'] == 'create') {
+
+                // 🔍 Verifica se já existe o mesmo LUC para o mesmo cliente
+                $existe = ClienteLoja
+                    ::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+                    ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
+                    ->where('edificacoes.cliente_id', $request->cliente_id)
+                    ->where('edificacoes_niveis.id', $request->edificacao_nivel_id)
+                    ->where('clientes_lojas.luc', $request->luc)
+                    ->exists();
+
+                if ($existe) {
+                    return $this->sendResponse('Já existe uma loja com esse LUC para este cliente (Nível).', 2020, null, $request);
+                }
+
+                // Incluir Registro
+                ClienteLoja::create($request->all());
+
+                // Transação
+                Transacoes::transacaoRecord(5, 1, 'clientes', $request, $request);
+            } else if ($request['operacao'] == 'edit') {
+
+                // Buscando Registro
+                $registro = ClienteLoja::find($request['cliente_loja_id']);
+
+                // 🔍 Verifica duplicidade (ignorando o próprio registro)
+                $existe = ClienteLoja
+                    ::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+                    ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
+                    ->where('edificacoes.cliente_id', $request->cliente_id)
+                    ->where('edificacoes_niveis.id', $request->edificacao_nivel_id)
+                    ->where('clientes_lojas.luc', $request->luc)
+                    ->where('clientes_lojas.id', '!=', $registro->id)
+                    ->exists();
+
+                if ($existe) {
+                    return $this->sendResponse('Já existe uma loja com esse LUC para este cliente (Nível).', 2020, null, $request);
+                }
+
+                // Alterando registro
+                ClienteLoja::find($request['cliente_loja_id'])->update($request->all());
+
+                // Transação
+                Transacoes::transacaoRecord(5, 2, 'clientes', $registro, $request);
+            }
+
+            // Return
+            return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $request);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function lojas($cliente_id)
+    {
+        try {
+            $registros = array();
+
+            $registros['permissoes'] = GrupoPermissao
+                ::join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
+                ->select('permissoes.name as permissao')
+                ->where('grupos_permissoes.grupo_id', Auth::user()->grupo_id)
+                ->where(function ($query) {
+                    $query->where('permissoes.name', 'like', 'clientes_list%')
+                        ->orWhere('permissoes.name', 'like', 'clientes_show%')
+                        ->orWhere('permissoes.name', 'like', 'clientes_edit%')
+                        ->orWhere('permissoes.name', 'like', 'clientes_destroy%');
+                })
+                ->get();
+
+            $registros['loja_fontes'] = ClienteLoja
+                ::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+                ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
+                ->where('edificacoes.cliente_id', $cliente_id)
+                ->select('edificacoes.id', 'edificacoes.name')
+                ->orderby('edificacoes.name')
+                ->get();
+
+            $registros['clientes_lojas'] = ClienteLoja
+                ::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+                ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
+                ->leftJoin('clientes as subordinados_clientes', 'subordinados_clientes.id', '=', 'clientes_lojas.subordinado_cliente_id')
+                ->where('edificacoes.cliente_id', $cliente_id)
+                ->select('clientes_lojas.*', 'edificacoes.id as edificacaoId', 'edificacoes.name as edificacaoName', 'edificacoes_niveis.name as edificacaoNivelName', 'subordinados_clientes.name as subordinadoClienteName')
+                ->orderby('clientes_lojas.ordem')
+                ->get();
+
+            return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function deletar_loja($cliente_loja_id)
+    {
+        $registro = ClienteLoja::find($cliente_loja_id);
+
+        if (!$registro) {
+            return $this->sendResponse('Cliente Loja não encontrado.', 4040, null, $registro);
+        } else {
+            //Deletar
+            $registro->delete();
+
+            //gravar transacao
+            Transacoes::transacaoRecord(5, 3, 'clientes', $registro, $registro);
+
+            //Return
+            return $this->sendResponse('Cliente Loja excluído com sucesso.', 2000, null, $registro['caminho']);
+        }
+    }
+
+    public function editar_sistema_preventivo(Request $request)
+    {
+        try {
+            if ($request['operacao'] == 'create') {
+                // Incluir Registro
+                ClienteSistemaPreventivo::create($request->all());
+
+                // Transação
+                Transacoes::transacaoRecord(6, 1, 'clientes', $request, $request);
+            } else if ($request['operacao'] == 'edit') {
+                // Buscando Registro
+                $registro = ClienteSistemaPreventivo::find($request['cliente_sistema_preventivo_id']);
+
+                // Dados Anterior
+                $dadosAnterior = $registro;
+
+                // Alterando registro
+                $registro->update($request->all());
+
+                // Transação
+                Transacoes::transacaoRecord(6, 2, 'clientes', $dadosAnterior, $request);
+            }
+
+            // Return
+            return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $request);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function sistemas_preventivos($cliente_id)
+    {
+        try {
+            $registros = array();
+
+            $registros['permissoes'] = GrupoPermissao
+                ::join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
+                ->select('permissoes.name as permissao')
+                ->where('grupos_permissoes.grupo_id', Auth::user()->grupo_id)
+                ->where(function ($query) {
+                    $query->where('permissoes.name', 'like', 'clientes_list%')
+                        ->orWhere('permissoes.name', 'like', 'clientes_show%')
+                        ->orWhere('permissoes.name', 'like', 'clientes_edit%')
+                        ->orWhere('permissoes.name', 'like', 'clientes_destroy%');
+                })
+                ->get();
+
+            $registros['sistema_preventivo_fontes'] = MedidaSeguranca::orderby('ordem', 'ASC')->get();
+
+            $registros['clientes_sistemas_preventivos'] = ClienteSistemaPreventivo
+                ::join('medidas_seguranca', 'medidas_seguranca.id', 'clientes_sistemas_preventivos.medida_seguranca_id')
+                ->select('clientes_sistemas_preventivos.*', 'medidas_seguranca.id as sistema_preventivo_fonte_id', 'medidas_seguranca.name as medidaSegurancaName')
+                ->where('clientes_sistemas_preventivos.cliente_id', $cliente_id)
+                ->orderby('medidas_seguranca.name')
+                ->get();
+
+            return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function deletar_sistema_preventivo($cliente_sistema_preventivo_id)
+    {
+        $registro = ClienteSistemaPreventivo::find($cliente_sistema_preventivo_id);
+
+        if (!$registro) {
+            return $this->sendResponse('Sistema Preventivo não encontrado.', 4040, null, $registro);
+        } else {
+            //Deletar
+            $registro->delete();
+
+            //gravar transacao
+            Transacoes::transacaoRecord(6, 3, 'clientes', $registro, $registro);
+
+            //Return
+            return $this->sendResponse('Sistema Preventivo excluído com sucesso.', 2000, null, $registro['fotografia']);
         }
     }
 
@@ -721,5 +1025,19 @@ class ClienteController extends Controller
 
             return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, []);
         }
+    }
+
+    public function sistema_preventivo_informacao($sistema_preventivo_numero)
+    {
+        $dados = array();
+
+        $dados['sistema_preventivo'] = ClienteSistemaPreventivo
+            ::join('clientes', 'clientes.id', 'clientes_sistemas_preventivos.cliente_id')
+            ->join('medidas_seguranca', 'medidas_seguranca.id', 'clientes_sistemas_preventivos.medida_seguranca_id')
+            ->select('clientes_sistemas_preventivos.*', 'clientes.name as clienteName', 'medidas_seguranca.name as medidaSegurancaName')
+            ->where('clientes_sistemas_preventivos.sistema_preventivo_numero', $sistema_preventivo_numero)
+            ->first();
+
+        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $dados);
     }
 }

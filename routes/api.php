@@ -147,6 +147,9 @@ require __DIR__ . '/routes_edificacoes_locais.php';
 // Mapas Preventivos
 require __DIR__ . '/routes_mapas_preventivos.php';
 
+// Vistorias Sistemas
+require __DIR__ . '/routes_vistorias_sistemas.php';
+
 // Rotas Domínio Clientes - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 // Rotas Domínio Clientes - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 

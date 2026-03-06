@@ -43,6 +43,7 @@ class ZZZ_20260118_Seeder extends Seeder
         Documento::create(['id' => 74, 'name' => 'ART e nota fiscal de inspeção e manutenção de extintores de incêndio', 'documento_submodulo_id' => 1, 'documento_fonte_id' => 6, 'ordem' => 330]);
         Documento::create(['id' => 75, 'name' => 'Contrato de prestação de serviços da Brigada de Incêndio, quando aplicável', 'documento_submodulo_id' => 1, 'documento_fonte_id' => 6, 'ordem' => 340]);
         Documento::create(['id' => 76, 'name' => 'ART de responsável técnico pela edificação, quando aplicável', 'documento_submodulo_id' => 1, 'documento_fonte_id' => 6, 'ordem' => 350]);
+
         Documento::create(['id' => 77, 'name' => 'ART do sistema elétrico da edificação (inspeção, testes e manutenção)', 'documento_submodulo_id' => 1, 'documento_fonte_id' => 7, 'ordem' => 360]);
         Documento::create(['id' => 78, 'name' => 'ART dos quadros elétricos e painéis de distribuição (inspeção, testes e manutenção)', 'documento_submodulo_id' => 1, 'documento_fonte_id' => 7, 'ordem' => 370]);
         Documento::create(['id' => 79, 'name' => 'ART dos sistemas elétricos de segurança (alimentação dos sistemas de incêndio)', 'documento_submodulo_id' => 1, 'documento_fonte_id' => 7, 'ordem' => 380]);

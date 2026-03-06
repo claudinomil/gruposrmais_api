@@ -65,7 +65,8 @@ class Cliente extends Model
         'contato_2_setor',
         'contato_2_cargo',
         'contato_2_email',
-        'dominio'
+        'dominio',
+        'numero_lojas'
     ];
 
     protected $dates = [
@@ -87,8 +88,8 @@ class Cliente extends Model
     public function setUfCobrancaAttribute($value) {$this->attributes['uf_cobranca'] = mb_strtoupper($value);}
     public function setEmailAttribute($value) {$this->attributes['email'] = mb_strtolower($value);}
     public function setSiteAttribute($value) {$this->attributes['site'] = mb_strtolower($value);}
-    public function setDominioAttribute($value) {$this->attributes['dominio'] = mb_strtolower($value);}
-
+    public function setDominioAttribute($value) {if ($value != '') {$this->attributes['dominio'] = mb_strtolower($value);}}
     public function setIdentidadeDataEmissaoAttribute($value) {if ($value != '') {$this->attributes['identidade_data_emissao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
     public function setDataNascimentoAttribute($value) {if ($value != '') {$this->attributes['data_nascimento'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
+    //public function setNumeroLojasAttribute($value) {if ($value == '') {$this->attributes['numero_lojas'] = 0;}}
 }

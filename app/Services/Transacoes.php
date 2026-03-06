@@ -227,6 +227,22 @@ class Transacoes
             }
         }
 
+        // Opção para o campo edificacao_nivel_id (Com Cliente e Edificação)
+        if ($op == 15) {
+            if (($dadoAtual != "") and ($dadoAtual != 0)) {
+                $dados = EdificacaoNivel
+                    ::Join('edificacoes', 'edificacoes.id', 'edificacoes_niveis.edificacao_id')
+                    ->Join('clientes', 'clientes.id', 'edificacoes.cliente_id')
+                    ->select('edificacoes.name as edificacaoName', 'edificacoes_niveis.name as edificacaoNivelName', 'clientes.name as clienteName')
+                    ->where('edificacoes_niveis.id', $dadoAtual)
+                    ->first();
+
+                $val_retorno = $dados->edificacaoName.' - '.$dados->edificacaoNivelName.' - '.$dados->clienteName;
+
+                $retorno = $this->abreSpan . ':: ' . $etiqueta . ": " . $this->fechaSpan . $val_retorno . "<br>";
+            }
+        }
+
         return $retorno;
     }
 
@@ -489,9 +505,9 @@ class Transacoes
                 //Tabela clientes_documentos
                 if ($op == 3) {
                     $dados .= '<b>:: Clientes Documentos</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Funcionário', Cliente::class, 'name');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['caminho'], $dadosAtual['caminho'], 'Caminho', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Cliente', Cliente::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['documento_id'], $dadosAtual['documento_id'], 'Documento', Documento::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['data_emissao'], $dadosAtual['data_emissao'], 'Data Emissão', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['data_vencimento'], $dadosAtual['data_vencimento'], 'Data Vencimento', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['data_ultimo_aviso'], $dadosAtual['data_ultimo_aviso'], 'Data Último Aviso', '', '');
@@ -501,12 +517,30 @@ class Transacoes
                 // Avisos
                 if ($op == 4) {
                     $dados .= '<b>:: Clientes Avisos</b>'.'<br><br>';
-                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Funcionário', Cliente::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Cliente', Cliente::class, 'name');
                     $dados .= $this->retornaDado(2, $dadosAnterior['documento_id'], $dadosAtual['documento_id'], 'Documento', Documento::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['data_emissao'], $dadosAtual['data_emissao'], 'Data Emissão', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['data_vencimento'], $dadosAtual['data_vencimento'], 'Data Vencimento', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['data_aviso'], $dadosAtual['data_aviso'], 'Data Aviso', '', '');
                     $dados .= $this->retornaDado(1, $dadosAnterior['cliente_email'], $dadosAtual['cliente_email'], 'E-mail envio', '', '');
+                }
+
+                // Tabela clientes_lojas
+                if ($op == 5) {
+                    $dados .= '<b>:: Clientes Lojas</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(15, $dadosAnterior['edificacao_nivel_id'], $dadosAtual['edificacao_nivel_id'], 'Edificação', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['luc'], $dadosAtual['luc'], 'Loja de Unidade Comercial', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['ordem'], $dadosAtual['ordem'], 'Ordem', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['subordinado_cliente_id'], $dadosAtual['subordinado_cliente_id'], 'Cliente ocupando a LUC', Cliente::class, 'name');
+                }
+
+                // Tabela clientes_sistemas_preventivos
+                if ($op == 6) {
+                    $dados .= '<b>:: Clientes Sistemas Preventivos</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Cliente', Cliente::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['medida_seguranca_id'], $dadosAtual['medida_seguranca_id'], 'Medida Segurança', MedidaSeguranca::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');
                 }
             }
 
