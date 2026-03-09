@@ -23,6 +23,7 @@ use App\Models\BrigadaIncendio;
 use App\Models\ClienteDocumentoExigido;
 use App\Models\ClienteLoja;
 use App\Models\ClienteSistemaPreventivo;
+use App\Models\Edificacao;
 use App\Models\EdificacaoNivel;
 use App\Models\GrupoPermissao;
 use App\Models\VisitaTecnica;
@@ -668,6 +669,7 @@ class ClienteController extends Controller
                 ->where('clientes_documentos.cliente_id', $cliente_id)
                 ->orderby('documento_fontes.ordem', 'ASC')
                 ->orderby('documentos.ordem', 'ASC')
+                ->orderBy('clientes_documentos.data_emissao', 'DESC')
                 ->get();
 
             return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -775,20 +777,28 @@ class ClienteController extends Controller
                 })
                 ->get();
 
-            $registros['loja_fontes'] = ClienteLoja
-                ::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
-                ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
-                ->where('edificacoes.cliente_id', $cliente_id)
+            // $registros['loja_fontes'] = ClienteLoja
+            //     ::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+            //     ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
+            //     ->where('edificacoes.cliente_id', $cliente_id)
+            //     ->select('edificacoes.id', 'edificacoes.name')
+            //     ->orderby('edificacoes.name')
+            //     ->get();
+
+            $registros['loja_fontes'] = Edificacao
+                ::where('edificacoes.cliente_id', $cliente_id)
                 ->select('edificacoes.id', 'edificacoes.name')
                 ->orderby('edificacoes.name')
                 ->get();
 
-            $registros['clientes_lojas'] = ClienteLoja
+                $registros['clientes_lojas'] = ClienteLoja
                 ::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
                 ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
                 ->leftJoin('clientes as subordinados_clientes', 'subordinados_clientes.id', '=', 'clientes_lojas.subordinado_cliente_id')
                 ->where('edificacoes.cliente_id', $cliente_id)
                 ->select('clientes_lojas.*', 'edificacoes.id as edificacaoId', 'edificacoes.name as edificacaoName', 'edificacoes_niveis.name as edificacaoNivelName', 'subordinados_clientes.name as subordinadoClienteName')
+                ->orderby('edificacoes.name')
+                ->orderby('edificacoes_niveis.ordem')
                 ->orderby('clientes_lojas.ordem')
                 ->get();
 

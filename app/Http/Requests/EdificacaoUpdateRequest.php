@@ -113,15 +113,15 @@ class EdificacaoUpdateRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             // 1️⃣ Validação de igualdade de áreas -------------------------------
-            $areaTotal = $this->input('area_total_construida');
-            $areaNiveis = $this->input('area_total_construida_niveis');
+            // $areaTotal = $this->input('area_total_construida');
+            // $areaNiveis = $this->input('area_total_construida_niveis');
 
-            if ($areaTotal !== $areaNiveis) {
-                $validator->errors()->add(
-                    'area_total_construida_niveis',
-                    'O campo "Área Total Construída dos Níveis" deve ser igual ao campo "Área Total Construída".'
-                );
-            }
+            // if ($areaTotal !== $areaNiveis) {
+            //     $validator->errors()->add(
+            //         'area_total_construida_niveis',
+            //         'O campo "Área Total Construída dos Níveis" deve ser igual ao campo "Área Total Construída".'
+            //     );
+            // }
 
             // 2️⃣ Validação de nomes duplicados -------------------------------
             $grupos = ['pavimentos', 'mezaninos', 'coberturas', 'areas_tecnicas'];
