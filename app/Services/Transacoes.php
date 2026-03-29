@@ -14,7 +14,6 @@ use App\Models\Documento;
 use App\Models\EdificacaoLocal;
 use App\Models\EdificacaoNivel;
 use App\Models\Empresa;
-use App\Models\SistemaPreventivo;
 use App\Models\EscalaTipo;
 use App\Models\FormaPagamento;
 use App\Models\FormaPagamentoStatus;
@@ -993,7 +992,6 @@ class Transacoes
                 if ($op == 1) {
                     $dados .= '<b>:: Mapas Preventivos</b>'.'<br><br>';
                     $dados .= $this->retornaDado(2, $dadosAnterior['edificacao_local_id'], $dadosAtual['edificacao_local_id'], 'Edificação Local', EdificacaoLocal::class, 'name');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['sistema_preventivo_id'], $dadosAtual['sistema_preventivo_id'], 'Sistema Preventivo', SistemaPreventivo::class, 'name');
                 }
             }
 

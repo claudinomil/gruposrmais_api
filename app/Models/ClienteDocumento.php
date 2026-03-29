@@ -20,7 +20,8 @@ class ClienteDocumento extends Model
         'data_emissao',
         'data_vencimento',
         'data_ultimo_aviso',
-        'aviso'
+        'aviso',
+        'edificacao_id'
     ];
 
     protected $dates = [

@@ -15,8 +15,7 @@ class MapaPreventivoUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'edificacao_local_id' => ['required', 'integer'],
-            'sistema_preventivo_id' => ['required', 'integer']
+            'edificacao_local_id' => ['required', 'integer']
         ];
     }
 
@@ -24,9 +23,7 @@ class MapaPreventivoUpdateRequest extends FormRequest
     {
         return [
             'edificacao_local_id.required' => 'Edificação Local é requerido.',
-            'edificacao_local_id.integer' => 'Edificação Local deve ser um ítem da lista.',
-            'sistema_preventivo_id.required' => 'Sistema Preventivo é requerido.',
-            'sistema_preventivo_id.integer' => 'Sistema Preventivo deve ser um ítem da lista.'
+            'edificacao_local_id.integer' => 'Edificação Local deve ser um ítem da lista.'
         ];
     }
 

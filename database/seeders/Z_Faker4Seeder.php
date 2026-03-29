@@ -38,15 +38,5 @@ class Z_Faker4Seeder extends Seeder
             Funcionario::where('id', $i)->update(['tomador_servico_cliente_id' => 1]);
         }
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-        // Grupos Gráficos''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        GrupoGrafico::create(['grupo_id' => 11, 'grafico_id' => 11]);
-        GrupoGrafico::create(['grupo_id' => 11, 'grafico_id' => 12]);
-        GrupoGrafico::create(['grupo_id' => 11, 'grafico_id' => 13]);
-        GrupoGrafico::create(['grupo_id' => 11, 'grafico_id' => 14]);
-        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-
-
     }
 }

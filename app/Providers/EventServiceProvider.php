@@ -29,7 +29,6 @@ use App\Models\ProdutoMovimentacao;
 use App\Models\OrdemServico;
 use App\Models\Proposta;
 use App\Models\MedidaSeguranca;
-use App\Models\SistemaPreventivo;
 use App\Models\Situacao;
 use App\Models\User;
 use App\Models\Veiculo;
@@ -110,7 +109,6 @@ class EventServiceProvider extends ServiceProvider
         Veiculo::observe(VeiculoObserver::class);
         VisitaTecnica::observe(VisitaTecnicaObserver::class);
         MedidaSeguranca::observe(MedidaSegurancaObserver::class);
-        SistemaPreventivo::observe(SistemaPreventivoObserver::class);
         Edificacao::observe(EdificacaoObserver::class);
         EdificacaoLocal::observe(EdificacaoLocalObserver::class);
         MapaPreventivo::observe(MapaPreventivoObserver::class);

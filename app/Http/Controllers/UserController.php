@@ -28,10 +28,12 @@ use Illuminate\Support\Str;
 class UserController extends Controller
 {
     private $user;
+    private $x_cliente_id;
 
-    public function __construct(User $user)
+    public function __construct(Request $request, User $user)
     {
         $this->user = $user;
+        $this->x_cliente_id = $request->header('X-Cliente-Id');
     }
 
     public function index()
@@ -424,17 +426,16 @@ class UserController extends Controller
                 $registros['nameSubmodulo'] = Submodulo::select('name')->where('menu_route', '=', $searchSubmodulo)->get();
 
                 //Submódulo nome dos campos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                // Acertos
-                if ($searchSubmodulo == 'clientes_funcionarios') {$searchSubmodulo = 'funcionarios';}
-
                 $registros['namesFieldsSubmodulo'] = Schema::getColumnListing($searchSubmodulo);
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 // Dashboards que o usuário logado possui'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                if ($this->x_cliente_id == 0) {$sistema = 1;} else {$sistema = 2;}
+
                 $registros['userDashboards'] = GrupoGrafico
                     ::join('graficos', 'graficos.id', '=', 'grupos_graficos.grafico_id')
                     ->select('graficos.dashboard')
-                    ->where('graficos.sistema', 1)
+                    ->where('graficos.sistema', $sistema)
                     ->where('grupos_graficos.grupo_id', Auth::user()->grupo_id)
                     ->groupBy('graficos.dashboard')
                     ->get();
@@ -473,15 +474,23 @@ class UserController extends Controller
         }
     }
 
-    public function email_pertence($email, $cliente_id)
+    public function email_pertence_sistema($email, $cliente_id, $sistema)
     {
-        $registro = $this->user->where('email', $email)->where('cliente_id', $cliente_id)->get();
+        $registro = User::join('grupos', 'grupos.id', 'users.grupo_id')
+            ->select('users.email', 'users.cliente_id', 'grupos.sistema')
+            ->where('users.email', $email)
+            ->first();
 
-        if (count($registro) == 1) {
-            return $this->sendResponse('E-mail pertence a um Usuário do Cliente.', 2000, null, null);
-        } else {
-            return $this->sendResponse('E-mail não pertence a um Usuário do Cliente.', 2005, null, null);
-        }
+        // Não encontrou E-mail
+        if (!$registro) {return $this->sendResponse('E-mail não pertence a um Usuário do Sistema.', 2005, null, null);}
+
+        // E-mail não pertence a um Grupo do Sistema pretendido (Padrão/Clientes)
+        if ($registro->sistema != $sistema) {return $this->sendResponse('E-mail não pertence a um Grupo do Sistema pretendido.', 2005, null, null);}
+
+        // E-mail não pertence a um Usuário do Cliente
+        if ($sistema == 2 and $registro->cliente_id != $cliente_id) {return $this->sendResponse('E-mail não pertence a um Usuário do Cliente.', 2005, null, null);}
+
+        return $this->sendResponse('Operação realizada com sucesso.', 2000, null, null);
     }
 
     public function update_confirm(Request $request)

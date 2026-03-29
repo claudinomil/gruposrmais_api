@@ -2,24 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\BrigadaIncendio;
 use App\Models\Cliente;
-use App\Models\ClienteExecutivo;
 use App\Models\ClienteSistemaPreventivo;
 use App\Models\Edificacao;
 use App\Models\EdificacaoMedidaSeguranca;
 use App\Models\EdificacaoNivel;
-use App\Models\Fornecedor;
-use App\Models\Funcionario;
-use App\Models\GrupoGrafico;
-use App\Models\Modulo;
-use App\Models\ProdutoEntrada;
-use App\Models\OrdemServico;
-use App\Models\Proposta;
-use App\Models\Submodulo;
 use App\Models\User;
-use App\Models\Veiculo;
-use App\Models\VisitaTecnica;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -29,7 +17,7 @@ class Z_Faker5Seeder extends Seeder
     {
         $faker = \Faker\Factory::create('pt_BR');
 
-        // Criar Edificações e Edificações Níveis'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        // Criar Edificações e Edificações Níveis'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
         // Para o Cliente SHOPPING 1'''''''''''''''''''''''''''''''''''''''''
         $cliente = Cliente::where('name', 'SHOPPING 1')->first();
@@ -406,15 +394,46 @@ class Z_Faker5Seeder extends Seeder
             ]);
         }
         //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-        // Clientes Sistemas Preventivos (para o Cliente SHOPPING 1)''''''''''''''''''''''''''''''''''''''''''''''''''''
+        // Clientes Sistemas Preventivos (para o Cliente SHOPPING 1)''''''''''''''''''''''''''''''''''''''''''
 
         // Medida Segurança: APARELHO EXTINTOR
         ClienteSistemaPreventivo::create(['id' => 1, 'cliente_id' => 3, 'medida_seguranca_id' => 3, 'name' => 'PQS', 'sistema_preventivo_numero' => '0000001', 'descricao' => 'EXEMPLO DE DESCRIÇÃO']);
         ClienteSistemaPreventivo::create(['id' => 2, 'cliente_id' => 3, 'medida_seguranca_id' => 3, 'name' => 'CO2', 'sistema_preventivo_numero' => '0000002', 'descricao' => 'EXEMPLO DE DESCRIÇÃO']);
         ClienteSistemaPreventivo::create(['id' => 3, 'cliente_id' => 3, 'medida_seguranca_id' => 3, 'name' => 'ÁGUA', 'sistema_preventivo_numero' => '0000003', 'descricao' => 'EXEMPLO DE DESCRIÇÃO']);
         ClienteSistemaPreventivo::create(['id' => 4, 'cliente_id' => 3, 'medida_seguranca_id' => 3, 'name' => 'ESPUMA MECÂNICA', 'sistema_preventivo_numero' => '0000004', 'descricao' => 'EXEMPLO DE DESCRIÇÃO']);
-        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+        // Usuário para testes no Grupo Cliente Domínio'''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        User::create([
+            'name' => 'CLAUDINO TESTE 1',
+            'email' => 'claudinoteste1@gmail.com',
+            'situacao_id' => 1,
+            'grupo_id' => 1,
+            'password' => Hash::make('12345678'),
+            'email_verified_at' => now(),
+            'user_confirmed_at' => now(),
+            'layout_mode' => 'layout_mode_light',
+            'layout_style' => 'layout_style_vertical_scrollable',
+            'avatar' => 'build/assets/images/users/avatar-0.png',
+            'created_at' => now()
+        ]);
+
+        User::create([
+            'name' => 'CLAUDINO TESTE 2',
+            'email' => 'claudinoteste2@gmail.com',
+            'situacao_id' => 1,
+            'grupo_id' => 11,
+            'cliente_id' => 1,
+            'password' => Hash::make('12345678'),
+            'email_verified_at' => now(),
+            'user_confirmed_at' => now(),
+            'layout_mode' => 'layout_mode_light',
+            'layout_style' => 'layout_style_vertical_scrollable',
+            'avatar' => 'build/assets/images/users/avatar-0.png',
+            'created_at' => now()
+        ]);
+        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     }
 }

@@ -105,6 +105,7 @@ class GrupoController extends Controller
 
             $registro['id'] = $dados[0]->id; //Guarda id do Grupo
             $registro['name'] = $dados[0]->name; //Guarda name do Grupo
+            $registro['sistema'] = $dados[0]->sistema; //Guarda sistema do Grupo
 
             foreach ($dados as $key => $dado) {
                 $registro[$dado->permissaoName] = true; //Guarda nome das Permissoes do Grupo

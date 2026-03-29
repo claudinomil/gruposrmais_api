@@ -12,7 +12,8 @@ class Grupo extends Model
     protected $table = 'grupos';
 
     protected $fillable = [
-        'name'
+        'name',
+        'sistema'
     ];
 
     public function setNameAttribute($value) {$this->attributes['name'] = mb_strtoupper($value);}

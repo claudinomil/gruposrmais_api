@@ -12,7 +12,6 @@ class MapaPreventivo extends Model
     protected $table = 'mapas_preventivos';
 
     protected $fillable = [
-        'edificacao_local_id',
-        'sistema_preventivo_id'
+        'edificacao_local_id'
     ];
 }

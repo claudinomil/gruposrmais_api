@@ -66,12 +66,6 @@ require __DIR__ . '/routes_clientes.php';
 //Dashboards
 require __DIR__ . '/routes_dashboards.php';
 
-//Dashboards2
-require __DIR__ . '/routes_dashboards2.php';
-
-//Dashboards3
-require __DIR__ . '/routes_dashboards3.php';
-
 //Fornecedores
 require __DIR__ . '/routes_fornecedores.php';
 
@@ -135,9 +129,6 @@ require __DIR__ . '/routes_patrimonio.php';
 // Medidas Segurança
 require __DIR__ . '/routes_medidas_seguranca.php';
 
-// Sistemas Preventivos
-require __DIR__ . '/routes_sistemas_preventivos.php';
-
 // Edificações
 require __DIR__ . '/routes_edificacoes.php';
 
@@ -149,18 +140,3 @@ require __DIR__ . '/routes_mapas_preventivos.php';
 
 // Vistorias Sistemas
 require __DIR__ . '/routes_vistorias_sistemas.php';
-
-// Rotas Domínio Clientes - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-// Rotas Domínio Clientes - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-// Clientes Dashboards
-require __DIR__ . '/routes_clientes_dashboards.php';
-
-// Clientes Funcionários
-require __DIR__ . '/routes_clientes_funcionarios.php';
-
-// Clientes Relatórios
-require __DIR__ . '/routes_clientes_relatorios.php';
-
-// Rotas Domínio Clientes - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-// Rotas Domínio Clientes - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

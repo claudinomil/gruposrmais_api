@@ -103,15 +103,6 @@ class MedidaSegurancaController extends Controller
 
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Edificações Medidas Segurança.', 2040, null, null);
                 }
-
-                //Tabela sistemas_preventivos
-                if (SuporteFacade::verificarRelacionamento('sistemas_preventivos', 'medida_seguranca_id', $id) > 0) {
-                    // Verificar/Bloquear/Desbloquear Tabela''''''''''
-                    SuporteFacade::bloquearTabela(3, 'medidas_seguranca');
-                    //''''''''''''''''''''''''''''''''''''''''''''''''
-
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Sistemas Preventivos.', 2040, null, null);
-                }
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

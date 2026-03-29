@@ -37,5 +37,5 @@ Route::get('users/confirm/{email}', [UserController::class, 'confirm']);
 //Alterar campo de confirmação de email (user_confirmed_at)
 Route::post('users/confirmupdate', [UserController::class, 'update_confirm']);
 
-// Verificar se email pertence a um usuário do Cliente
-Route::get('users/email/pertence/{email}/{cliente_id}', [UserController::class, 'email_pertence']);
+// Verificar se usuário pertence ao Sistema pretendido (Sistema Padrão / Sistema Clientes)
+Route::get('users/email/pertence/sistema/{email}/{cliente_id}/{sistema}', [UserController::class, 'email_pertence_sistema']);

@@ -65,8 +65,7 @@ class Cliente extends Model
         'contato_2_setor',
         'contato_2_cargo',
         'contato_2_email',
-        'dominio',
-        'numero_lojas'
+        'dominio'
     ];
 
     protected $dates = [
@@ -91,5 +90,4 @@ class Cliente extends Model
     public function setDominioAttribute($value) {if ($value != '') {$this->attributes['dominio'] = mb_strtolower($value);}}
     public function setIdentidadeDataEmissaoAttribute($value) {if ($value != '') {$this->attributes['identidade_data_emissao'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
     public function setDataNascimentoAttribute($value) {if ($value != '') {$this->attributes['data_nascimento'] = Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d');}}
-    //public function setNumeroLojasAttribute($value) {if ($value == '') {$this->attributes['numero_lojas'] = 0;}}
 }

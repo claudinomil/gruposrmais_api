@@ -2,40 +2,40 @@
 
 namespace App\Http\Controllers;
 
-use App\Facades\SuporteFacade;
 use App\Http\Requests\ClienteStoreRequest;
 use App\Http\Requests\ClienteUpdateRequest;
+use App\Facades\SuporteFacade;
+use App\Facades\Transacoes;
 use App\Models\Banco;
 use App\Models\ClienteDocumento;
 use App\Models\Documento;
 use App\Models\DocumentoFonte;
-use App\Models\EdificacaoClassificacao;
 use App\Models\Genero;
 use App\Models\IdentidadeOrgao;
 use App\Models\Estado;
-use App\Models\IncendioRisco;
 use App\Models\OrdemServico;
 use App\Models\Proposta;
 use App\Models\MedidaSeguranca;
 use App\Models\Cliente;
-use App\Facades\Transacoes;
 use App\Models\BrigadaIncendio;
 use App\Models\ClienteDocumentoExigido;
 use App\Models\ClienteLoja;
 use App\Models\ClienteSistemaPreventivo;
 use App\Models\Edificacao;
+use App\Models\EdificacaoLocal;
 use App\Models\EdificacaoNivel;
 use App\Models\GrupoPermissao;
 use App\Models\VisitaTecnica;
-use http\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class ClienteController extends Controller
 {
     private $cliente;
 
-    public function __construct(Cliente $cliente)
+    public function __construct(Request $request, Cliente $cliente)
     {
         $this->cliente = $cliente;
     }
@@ -96,8 +96,7 @@ class ClienteController extends Controller
             $registros['identidade_estados'] = Estado::all();
 
             //Documentos
-            $registros['documentos'] = Documento
-                ::leftjoin('documento_submodulos', 'documento_submodulos.id', 'documentos.documento_submodulo_id')
+            $registros['documentos'] = Documento::leftjoin('documento_submodulos', 'documento_submodulos.id', 'documentos.documento_submodulo_id')
                 ->leftjoin('documento_fontes', 'documento_fontes.id', 'documentos.documento_fonte_id')
                 ->select('documentos.*', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
                 ->where('documentos.documento_submodulo_id', 1)
@@ -106,10 +105,22 @@ class ClienteController extends Controller
                 ->get();
 
             // Edificações Níveis
-            $registros['edificacoes_niveis'] = EdificacaoNivel
-                ::Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
+            $registros['edificacoes_niveis'] = EdificacaoNivel::Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
                 ->Join('clientes', 'clientes.id', '=', 'edificacoes.cliente_id')
                 ->select(['edificacoes_niveis.*', 'edificacoes.name as edificacaoName', 'clientes.id as clienteId', 'clientes.name as clienteName'])
+                ->orderby('clientes.name')
+                ->orderby('edificacoes.name')
+                ->orderby('edificacoes_niveis.name')
+                ->get();
+
+            // Edificações
+            $registros['edificacoes'] = Edificacao::orderby('name')->get();
+
+            // Edificações Locais
+            $registros['edificacoes_locais'] = EdificacaoLocal::leftJoin('edificacoes_niveis', 'edificacoes_niveis.id', '=', 'edificacoes_locais.edificacao_nivel_id')
+                ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
+                ->Join('clientes', 'clientes.id', '=', 'edificacoes.cliente_id')
+                ->select(['edificacoes_locais.*', 'edificacoes_niveis.name as edificacaoNivelName', 'edificacoes.name as edificacaoName', 'clientes.id as clienteId', 'clientes.name as clienteName'])
                 ->orderby('clientes.name')
                 ->orderby('edificacoes.name')
                 ->orderby('edificacoes_niveis.name')
@@ -325,8 +336,7 @@ class ClienteController extends Controller
             $registro = array();
 
             //Cliente
-            $cliente = Cliente
-                ::leftJoin('identidade_orgaos', 'clientes.identidade_orgao_id', '=', 'identidade_orgaos.id')
+            $cliente = Cliente::leftJoin('identidade_orgaos', 'clientes.identidade_orgao_id', '=', 'identidade_orgaos.id')
                 ->leftJoin('estados', 'clientes.identidade_estado_id', '=', 'estados.id')
                 ->leftJoin('generos', 'clientes.genero_id', '=', 'generos.id')
                 ->leftJoin('clientes as principal_clientes', 'clientes.principal_cliente_id', '=', 'principal_clientes.id')
@@ -355,73 +365,55 @@ class ClienteController extends Controller
             $registro = array();
 
             // Documentos
-            $documentos = ClienteDocumento
-                ::where('cliente_id', '=', $id)
+            $documentos = ClienteDocumento::where('cliente_id', '=', $id)
                 ->count();
 
             $registro['documentos'] = $documentos;
 
             // Visitas Técnicas
-            $visitas_tecnicas = VisitaTecnica
-                ::where('cliente_id', '=', $id)
+            $visitas_tecnicas = VisitaTecnica::where('cliente_id', '=', $id)
                 ->count();
 
             $registro['visitas_tecnicas'] = $visitas_tecnicas;
 
             // Ordens Serviços
-            $ordens_servicos = OrdemServico
-                ::where('cliente_id', '=', $id)
+            $ordens_servicos = OrdemServico::where('cliente_id', '=', $id)
                 ->count();
 
             $registro['ordens_servicos'] = $ordens_servicos;
 
             // Brigadas Incêndios
-            $brigadas_incendios = BrigadaIncendio
-                ::where('cliente_id', '=', $id)
+            $brigadas_incendios = BrigadaIncendio::where('cliente_id', '=', $id)
                 ->count();
 
             $registro['brigadas_incendios'] = $brigadas_incendios;
 
             // Propostas
-            $propostas = Proposta
-                ::where('cliente_id', '=', $id)
+            $propostas = Proposta::where('cliente_id', '=', $id)
                 ->count();
 
             $registro['propostas'] = $propostas;
 
             // Clientes Rede
-            $clientes_rede = Cliente
-                ::where('rede_cliente_id', '=', $id)
+            $clientes_rede = Cliente::where('rede_cliente_id', '=', $id)
                 ->count();
 
             $registro['clientes_rede'] = $clientes_rede;
 
             // Clientes Principal
-            $clientes_principal = Cliente
-                ::where('principal_cliente_id', '=', $id)
+            $clientes_principal = Cliente::where('principal_cliente_id', '=', $id)
                 ->count();
 
             $registro['clientes_principal'] = $clientes_principal;
 
             // Documentos Exigidos
-            $documentos_exigidos = ClienteDocumentoExigido
-                ::where('cliente_id', $id)
+            $documentos_exigidos = ClienteDocumentoExigido::where('cliente_id', $id)
                 ->count();
 
             $registro['documentos_exigidos'] = $documentos_exigidos;
 
-            // Lojas
-            $lojas = ClienteLoja
-                ::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
-                ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
-                ->where('edificacoes.cliente_id', '=', $id)
-                ->count();
-
-            $registro['lojas'] = $lojas;
-
             // Sistemas Preventivos
-            $sistemas_preventivos = ClienteSistemaPreventivo
-                ::where('cliente_id', '=', $id)
+            $sistemas_preventivos = ClienteSistemaPreventivo::where('cliente_id', '=', $id)
                 ->count();
 
             $registro['sistemas_preventivos'] = $sistemas_preventivos;
@@ -535,8 +527,7 @@ class ClienteController extends Controller
 
             $registros['documento_fontes'] = DocumentoFonte::orderby('ordem', 'ASC')->get();
 
-            $registros['clientes_documentos_exigidos'] = ClienteDocumentoExigido
-                ::join('documentos', 'documentos.id', '=', 'clientes_documentos_exigidos.documento_id')
+            $registros['clientes_documentos_exigidos'] = ClienteDocumentoExigido::join('documentos', 'documentos.id', '=', 'clientes_documentos_exigidos.documento_id')
                 ->join('documento_submodulos', 'documento_submodulos.id', '=', 'documentos.documento_submodulo_id')
                 ->join('documento_fontes', 'documento_fontes.id', '=', 'documentos.documento_fonte_id')
                 ->leftJoin('clientes_documentos', function ($join) {
@@ -611,6 +602,41 @@ class ClienteController extends Controller
     public function editar_documento(Request $request)
     {
         try {
+            $validator = Validator::make($request->all(), [
+                'operacao' => ['required'],
+                'cliente_id' => ['required'],
+                'documento_id' => ['required'],
+                'edificacao_id' => [
+                    'nullable',
+                    function ($attribute, $value, $fail) use ($request) {
+                        if ($value) {
+                            $exists = Edificacao::where('id', $value)
+                                ->where('cliente_id', $request->cliente_id)
+                                ->exists();
+
+                            if (!$exists) {
+                                $fail('A Edificação informada não pertence ao Cliente.');
+                            }
+                        }
+                    }
+                ],
+                'data_emissao' => ['nullable', 'date'],
+                'data_vencimento' => ['nullable', 'date'],
+            ], [
+                'operacao.required' => 'A operação é obrigatória.',
+                'cliente_id.required' => 'O cliente é obrigatório.',
+                'documento_id.required' => 'O documento é obrigatório.',
+                'data_emissao.date' => 'A data de emissão é inválida.',
+                'data_vencimento.date' => 'A data de vencimento é inválida.',
+            ]);
+
+            // Se falhar retorna
+            if ($validator->fails()) {
+                $mensagens = implode("<br>", $validator->errors()->all());
+
+                return $this->sendResponse($mensagens, 2020, null, $request);
+            }
+
             if ($request['operacao'] == 'create') {
                 // Incluir Registro
                 ClienteDocumento::create($request->all());
@@ -647,8 +673,7 @@ class ClienteController extends Controller
         try {
             $registros = array();
 
-            $registros['permissoes'] = GrupoPermissao
-                ::join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
+            $registros['permissoes'] = GrupoPermissao::join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
                 ->select('permissoes.name as permissao')
                 ->where('grupos_permissoes.grupo_id', Auth::user()->grupo_id)
                 ->where(function ($query) {
@@ -661,11 +686,11 @@ class ClienteController extends Controller
 
             $registros['documento_fontes'] = DocumentoFonte::orderby('ordem', 'ASC')->get();
 
-            $registros['clientes_documentos'] = ClienteDocumento
-                ::join('documentos', 'clientes_documentos.documento_id', 'documentos.id')
+            $registros['clientes_documentos'] = ClienteDocumento::leftjoin('edificacoes', 'edificacoes.id', 'clientes_documentos.edificacao_id')
+                ->join('documentos', 'clientes_documentos.documento_id', 'documentos.id')
                 ->join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
                 ->join('documento_fontes', 'documentos.documento_fonte_id', 'documento_fontes.id')
-                ->select('clientes_documentos.*', 'documentos.documento_fonte_id', 'documentos.name as documentoName', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
+                ->select('clientes_documentos.*', 'edificacoes.name as edificacaoName', 'documentos.documento_fonte_id', 'documentos.name as documentoName', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
                 ->where('clientes_documentos.cliente_id', $cliente_id)
                 ->orderby('documento_fontes.ordem', 'ASC')
                 ->orderby('documentos.ordem', 'ASC')
@@ -703,21 +728,59 @@ class ClienteController extends Controller
     public function editar_loja(Request $request)
     {
         try {
+            $validator = Validator::make($request->all(), [
+                'operacao' => ['required'],
+                'cliente_id' => ['required'],
+                'luc' => [
+                    'required',
+                    function ($attribute, $value, $fail) use ($request) {
+
+                        $query = ClienteLoja::join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+                            ->join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
+                            ->where('edificacoes.cliente_id', $request->cliente_id)
+                            ->where('edificacoes_niveis.id', $request->edificacao_nivel_id)
+                            ->where('clientes_lojas.luc', $value);
+
+                        // Se for edição, ignorar o próprio registro
+                        if ($request->operacao === 'edit') {
+                            $query->where('clientes_lojas.id', '!=', $request->id);
+                        }
+
+                        if ($query->exists()) {
+                            $fail('Este LUC já está cadastrado para este Cliente e Edificação Nível.');
+                        }
+                    }
+                ],
+                'edificacao_nivel_id' => [
+                    'required',
+                    function ($attribute, $value, $fail) use ($request) {
+                        if ($value) {
+                            $exists = EdificacaoNivel::where('edificacoes_niveis.id', $value)
+                                ->join('edificacoes', 'edificacoes.id', 'edificacoes_niveis.edificacao_id')
+                                ->where('edificacoes.cliente_id', $request->cliente_id)
+                                ->exists();
+
+                            if (!$exists) {
+                                $fail('A Edificação Nível informada não pertence ao Cliente.');
+                            }
+                        }
+                    }
+                ],
+            ], [
+                'operacao.required' => 'A operação é obrigatória.',
+                'cliente_id.required' => 'O cliente é obrigatório.',
+                'edificacao_nivel_id.required' => 'A Edificação Nível é obrigatório.',
+                'luc.required' => 'O LUC é obrigatório.'
+            ]);
+
+            // Se falhar retorna
+            if ($validator->fails()) {
+                $mensagens = implode("<br>", $validator->errors()->all());
+
+                return $this->sendResponse($mensagens, 2020, null, $request);
+            }
+
             if ($request['operacao'] == 'create') {
-
-                // 🔍 Verifica se já existe o mesmo LUC para o mesmo cliente
-                $existe = ClienteLoja
-                    ::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
-                    ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
-                    ->where('edificacoes.cliente_id', $request->cliente_id)
-                    ->where('edificacoes_niveis.id', $request->edificacao_nivel_id)
-                    ->where('clientes_lojas.luc', $request->luc)
-                    ->exists();
-
-                if ($existe) {
-                    return $this->sendResponse('Já existe uma loja com esse LUC para este cliente (Nível).', 2020, null, $request);
-                }
-
                 // Incluir Registro
                 ClienteLoja::create($request->all());
 
@@ -727,20 +790,6 @@ class ClienteController extends Controller
 
                 // Buscando Registro
                 $registro = ClienteLoja::find($request['cliente_loja_id']);
-
-                // 🔍 Verifica duplicidade (ignorando o próprio registro)
-                $existe = ClienteLoja
-                    ::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
-                    ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
-                    ->where('edificacoes.cliente_id', $request->cliente_id)
-                    ->where('edificacoes_niveis.id', $request->edificacao_nivel_id)
-                    ->where('clientes_lojas.luc', $request->luc)
-                    ->where('clientes_lojas.id', '!=', $registro->id)
-                    ->exists();
-
-                if ($existe) {
-                    return $this->sendResponse('Já existe uma loja com esse LUC para este cliente (Nível).', 2020, null, $request);
-                }
 
                 // Alterando registro
                 ClienteLoja::find($request['cliente_loja_id'])->update($request->all());
@@ -765,8 +814,7 @@ class ClienteController extends Controller
         try {
             $registros = array();
 
-            $registros['permissoes'] = GrupoPermissao
-                ::join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
+            $registros['permissoes'] = GrupoPermissao::join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
                 ->select('permissoes.name as permissao')
                 ->where('grupos_permissoes.grupo_id', Auth::user()->grupo_id)
                 ->where(function ($query) {
@@ -777,22 +825,12 @@ class ClienteController extends Controller
                 })
                 ->get();
 
-            // $registros['loja_fontes'] = ClienteLoja
-            //     ::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
-            //     ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
-            //     ->where('edificacoes.cliente_id', $cliente_id)
-            //     ->select('edificacoes.id', 'edificacoes.name')
-            //     ->orderby('edificacoes.name')
-            //     ->get();
-
-            $registros['loja_fontes'] = Edificacao
-                ::where('edificacoes.cliente_id', $cliente_id)
+            $registros['loja_fontes'] = Edificacao::where('edificacoes.cliente_id', $cliente_id)
                 ->select('edificacoes.id', 'edificacoes.name')
                 ->orderby('edificacoes.name')
                 ->get();
 
-                $registros['clientes_lojas'] = ClienteLoja
-                ::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+            $registros['clientes_lojas'] = ClienteLoja::Join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
                 ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
                 ->leftJoin('clientes as subordinados_clientes', 'subordinados_clientes.id', '=', 'clientes_lojas.subordinado_cliente_id')
                 ->where('edificacoes.cliente_id', $cliente_id)
@@ -833,6 +871,48 @@ class ClienteController extends Controller
     public function editar_sistema_preventivo(Request $request)
     {
         try {
+            $validator = Validator::make($request->all(), [
+                'operacao' => ['required'],
+                'cliente_id' => ['required'],
+                'medida_seguranca_id' => ['required'],
+                'name' => ['required'],
+                'sistema_preventivo_numero' => [
+                    'required',
+                    Rule::unique('clientes_sistemas_preventivos', 'sistema_preventivo_numero')
+                        ->ignore($request->cliente_sistema_preventivo_id),
+                ],
+                'edificacao_local_id' => [
+                    'nullable',
+                    function ($attribute, $value, $fail) use ($request) {
+                        if ($value) {
+                            $exists = EdificacaoLocal::where('edificacoes_locais.id', $value)
+                                ->join('edificacoes_niveis', 'edificacoes_niveis.id', 'edificacoes_locais.edificacao_nivel_id')
+                                ->join('edificacoes', 'edificacoes.id', 'edificacoes_niveis.edificacao_id')
+                                ->where('edificacoes.cliente_id', $request->cliente_id)
+                                ->exists();
+
+                            if (!$exists) {
+                                $fail('A Edificação Local informada não pertence ao Cliente.');
+                            }
+                        }
+                    }
+                ],
+            ], [
+                'operacao.required' => 'A operação é obrigatória.',
+                'cliente_id.required' => 'O cliente é obrigatório.',
+                'medida_seguranca_id.required' => 'A Medida Segurança é obrigatório.',
+                'name.required' => 'O Nome é obrigatório',
+                'sistema_preventivo_numero.required' => 'O Número é obrigatório',
+                'sistema_preventivo_numero.unique' => 'Este número já está cadastrado.'
+            ]);
+
+            // Se falhar retorna
+            if ($validator->fails()) {
+                $mensagens = implode("<br>", $validator->errors()->all());
+
+                return $this->sendResponse($mensagens, 2020, null, $request);
+            }
+
             if ($request['operacao'] == 'create') {
                 // Incluir Registro
                 ClienteSistemaPreventivo::create($request->all());
@@ -869,8 +949,7 @@ class ClienteController extends Controller
         try {
             $registros = array();
 
-            $registros['permissoes'] = GrupoPermissao
-                ::join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
+            $registros['permissoes'] = GrupoPermissao::join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
                 ->select('permissoes.name as permissao')
                 ->where('grupos_permissoes.grupo_id', Auth::user()->grupo_id)
                 ->where(function ($query) {
@@ -883,9 +962,11 @@ class ClienteController extends Controller
 
             $registros['sistema_preventivo_fontes'] = MedidaSeguranca::orderby('ordem', 'ASC')->get();
 
-            $registros['clientes_sistemas_preventivos'] = ClienteSistemaPreventivo
-                ::join('medidas_seguranca', 'medidas_seguranca.id', 'clientes_sistemas_preventivos.medida_seguranca_id')
-                ->select('clientes_sistemas_preventivos.*', 'medidas_seguranca.id as sistema_preventivo_fonte_id', 'medidas_seguranca.name as medidaSegurancaName')
+            $registros['clientes_sistemas_preventivos'] = ClienteSistemaPreventivo::leftJoin('edificacoes_locais', 'edificacoes_locais.id', 'clientes_sistemas_preventivos.edificacao_local_id')
+                ->leftJoin('edificacoes_niveis', 'edificacoes_niveis.id', 'edificacoes_locais.edificacao_nivel_id')
+                ->leftJoin('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
+                ->join('medidas_seguranca', 'medidas_seguranca.id', 'clientes_sistemas_preventivos.medida_seguranca_id')
+                ->select('clientes_sistemas_preventivos.*', 'medidas_seguranca.id as sistema_preventivo_fonte_id', 'medidas_seguranca.name as medidaSegurancaName', 'edificacoes.name as edificacaoName', 'edificacoes_niveis.name as edificacaoNivelName', 'edificacoes_locais.name as edificacaoLocalName')
                 ->where('clientes_sistemas_preventivos.cliente_id', $cliente_id)
                 ->orderby('medidas_seguranca.name')
                 ->get();
@@ -921,8 +1002,7 @@ class ClienteController extends Controller
     public function propostas($cliente_id)
     {
         try {
-            $registros = Proposta
-                ::where('propostas.cliente_id', $cliente_id)
+            $registros = Proposta::where('propostas.cliente_id', $cliente_id)
                 ->orderby('propostas.data_proposta', 'DESC')
                 ->get();
 
@@ -939,8 +1019,7 @@ class ClienteController extends Controller
     public function ordens_servicos($cliente_id)
     {
         try {
-            $registros = OrdemServico
-                ::leftJoin('ordem_servico_tipos', 'ordens_servicos.ordem_servico_tipo_id', '=', 'ordem_servico_tipos.id')
+            $registros = OrdemServico::leftJoin('ordem_servico_tipos', 'ordens_servicos.ordem_servico_tipo_id', '=', 'ordem_servico_tipos.id')
                 ->leftJoin('clientes', 'ordens_servicos.cliente_id', '=', 'clientes.id')
                 ->select(['ordens_servicos.*', 'ordem_servico_tipos.name as ordemServicoTipoName', 'clientes.name as clienteName'])
                 ->where('ordens_servicos.cliente_id', $cliente_id)
@@ -961,8 +1040,7 @@ class ClienteController extends Controller
     public function visitas_tecnicas($cliente_id)
     {
         try {
-            $registros = VisitaTecnica
-                ::leftJoin('visita_tecnica_tipos', 'visitas_tecnicas.visita_tecnica_tipo_id', '=', 'visita_tecnica_tipos.id')
+            $registros = VisitaTecnica::leftJoin('visita_tecnica_tipos', 'visitas_tecnicas.visita_tecnica_tipo_id', '=', 'visita_tecnica_tipos.id')
                 ->leftJoin('clientes', 'visitas_tecnicas.cliente_id', '=', 'clientes.id')
                 ->select(['visitas_tecnicas.*', 'visita_tecnica_tipos.name as visitaTecnicaTipoName', 'clientes.name as clienteName'])
                 ->where('visitas_tecnicas.cliente_id', $cliente_id)
@@ -983,8 +1061,7 @@ class ClienteController extends Controller
     public function brigadas_incendios($cliente_id)
     {
         try {
-            $registros = BrigadaIncendio
-                ::join('clientes', 'clientes.id', 'brigadas_incendios.cliente_id')
+            $registros = BrigadaIncendio::join('clientes', 'clientes.id', 'brigadas_incendios.cliente_id')
                 ->select('brigadas_incendios.*', 'clientes.name as clienteName')
                 ->where('brigadas_incendios.cliente_id', $cliente_id)
                 ->get();
@@ -1002,8 +1079,7 @@ class ClienteController extends Controller
     public function clientes_rede($cliente_id)
     {
         try {
-            $registros = Cliente
-                ::select('clientes.id', 'clientes.name', 'clientes.cnpj')
+            $registros = Cliente::select('clientes.id', 'clientes.name', 'clientes.cnpj')
                 ->where('clientes.rede_cliente_id', $cliente_id)
                 ->orderby('clientes.name', 'ASC')
                 ->get();
@@ -1021,8 +1097,7 @@ class ClienteController extends Controller
     public function clientes_principal($cliente_id)
     {
         try {
-            $registros = Cliente
-                ::select('clientes.id', 'clientes.name', 'clientes.cnpj')
+            $registros = Cliente::select('clientes.id', 'clientes.name', 'clientes.cnpj')
                 ->where('clientes.principal_cliente_id', $cliente_id)
                 ->orderby('clientes.name', 'ASC')
                 ->get();
@@ -1041,8 +1116,7 @@ class ClienteController extends Controller
     {
         $dados = array();
 
-        $dados['sistema_preventivo'] = ClienteSistemaPreventivo
-            ::join('clientes', 'clientes.id', 'clientes_sistemas_preventivos.cliente_id')
+        $dados['sistema_preventivo'] = ClienteSistemaPreventivo::join('clientes', 'clientes.id', 'clientes_sistemas_preventivos.cliente_id')
             ->join('medidas_seguranca', 'medidas_seguranca.id', 'clientes_sistemas_preventivos.medida_seguranca_id')
             ->select('clientes_sistemas_preventivos.*', 'clientes.name as clienteName', 'medidas_seguranca.name as medidaSegurancaName')
             ->where('clientes_sistemas_preventivos.sistema_preventivo_numero', $sistema_preventivo_numero)

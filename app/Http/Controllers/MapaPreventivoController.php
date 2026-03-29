@@ -7,8 +7,6 @@ use App\Http\Requests\MapaPreventivoStoreRequest;
 use App\Http\Requests\MapaPreventivoUpdateRequest;
 use App\Models\MapaPreventivo;
 use App\Models\EdificacaoLocal;
-use App\Models\EdificacaoNivel;
-use App\Models\SistemaPreventivo;
 
 class MapaPreventivoController extends Controller
 {
@@ -22,12 +20,11 @@ class MapaPreventivoController extends Controller
     public function index()
     {
         $registros = $this->mapa_preventivo
-            ->Join('sistemas_preventivos', 'sistemas_preventivos.id', '=', 'mapas_preventivos.sistema_preventivo_id')
             ->Join('edificacoes_locais', 'edificacoes_locais.id', '=', 'mapas_preventivos.edificacao_local_id')
             ->Join('edificacoes_niveis', 'edificacoes_niveis.id', '=', 'edificacoes_locais.edificacao_nivel_id')
             ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
             ->Join('clientes', 'clientes.id', '=', 'edificacoes.cliente_id')
-            ->select(['mapas_preventivos.*', 'sistemas_preventivos.name as sistemaPreventivoName', 'edificacoes_locais.name as edificacaoLocalName', 'edificacoes_niveis.name as edificacaoNivelName', 'edificacoes.name as edificacaoName', 'clientes.name as clienteName'])
+            ->select(['mapas_preventivos.*', 'edificacoes_locais.name as edificacaoLocalName', 'edificacoes_niveis.name as edificacaoNivelName', 'edificacoes.name as edificacaoName', 'clientes.name as clienteName'])
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -37,12 +34,11 @@ class MapaPreventivoController extends Controller
     {
         try {
             $registro = $this->mapa_preventivo
-                ->Join('sistemas_preventivos', 'sistemas_preventivos.id', '=', 'mapas_preventivos.sistema_preventivo_id')
                 ->Join('edificacoes_locais', 'edificacoes_locais.id', '=', 'mapas_preventivos.edificacao_local_id')
                 ->Join('edificacoes_niveis', 'edificacoes_niveis.id', '=', 'edificacoes_locais.edificacao_nivel_id')
                 ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
                 ->Join('clientes', 'clientes.id', '=', 'edificacoes.cliente_id')
-                ->select(['mapas_preventivos.*', 'sistemas_preventivos.name as sistemaPreventivoName', 'edificacoes_locais.name as edificacaoLocalName', 'edificacoes_niveis.name as edificacaoNivelName', 'edificacoes.name as edificacaoName', 'clientes.name as clienteName'])
+                ->select(['mapas_preventivos.*', 'edificacoes_locais.name as edificacaoLocalName', 'edificacoes_niveis.name as edificacaoNivelName', 'edificacoes.name as edificacaoName', 'clientes.name as clienteName'])
                 ->where('mapas_preventivos.id', '=', $id)
                 ->get()[0];
 
@@ -66,8 +62,7 @@ class MapaPreventivoController extends Controller
             $registros = array();
 
             // Edificações Locais
-            $registros['edificacoes_locais'] = EdificacaoLocal
-                ::Join('edificacoes_niveis', 'edificacoes_niveis.id', '=', 'edificacoes_locais.edificacao_nivel_id')
+            $registros['edificacoes_locais'] = EdificacaoLocal::Join('edificacoes_niveis', 'edificacoes_niveis.id', '=', 'edificacoes_locais.edificacao_nivel_id')
                 ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
                 ->Join('clientes', 'clientes.id', '=', 'edificacoes.cliente_id')
                 ->select(['edificacoes_locais.*', 'edificacoes_niveis.name as edificacaoNivelName', 'edificacoes.name as edificacaoName', 'clientes.name as clienteName'])
@@ -75,9 +70,6 @@ class MapaPreventivoController extends Controller
                 ->orderby('edificacoes.name')
                 ->orderby('edificacoes_niveis.name')
                 ->get();
-
-            // Sistemas Preventivos
-            $registros['sistemas_preventivos'] = SistemaPreventivo::all();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -204,12 +196,11 @@ class MapaPreventivoController extends Controller
 
         //Registros
         $registros = $this->mapa_preventivo
-            ->Join('sistemas_preventivos', 'sistemas_preventivos.id', '=', 'mapas_preventivos.sistema_preventivo_id')
             ->Join('edificacoes_locais', 'edificacoes_locais.id', '=', 'mapas_preventivos.edificacao_local_id')
             ->Join('edificacoes_niveis', 'edificacoes_niveis.id', '=', 'edificacoes_locais.edificacao_nivel_id')
             ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
             ->Join('clientes', 'clientes.id', '=', 'edificacoes.cliente_id')
-            ->select(['mapas_preventivos.*', 'sistemas_preventivos.name as sistemaPreventivoName', 'edificacoes_locais.name as edificacaoLocalName', 'edificacoes_niveis.name as edificacaoNivelName', 'edificacoes.name as edificacaoName', 'clientes.name as clienteName'])
+            ->select(['mapas_preventivos.*', 'edificacoes_locais.name as edificacaoLocalName', 'edificacoes_niveis.name as edificacaoNivelName', 'edificacoes.name as edificacaoName', 'clientes.name as clienteName'])
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

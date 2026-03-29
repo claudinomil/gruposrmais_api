@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class EdificacaoStoreRequest extends FormRequest
 {
@@ -15,7 +16,13 @@ class EdificacaoStoreRequest extends FormRequest
     {
         $rules = [
             'cliente_id' => ['required'],
-            'name' => ['required'],
+            'name' => [
+                'required',
+                Rule::unique('edificacoes', 'name')
+                    ->where(function ($query) {
+                        return $query->where('cliente_id', $this->cliente_id);
+                    })
+            ],
             'pavimentos' => ['required', 'integer', 'min:1'],
             'mezaninos' => ['required', 'integer', 'min:0'],
             'coberturas' => ['required', 'integer', 'min:0'],
@@ -57,6 +64,7 @@ class EdificacaoStoreRequest extends FormRequest
         $messages = [
             'cliente_id.required' => 'Cliente é requerido.',
             'name.required' => 'Nome é requerido.',
+            'name.unique' => 'Já existe uma Edificação com esse nome para este Cliente.',
             'pavimentos.required' => 'Pavimentos é requerido.',
             'pavimentos.integer' => 'Pavimentos tem que ser um número inteiro.',
             'pavimentos.min' => 'Pavimentos tem que ser no mínimo 1(um).',
