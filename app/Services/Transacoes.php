@@ -14,6 +14,7 @@ use App\Models\Documento;
 use App\Models\EdificacaoLocal;
 use App\Models\EdificacaoNivel;
 use App\Models\Empresa;
+use App\Models\EquipamentoPreventivo;
 use App\Models\EscalaTipo;
 use App\Models\FormaPagamento;
 use App\Models\FormaPagamentoStatus;
@@ -43,6 +44,7 @@ use App\Models\Produto;
 use App\Models\ProdutoCategoria;
 use App\Models\ProdutoEntrada;
 use App\Models\ProdutoTipo;
+use App\Models\SistemaPreventivo;
 use App\Models\Transacao;
 use App\Models\Veiculo;
 use App\Models\VeiculoCategoria;
@@ -1009,6 +1011,24 @@ class Transacoes
                 if ($op == 1) {
                     $dados .= '<b>:: Sistemas Preventivos</b>'.'<br><br>';
                     $dados .= $this->retornaDado(2, $dadosAnterior['medida_seguranca_id'], $dadosAtual['medida_seguranca_id'], 'Medida Segurança', MedidaSeguranca::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
+                }
+
+                // Tabela sistemas_preventivos_equipamentos
+                if ($op == 2) {
+                    $dados .= '<b>:: Sistema Preventivo Equipamento</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(2, $dadosAnterior['sistema_preventivo_id'], $dadosAtual['sistema_preventivo_id'], 'Sistema Preventivo', SistemaPreventivo::class, 'name');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['equipamento_preventivo_id'], $dadosAtual['equipamento_preventivo_id'], 'Equipamento Preventivo', EquipamentoPreventivo::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['equipamento_preventivo_item'], $dadosAtual['equipamento_preventivo_item'], 'Equipamento Item', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['equipamento_preventivo_nome'], $dadosAtual['equipamento_preventivo_nome'], 'Equipamento Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['equipamento_preventivo_quantidade'], $dadosAtual['equipamento_preventivo_quantidade'], 'Equipamento Quantidade', '', '');
+                }
+            }
+
+            // Equipamentos Preventivos
+            if ($submodulo_id == 51) {
+                if ($op == 1) {
+                    $dados .= '<b>:: Equipamentos Preventivos</b>'.'<br><br>';
                     $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
                 }
             }

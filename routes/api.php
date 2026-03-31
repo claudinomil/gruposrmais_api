@@ -140,3 +140,9 @@ require __DIR__ . '/routes_mapas_preventivos.php';
 
 // Vistorias Sistemas
 require __DIR__ . '/routes_vistorias_sistemas.php';
+
+// Sistemas Preventivos
+require __DIR__ . '/routes_sistemas_preventivos.php';
+
+// Equipamentos Preventivos
+require __DIR__ . '/routes_equipamentos_preventivos.php';

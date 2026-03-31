@@ -20,6 +20,7 @@ use App\Models\OrdemServicoVeiculo;
 use App\Models\PontoInteresseEspecialidade;
 use App\Models\PropostaServico;
 use App\Models\MedidaSeguranca;
+use App\Models\SistemaPreventivoEquipamento;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -890,6 +891,54 @@ class SuporteService
 
                     //gravar transacao
                     Transacoes::transacaoRecord(2, 1, 'propostas', $dadosAtual, $dadosAtual);
+                }
+            }
+        }
+    }
+
+    /*
+     * Editar dados na tabela sistemas_preventivos_equipamentos
+     *
+     * @PARAM op=1 : Incluir
+     * @PARAM op=2 : Excluir
+     * @PARAM op=3 : Excluir Todos e Incluir
+     */
+    public function editSistemaPreventivoEquipamento($op, $sistema_preventivo_id, $request)
+    {
+        // Excluir
+        if ($op == 2 or $op == 3) {
+            // Verificar os equipamentos do Sistema Preventivo
+            $sistemaPreventivoEquipamentos = PropostaServico::where('sistema_preventivo_id', $sistema_preventivo_id)->get();
+
+            foreach ($sistemaPreventivoEquipamentos as $sistemaPreventivoEquipamento) {
+                // Dados Anterior
+                $dadosAnterior = $sistemaPreventivoEquipamento;
+
+                // Excluir
+                SistemaPreventivoEquipamento::where('id', $sistemaPreventivoEquipamento['id'])->delete();
+
+                // gravar transacao
+                Transacoes::transacaoRecord(2, 3, 'sistemas_preventivos', $dadosAnterior, $dadosAnterior);
+            }
+        }
+
+        // Incluir
+        if ($op == 1 || $op == 3) {
+            for ($i = 0; $i <= 50; $i++) {
+                if (isset($request['equipamento_preventivo_id'][$i])) {
+                    // Dados Atual
+                    $dadosAtual = array();
+                    $dadosAtual['sistema_preventivo_id'] = $sistema_preventivo_id;
+                    $dadosAtual['equipamento_preventivo_id'] = $request['equipamento_preventivo_id'][$i];
+                    $dadosAtual['equipamento_preventivo_item'] = $request['equipamento_preventivo_item'][$i];
+                    $dadosAtual['equipamento_preventivo_nome'] = $request['equipamento_preventivo_nome'][$i];
+                    $dadosAtual['equipamento_preventivo_quantidade'] = $request['equipamento_preventivo_quantidade'][$i];
+
+                    // Incluir
+                    SistemaPreventivoEquipamento::create($dadosAtual);
+
+                    // gravar transacao
+                    Transacoes::transacaoRecord(2, 1, 'sistemas_preventivos', $dadosAtual, $dadosAtual);
                 }
             }
         }
