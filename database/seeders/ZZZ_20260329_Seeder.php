@@ -5,10 +5,8 @@ namespace Database\Seeders;
 use App\Models\Documento;
 use App\Models\DocumentoFonte;
 use App\Models\EquipamentoPreventivo;
-use App\Models\Modulo;
 use App\Models\Submodulo;
 use App\Models\Permissao;
-use App\Models\GrupoPermissao;
 
 use Illuminate\Database\Seeder;
 

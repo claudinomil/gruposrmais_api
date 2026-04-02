@@ -9,9 +9,7 @@ use App\Models\Cliente;
 use App\Models\Edificacao;
 use App\Models\EdificacaoClassificacao;
 use App\Models\EdificacaoNivel;
-use App\Models\EdificacaoMedidaSeguranca;
 use App\Models\IncendioRisco;
-use App\Models\MedidaSeguranca;
 
 class EdificacaoController extends Controller
 {
@@ -73,9 +71,6 @@ class EdificacaoController extends Controller
             // Incêndio Riscos
             $registros['incendio_riscos'] = IncendioRisco::all();
 
-            // Medidas Segurança
-            $registros['medidas_seguranca'] = MedidaSeguranca::all();
-
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -94,9 +89,6 @@ class EdificacaoController extends Controller
 
             // Editar dados na tabela edificacoes_niveis
             SuporteFacade::editEdificacoesNiveis($registro['id'], $request);
-
-            // Editar dados na tabela edificacoes_medidas_seguranca
-            SuporteFacade::editEdificacoesMedidasSeguranca($registro['id'], $request);
 
             return $this->sendResponse('Registro criado com sucesso.', 2010, null, null);
         } catch (\Exception $e) {
@@ -131,9 +123,6 @@ class EdificacaoController extends Controller
 
                 // Editar dados na tabela edificacoes_niveis
                 SuporteFacade::editEdificacoesNiveis($id, $request);
-
-                // Editar dados na tabela edificacoes_medidas_seguranca
-                SuporteFacade::editEdificacoesMedidasSeguranca($id, $request);
 
                 // Verificar/Bloquear/Desbloquear Tabela''''''''''
                 SuporteFacade::bloquearTabela(3, 'edificacoes');
@@ -188,9 +177,6 @@ class EdificacaoController extends Controller
                         return $this->sendResponse('Náo é possível excluir. Registro relacionado com Edificações Locais.', 2040, null, null);
                     }
                 }
-
-                // Deletar as medidas segurançarelacionadas a esses níveis
-                if ($nivelIds->isNotEmpty()) {EdificacaoMedidaSeguranca::whereIn('edificacao_nivel_id', $nivelIds)->delete();}
 
                 // Agora pode deletar os níveis
                 EdificacaoNivel::where('edificacao_id', $id)->delete();
@@ -284,30 +270,16 @@ class EdificacaoController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
 
-    public function medidas_seguranca()
+    public function edificacao_niveis($edificacao_id)
     {
-        $registros = MedidaSeguranca::orderby('ordem')->orderby('name')->get();
-
-        return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
-    }
-
-    public function edificacao_medidas_seguranca($edificacao_id)
-    {
-        $registros = EdificacaoMedidaSeguranca
-            ::join('edificacoes_niveis', 'edificacoes_niveis.id', 'edificacoes_medidas_seguranca.edificacao_nivel_id')
-            ->join('medidas_seguranca', 'medidas_seguranca.id', 'edificacoes_medidas_seguranca.medida_seguranca_id')
-            ->select(
-                'edificacoes_medidas_seguranca.edificacao_nivel_id',
-                'edificacoes_medidas_seguranca.medida_seguranca_id',
-                'edificacoes_medidas_seguranca.quantidade as edificacaoMedidaSegurancaQuantidade',
+        $registros = EdificacaoNivel::select(
                 'edificacoes_niveis.name as edificacaoNivelName',
                 'edificacoes_niveis.area_construida as edificacaoNivelAreaConstruida',
                 'edificacoes_niveis.ordem as edificacaoNivelOrdem',
-                'edificacoes_niveis.nivel as edificacaoNivelNivel',
-                'medidas_seguranca.name as medidaSegurancaName'
+                'edificacoes_niveis.nivel as edificacaoNivelNivel'
             )
             ->where('edificacoes_niveis.edificacao_id', $edificacao_id)
-            ->orderby('medidas_seguranca.ordem')->orderby('medidas_seguranca.name')->get();
+            ->get();
 
         return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
     }

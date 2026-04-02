@@ -13,6 +13,5 @@ Route::prefix('edificacoes')->group(function () {
     Route::get('/auxiliary/tables', [EdificacaoController::class, 'auxiliary'])->middleware(['auth:api']);
 
     // Outras Rotas de dados
-    Route::get('/dados/medidas_seguranca', [EdificacaoController::class, 'medidas_seguranca'])->middleware(['auth:api']);
-    Route::get('/dados/edificacao_medidas_seguranca/{edificacao_id}', [EdificacaoController::class, 'edificacao_medidas_seguranca'])->middleware(['auth:api']);
+    Route::get('/dados/edificacao_niveis/{edificacao_id}', [EdificacaoController::class, 'edificacao_niveis'])->middleware(['auth:api']);
 });

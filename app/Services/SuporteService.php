@@ -8,7 +8,6 @@ use App\Models\BrigadaIncendioEscala;
 use App\Models\BrigadaIncendioEscalaBrigadista;
 use App\Models\BrigadaIncendioProduto;
 use App\Models\EdificacaoNivel;
-use App\Models\EdificacaoMedidaSeguranca;
 use App\Models\Especialidade;
 use App\Models\ProdutoControleSituacaoItem;
 use App\Models\ProdutoEntradaItem;
@@ -19,7 +18,6 @@ use App\Models\OrdemServicoServico;
 use App\Models\OrdemServicoVeiculo;
 use App\Models\PontoInteresseEspecialidade;
 use App\Models\PropostaServico;
-use App\Models\MedidaSeguranca;
 use App\Models\SistemaPreventivoEquipamento;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -908,7 +906,7 @@ class SuporteService
         // Excluir
         if ($op == 2 or $op == 3) {
             // Verificar os equipamentos do Sistema Preventivo
-            $sistemaPreventivoEquipamentos = PropostaServico::where('sistema_preventivo_id', $sistema_preventivo_id)->get();
+            $sistemaPreventivoEquipamentos = SistemaPreventivoEquipamento::where('sistema_preventivo_id', $sistema_preventivo_id)->get();
 
             foreach ($sistemaPreventivoEquipamentos as $sistemaPreventivoEquipamento) {
                 // Dados Anterior
@@ -1007,80 +1005,6 @@ class SuporteService
             foreach ($niveisParaExcluir as $nivel) {
                 // Aqui você pode registrar log se desejar
                 $nivel->delete();
-            }
-        }
-    }
-
-    public function editEdificacoesMedidasSeguranca($edificacao_id, $request)
-    {
-        // Mapeamento de grupos -> código numérico do campo_nivel
-        $mapaNiveis = [
-            'pavimentos' => 1,
-            'mezaninos' => 2,
-            'coberturas' => 3,
-            'areas_tecnicas' => 4,
-        ];
-
-        foreach ($mapaNiveis as $grupo => $campo_nivel) {
-            // Busca os níveis existentes dessa edificação e grupo
-            $niveis = EdificacaoNivel::where('edificacao_id', $edificacao_id)
-                ->where('nivel', $campo_nivel)
-                ->get();
-
-            // Para cada nível (ordem = índice dentro do grupo)
-            foreach ($niveis as $nivel) {
-                $ordem = $nivel->ordem; // usado para montar o nome dos campos
-                $idsMantidos = [];
-
-                // Pega todos as medidas segurança disponíveis (IDs esperados no formulário)
-                $medidasSeguranca = MedidaSeguranca::all();
-
-                foreach ($medidasSeguranca as $medida) {
-                    $campoSistema = "nivel_medida_seguranca_id_{$medida->id}_{$grupo}_{$ordem}";
-                    $campoQuantidade = "nivel_quantidade_medida_seguranca_{$medida->id}_{$grupo}_{$ordem}";
-
-                    $medidaSegurancaId = $request->input($campoSistema);
-                    $quantidade = $request->input($campoQuantidade);
-                    if (is_null($quantidade)) {$quantidade = 0;}
-
-                    // Ignora se não houver dados
-                    if (empty($medidaSegurancaId) || is_null($quantidade)) {
-                        continue;
-                    }
-
-                    // Verifica se já existe esse sistema vinculado ao nível
-                    $registroExistente = EdificacaoMedidaSeguranca::where('edificacao_nivel_id', $nivel->id)
-                        ->where('medida_seguranca_id', $medidaSegurancaId)
-                        ->first();
-
-                    if ($registroExistente) {
-                        // Atualiza
-                        $registroExistente->update([
-                            'quantidade' => $quantidade,
-                        ]);
-
-                        $idsMantidos[] = $registroExistente->id;
-                    } else {
-                        // Cria novo
-                        $novo = EdificacaoMedidaSeguranca::create([
-                            'edificacao_nivel_id' => $nivel->id,
-                            'medida_seguranca_id' => $medidaSegurancaId,
-                            'quantidade' => $quantidade,
-                        ]);
-
-                        $idsMantidos[] = $novo->id;
-                    }
-                }
-
-                // Exclui os registros que não estão mais no formulário
-                $aExcluir = EdificacaoMedidaSeguranca::where('edificacao_nivel_id', $nivel->id)
-                    ->whereNotIn('id', $idsMantidos)
-                    ->get();
-
-                foreach ($aExcluir as $item) {
-                    // Log de exclusão, se necessário
-                    $item->delete();
-                }
             }
         }
     }

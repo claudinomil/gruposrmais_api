@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Cliente;
 use App\Models\ClienteSistemaPreventivo;
 use App\Models\Edificacao;
-use App\Models\EdificacaoMedidaSeguranca;
 use App\Models\EdificacaoNivel;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -58,15 +57,6 @@ class Z_Faker5Seeder extends Seeder
             'area_construida' => 10.00
         ]);
 
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
-
         // Edificação Nível
         $edificacao_nivel = EdificacaoNivel::create([
             'edificacao_id' => $edificacao->id,
@@ -75,15 +65,6 @@ class Z_Faker5Seeder extends Seeder
             'name' => 'Pavimento 2',
             'area_construida' => 10.00
         ]);
-
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
 
         // Edificação Nível
         $edificacao_nivel = EdificacaoNivel::create([
@@ -94,15 +75,6 @@ class Z_Faker5Seeder extends Seeder
             'area_construida' => 10.00
         ]);
 
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
-
         // Edificação Nível
         $edificacao_nivel = EdificacaoNivel::create([
             'edificacao_id' => $edificacao->id,
@@ -111,15 +83,6 @@ class Z_Faker5Seeder extends Seeder
             'name' => 'Mezanino 2',
             'area_construida' => 20.00
         ]);
-
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
         //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
         // Para o Cliente SHOPPING 1'''''''''''''''''''''''''''''''''''''''''
@@ -161,15 +124,6 @@ class Z_Faker5Seeder extends Seeder
             'area_construida' => 20.00
         ]);
 
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
-
         // Edificação Nível
         $edificacao_nivel = EdificacaoNivel::create([
             'edificacao_id' => $edificacao->id,
@@ -178,15 +132,6 @@ class Z_Faker5Seeder extends Seeder
             'name' => 'Pavimento 2',
             'area_construida' => 30.00
         ]);
-
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
         //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
         // Para o Cliente REDE 1'''''''''''''''''''''''''''''''''''''''''''''
@@ -228,15 +173,6 @@ class Z_Faker5Seeder extends Seeder
             'area_construida' => 15.00
         ]);
 
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
-
         // Edificação Nível
         $edificacao_nivel = EdificacaoNivel::create([
             'edificacao_id' => $edificacao->id,
@@ -246,15 +182,6 @@ class Z_Faker5Seeder extends Seeder
             'area_construida' => 15.00
         ]);
 
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
-
         // Edificação Nível
         $edificacao_nivel = EdificacaoNivel::create([
             'edificacao_id' => $edificacao->id,
@@ -263,15 +190,6 @@ class Z_Faker5Seeder extends Seeder
             'name' => 'Cobertura 1',
             'area_construida' => 20.00
         ]);
-
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
         //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
         // Para o Cliente REDE 1'''''''''''''''''''''''''''''''''''''''''''''
@@ -313,15 +231,6 @@ class Z_Faker5Seeder extends Seeder
             'area_construida' => 10.00
         ]);
 
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
-
         // Edificação Nível
         $edificacao_nivel = EdificacaoNivel::create([
             'edificacao_id' => $edificacao->id,
@@ -330,15 +239,6 @@ class Z_Faker5Seeder extends Seeder
             'name' => 'Pavimento 2',
             'area_construida' => 10.00
         ]);
-
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
 
         // Edificação Nível
         $edificacao_nivel = EdificacaoNivel::create([
@@ -349,15 +249,6 @@ class Z_Faker5Seeder extends Seeder
             'area_construida' => 10.00
         ]);
 
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
-
         // Edificação Nível
         $edificacao_nivel = EdificacaoNivel::create([
             'edificacao_id' => $edificacao->id,
@@ -367,15 +258,6 @@ class Z_Faker5Seeder extends Seeder
             'area_construida' => 10.00
         ]);
 
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
-
         // Edificação Nível
         $edificacao_nivel = EdificacaoNivel::create([
             'edificacao_id' => $edificacao->id,
@@ -384,15 +266,6 @@ class Z_Faker5Seeder extends Seeder
             'name' => 'Cobertura 1',
             'area_construida' => 10.00
         ]);
-
-        // Edificações Medidas Segurança
-        for($i=1; $i<=24; $i++) {
-            EdificacaoMedidaSeguranca::create([
-                'edificacao_nivel_id' => $edificacao_nivel->id,
-                'medida_seguranca_id' => $i,
-                'quantidade' => 0
-            ]);
-        }
         //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
