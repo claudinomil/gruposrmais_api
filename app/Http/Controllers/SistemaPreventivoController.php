@@ -26,36 +26,36 @@ class SistemaPreventivoController extends Controller
 
     public function index()
     {
-        // $registros = $this->sistema_preventivo
-        //     ->Join('medidas_seguranca', 'medidas_seguranca.id', '=', 'sistemas_preventivos.medida_seguranca_id')
-        //     ->select(['sistemas_preventivos.*', 'medidas_seguranca.name as medidaSegurancaName'])
-        //     ->get();
-
-
         $registros = $this->sistema_preventivo
-            ->join('medidas_seguranca', 'medidas_seguranca.id', '=', 'sistemas_preventivos.medida_seguranca_id')
-            ->leftJoin('sistemas_preventivos_equipamentos as spe', 'spe.sistema_preventivo_id', '=', 'sistemas_preventivos.id')
-            ->leftJoin('equipamentos_preventivos as ep', 'ep.id', '=', 'spe.equipamento_preventivo_id')
-            ->select(
-                'sistemas_preventivos.*',
-                'medidas_seguranca.name as medidaSegurancaName',
-                DB::raw("
-                    CASE
-                        WHEN COUNT(ep.id) = 0 THEN JSON_ARRAY()
-                        ELSE JSON_ARRAYAGG(
-                            JSON_OBJECT(
-                                'id', ep.id,
-                                'name', ep.name,
-                                'item', spe.equipamento_preventivo_item,
-                                'nome', spe.equipamento_preventivo_nome,
-                                'quantidade', spe.equipamento_preventivo_quantidade
-                            )
-                        )
-                    END as equipamentos
-                ")
-            )
-            ->groupBy('sistemas_preventivos.id', 'medidas_seguranca.name')
+            ->Join('medidas_seguranca', 'medidas_seguranca.id', '=', 'sistemas_preventivos.medida_seguranca_id')
+            ->select(['sistemas_preventivos.*', 'medidas_seguranca.name as medidaSegurancaName'])
             ->get();
+
+
+        // $registros = $this->sistema_preventivo
+        //     ->join('medidas_seguranca', 'medidas_seguranca.id', '=', 'sistemas_preventivos.medida_seguranca_id')
+        //     ->leftJoin('sistemas_preventivos_equipamentos as spe', 'spe.sistema_preventivo_id', '=', 'sistemas_preventivos.id')
+        //     ->leftJoin('equipamentos_preventivos as ep', 'ep.id', '=', 'spe.equipamento_preventivo_id')
+        //     ->select(
+        //         'sistemas_preventivos.*',
+        //         'medidas_seguranca.name as medidaSegurancaName',
+        //         DB::raw("
+        //             CASE
+        //                 WHEN COUNT(ep.id) = 0 THEN JSON_ARRAY()
+        //                 ELSE JSON_ARRAYAGG(
+        //                     JSON_OBJECT(
+        //                         'id', ep.id,
+        //                         'name', ep.name,
+        //                         'item', spe.equipamento_preventivo_item,
+        //                         'nome', spe.equipamento_preventivo_nome,
+        //                         'quantidade', spe.equipamento_preventivo_quantidade
+        //                     )
+        //                 )
+        //             END as equipamentos
+        //         ")
+        //     )
+        //     ->groupBy('sistemas_preventivos.id', 'medidas_seguranca.name')
+        //     ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
