@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Cliente;
+use App\Models\ClienteSistemaPreventivo;
 use App\Models\Funcionario;
 use App\Models\GrupoGrafico;
 use App\Models\User;

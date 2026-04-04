@@ -18,4 +18,9 @@ class SistemaPreventivoEquipamento extends Model
         'equipamento_preventivo_nome',
         'equipamento_preventivo_quantidade'
     ];
+
+    public function equipamento()
+    {
+        return $this->belongsTo(EquipamentoPreventivo::class, 'equipamento_preventivo_id');
+    }
 }

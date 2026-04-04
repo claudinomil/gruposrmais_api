@@ -25,6 +25,7 @@ use App\Models\Edificacao;
 use App\Models\EdificacaoLocal;
 use App\Models\EdificacaoNivel;
 use App\Models\GrupoPermissao;
+use App\Models\SistemaPreventivo;
 use App\Models\VisitaTecnica;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -126,8 +127,8 @@ class ClienteController extends Controller
                 ->orderby('edificacoes_niveis.name')
                 ->get();
 
-            // Medidas Segurança
-            $registros['medidas_seguranca'] = MedidaSeguranca::orderby('name')->get();
+            // Sistemas Preventivos
+            $registros['sistemas_preventivos'] = SistemaPreventivo::orderby('name')->get();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
         } catch (\Exception $e) {
@@ -874,8 +875,7 @@ class ClienteController extends Controller
             $validator = Validator::make($request->all(), [
                 'operacao' => ['required'],
                 'cliente_id' => ['required'],
-                'medida_seguranca_id' => ['required'],
-                'name' => ['required'],
+                'sistema_preventivo_id' => ['required'],
                 'sistema_preventivo_numero' => [
                     'required',
                     Rule::unique('clientes_sistemas_preventivos', 'sistema_preventivo_numero')
@@ -900,8 +900,7 @@ class ClienteController extends Controller
             ], [
                 'operacao.required' => 'A operação é obrigatória.',
                 'cliente_id.required' => 'O cliente é obrigatório.',
-                'medida_seguranca_id.required' => 'A Medida Segurança é obrigatório.',
-                'name.required' => 'O Nome é obrigatório',
+                'sistema_preventivo_id.required' => 'O Sistema Preventivo é obrigatório.',
                 'sistema_preventivo_numero.required' => 'O Número é obrigatório',
                 'sistema_preventivo_numero.unique' => 'Este número já está cadastrado.'
             ]);
@@ -965,10 +964,12 @@ class ClienteController extends Controller
             $registros['clientes_sistemas_preventivos'] = ClienteSistemaPreventivo::leftJoin('edificacoes_locais', 'edificacoes_locais.id', 'clientes_sistemas_preventivos.edificacao_local_id')
                 ->leftJoin('edificacoes_niveis', 'edificacoes_niveis.id', 'edificacoes_locais.edificacao_nivel_id')
                 ->leftJoin('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
-                ->join('medidas_seguranca', 'medidas_seguranca.id', 'clientes_sistemas_preventivos.medida_seguranca_id')
-                ->select('clientes_sistemas_preventivos.*', 'medidas_seguranca.id as sistema_preventivo_fonte_id', 'medidas_seguranca.name as medidaSegurancaName', 'edificacoes.name as edificacaoName', 'edificacoes_niveis.name as edificacaoNivelName', 'edificacoes_locais.name as edificacaoLocalName')
+                ->join('sistemas_preventivos', 'sistemas_preventivos.id', 'clientes_sistemas_preventivos.sistema_preventivo_id')
+                ->join('medidas_seguranca', 'medidas_seguranca.id', 'sistemas_preventivos.medida_seguranca_id')
+                ->select('clientes_sistemas_preventivos.*', 'medidas_seguranca.id as sistema_preventivo_fonte_id', 'medidas_seguranca.name as medidaSegurancaName', 'sistemas_preventivos.name as sistemaPreventivoName', 'edificacoes.name as edificacaoName', 'edificacoes_niveis.name as edificacaoNivelName', 'edificacoes_locais.name as edificacaoLocalName')
                 ->where('clientes_sistemas_preventivos.cliente_id', $cliente_id)
                 ->orderby('medidas_seguranca.name')
+                ->orderby('sistemas_preventivos.name')
                 ->get();
 
             return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -1117,8 +1118,9 @@ class ClienteController extends Controller
         $dados = array();
 
         $dados['sistema_preventivo'] = ClienteSistemaPreventivo::join('clientes', 'clientes.id', 'clientes_sistemas_preventivos.cliente_id')
-            ->join('medidas_seguranca', 'medidas_seguranca.id', 'clientes_sistemas_preventivos.medida_seguranca_id')
-            ->select('clientes_sistemas_preventivos.*', 'clientes.name as clienteName', 'medidas_seguranca.name as medidaSegurancaName')
+            ->join('sistemas_preventivos', 'sistemas_preventivos.id', 'clientes_sistemas_preventivos.sistema_preventivo_id')
+            ->join('medidas_seguranca', 'medidas_seguranca.id', 'sistemas_preventivos.medida_seguranca_id')
+            ->select('clientes_sistemas_preventivos.*', 'clientes.name as clienteName', 'sistemas_preventivos.name as sistemaPreventivoName', 'medidas_seguranca.name as medidaSegurancaName')
             ->where('clientes_sistemas_preventivos.sistema_preventivo_numero', $sistema_preventivo_numero)
             ->first();
 

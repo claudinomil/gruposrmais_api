@@ -14,8 +14,7 @@ class ClienteSistemaPreventivo extends Model
     protected $fillable = [
         'cliente_id',
         'edificacao_local_id',
-        'medida_seguranca_id',
-        'name',
+        'sistema_preventivo_id',
         'sistema_preventivo_numero',
         'descricao',
         'fotografia'

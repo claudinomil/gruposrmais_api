@@ -539,8 +539,7 @@ class Transacoes
                 if ($op == 6) {
                     $dados .= '<b>:: Clientes Sistemas Preventivos</b>'.'<br><br>';
                     $dados .= $this->retornaDado(2, $dadosAnterior['cliente_id'], $dadosAtual['cliente_id'], 'Cliente', Cliente::class, 'name');
-                    $dados .= $this->retornaDado(2, $dadosAnterior['medida_seguranca_id'], $dadosAtual['medida_seguranca_id'], 'Medida Segurança', MedidaSeguranca::class, 'name');
-                    $dados .= $this->retornaDado(1, $dadosAnterior['name'], $dadosAtual['name'], 'Nome', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['sistema_preventivo_id'], $dadosAtual['sistema_preventivo_id'], 'Sistema Preventivo', SistemaPreventivo::class, 'name');
                     $dados .= $this->retornaDado(1, $dadosAnterior['descricao'], $dadosAtual['descricao'], 'Descrição', '', '');
                 }
             }

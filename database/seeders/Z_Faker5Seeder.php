@@ -269,15 +269,6 @@ class Z_Faker5Seeder extends Seeder
         //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-        // Clientes Sistemas Preventivos (para o Cliente SHOPPING 1)''''''''''''''''''''''''''''''''''''''''''
-
-        // Medida Segurança: APARELHO EXTINTOR
-        ClienteSistemaPreventivo::create(['id' => 1, 'cliente_id' => 3, 'medida_seguranca_id' => 3, 'name' => 'PQS', 'sistema_preventivo_numero' => '0000001', 'descricao' => 'EXEMPLO DE DESCRIÇÃO']);
-        ClienteSistemaPreventivo::create(['id' => 2, 'cliente_id' => 3, 'medida_seguranca_id' => 3, 'name' => 'CO2', 'sistema_preventivo_numero' => '0000002', 'descricao' => 'EXEMPLO DE DESCRIÇÃO']);
-        ClienteSistemaPreventivo::create(['id' => 3, 'cliente_id' => 3, 'medida_seguranca_id' => 3, 'name' => 'ÁGUA', 'sistema_preventivo_numero' => '0000003', 'descricao' => 'EXEMPLO DE DESCRIÇÃO']);
-        ClienteSistemaPreventivo::create(['id' => 4, 'cliente_id' => 3, 'medida_seguranca_id' => 3, 'name' => 'ESPUMA MECÂNICA', 'sistema_preventivo_numero' => '0000004', 'descricao' => 'EXEMPLO DE DESCRIÇÃO']);
-        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
         // Usuário para testes no Grupo Cliente Domínio'''''''''''''''''''''''''''''''''''''''''''''''''''''''
         User::create([
             'name' => 'CLAUDINO TESTE 1',

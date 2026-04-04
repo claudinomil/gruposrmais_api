@@ -16,5 +16,13 @@ class SistemaPreventivo extends Model
         'name'
     ];
 
-    public function setPlacaAttribute($value) {$this->attributes['name'] = mb_strtoupper($value);}
+    public function medidaSeguranca()
+    {
+        return $this->belongsTo(MedidaSeguranca::class);
+    }
+
+    public function equipamentos()
+    {
+        return $this->hasMany(SistemaPreventivoEquipamento::class, 'sistema_preventivo_id');
+    }
 }
