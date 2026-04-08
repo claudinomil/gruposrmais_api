@@ -29,6 +29,7 @@ class AppController extends Controller
             ->join('sistemas_preventivos', 'sistemas_preventivos.id', 'clientes_sistemas_preventivos.sistema_preventivo_id')
             ->join('medidas_seguranca', 'medidas_seguranca.id', 'sistemas_preventivos.medida_seguranca_id')
             ->select(
+                'clientes_sistemas_preventivos.id as clienteSistemaPreventivoId',
                 'clientes_sistemas_preventivos.sistema_preventivo_numero',
                 'clientes_sistemas_preventivos.descricao',
                 'clientes_sistemas_preventivos.fotografia',
