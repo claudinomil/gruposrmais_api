@@ -40,8 +40,7 @@ class AppController extends Controller
                 'edificacoes.name as edificacaoName'
             )
             ->where('edificacoes.id', $edificacao_id)
-            ->orderby('edificacoes.name')
-            ->orderby('edificacoes_niveis.name')
+            ->orderby('edificacoes_niveis.ordem')
             ->orderby('edificacoes_locais.name')
             ->orderby('medidas_seguranca.name')
             ->orderby('sistemas_preventivos.name')
