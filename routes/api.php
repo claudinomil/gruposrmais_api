@@ -1,5 +1,8 @@
 <?php
 
+// APP
+require __DIR__ . '/routes_app.php';
+
 //Auth
 require __DIR__ . '/routes_auth.php';
 
@@ -146,6 +149,3 @@ require __DIR__ . '/routes_sistemas_preventivos.php';
 
 // Equipamentos Preventivos
 require __DIR__ . '/routes_equipamentos_preventivos.php';
-
-// NFC e Scanner
-require __DIR__ . '/routes_nfc_scanner.php';
