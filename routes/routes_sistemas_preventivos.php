@@ -11,4 +11,7 @@ Route::prefix('sistemas_preventivos')->group(function () {
     Route::delete('/destroy/{id}', [SistemaPreventivoController::class, 'destroy'])->middleware(['auth:api']);
 
     Route::get('/auxiliary/tables', [SistemaPreventivoController::class, 'auxiliary'])->middleware(['auth:api']);
+
+    // Equipamentos
+    Route::get('/equipamentos/{sistema_preventivo_id}', [SistemaPreventivoController::class, 'equipamentos'])->middleware(['auth:api']);
 });

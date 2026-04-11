@@ -277,4 +277,22 @@ class SistemaPreventivoController extends Controller
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
+
+    public function equipamentos($sistema_preventivo_id)
+    {
+        try {
+            $registros = SistemaPreventivoEquipamento
+                ::join('equipamentos_preventivos', 'equipamentos_preventivos.id', 'sistemas_preventivos_equipamentos.equipamento_preventivo_id')
+                ->select('sistemas_preventivos_equipamentos.*', 'equipamentos_preventivos.name as equipamentoPreventivoName')
+                ->where('sistema_preventivo_id', $sistema_preventivo_id)->get();
+
+            return $this->sendResponse('Registros enviado com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
 }
