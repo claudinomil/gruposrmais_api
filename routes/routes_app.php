@@ -9,4 +9,5 @@ Route::prefix('app')->group(function () {
 
     // Dashboards
     Route::get('dashboards/operacoes', [AppController::class, 'dashboards_operacoes'])->middleware(['auth:api']);
+    Route::get('dashboards/funcionarios/funcoes', [AppController::class, 'dashboards_funcionarios_funcoes'])->middleware(['auth:api']);
 });

@@ -10,6 +10,7 @@ use App\Models\OrdemServico;
 use App\Models\Proposta;
 use App\Models\SistemaPreventivo;
 use App\Models\VisitaTecnica;
+use Illuminate\Support\Facades\DB;
 
 class AppController extends Controller
 {
@@ -69,6 +70,32 @@ class AppController extends Controller
             // 'Operação 9' => 40,
             // 'Operação 10' => 50,
         ]);
+    }
+
+    public function dashboards_funcionarios_funcoes()
+    {
+        // Funcionários Distribuição por Funções
+        $funcionarios_funcoes = DB::select("SELECT funcoes.name, count(funcionarios.id) as quantidade FROM funcionarios INNER JOIN funcoes ON funcionarios.funcao_id=funcoes.id GROUP BY funcoes.name ORDER BY funcoes.name");
+
+        $dados = [];
+
+        foreach ($funcionarios_funcoes as $item) {
+            $dados[$item->name] = $item->quantidade;
+        }
+
+        return response()->json($dados);
+
+        // return response()->json([
+        //     'Propostas' => Proposta::count(),
+        //     'Brigadas Incêndios' => BrigadaIncendio::count(),
+        //     'Visitas Técnicas' => VisitaTecnica::count(),
+        //     'Ordens Serviços' => OrdemServico::count(),
+        //     // 'Operação 7' => 20,
+        //     // 'Operação 8' => 30,
+        //     // 'Operação 9' => 40,
+        //     // 'Operação 10' => 50,
+        // ]);
+
     }
     // Dashboards - Fim'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     // Dashboards - Fim'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
