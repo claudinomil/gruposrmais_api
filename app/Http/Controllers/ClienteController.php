@@ -208,9 +208,34 @@ class ClienteController extends Controller
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Executivos.', 2040, null, null);
                 }
 
+                //Tabela clientes_documentos
+                if (SuporteFacade::verificarRelacionamento('clientes_documentos', 'cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Documentos.', 2040, null, null);
+                }
+
+                //Tabela clientes_documentos_exigidos
+                if (SuporteFacade::verificarRelacionamento('clientes_documentos_exigidos', 'cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Documentos Exigidos.', 2040, null, null);
+                }
+
                 //Tabela ordens_servicos
                 if (SuporteFacade::verificarRelacionamento('ordens_servicos', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Ordem de Serviço.', 2040, null, null);
+                }
+
+                //Tabela clientes_lojas
+                if (SuporteFacade::verificarRelacionamento('clientes_lojas', 'subordinado_cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Lojas.', 2040, null, null);
+                }
+
+                //Tabela clientes_materiais
+                if (SuporteFacade::verificarRelacionamento('clientes_materiais', 'cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Materiais.', 2040, null, null);
+                }
+
+                //Tabela clientes_sistemas_preventivos
+                if (SuporteFacade::verificarRelacionamento('clientes_sistemas_preventivos', 'cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Sistemas Preventivos.', 2040, null, null);
                 }
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
