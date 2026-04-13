@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\BrigadaIncendio;
 use App\Models\Cliente;
+use App\Models\ClienteDocumentoExigido;
+use App\Models\ClienteLoja;
 use App\Models\Funcionario;
 use App\Models\GrupoGrafico;
 use App\Models\OrdemServico;
@@ -203,38 +205,34 @@ class DashboardController extends Controller
 
             // Gráfico id=15 (Cliente Edificação Lojas)
             if ($grafico_id == 15) {
-                // Propostas Quantidade
-                $content['operacoes_propostas_quantidade'] = Proposta::where('cliente_id', $this->x_cliente_id)->count();
+                // Lojas Ocupadas
+                $content['lojas_ocupadas'] = ClienteLoja::join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+                    ->join('edificacoes', 'edificacoes.id', 'edificacoes_niveis.edificacao_id')
+                    ->where('edificacoes.cliente_id', $this->x_cliente_id)
+                    ->where('clientes_lojas.subordinado_cliente_id', '!=', null)
+                    ->count();
 
-                // Brigadas Incêndios Quantidade
-                $content['operacoes_brigadas_incendios_quantidade'] = BrigadaIncendio::where('cliente_id', $this->x_cliente_id)->count();
+                // Lojas Desocupadas
+                $content['lojas_desocupadas'] = ClienteLoja::join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+                    ->join('edificacoes', 'edificacoes.id', 'edificacoes_niveis.edificacao_id')
+                    ->where('edificacoes.cliente_id', $this->x_cliente_id)
+                    ->where('clientes_lojas.subordinado_cliente_id', '=', null)
+                    ->count();
 
-                // Visitas Técnicas Quantidade
-                $content['operacoes_visitas_tecnicas_quantidade'] = VisitaTecnica::where('cliente_id', $this->x_cliente_id)->count();
-
-                // Ordens de Serviços Quantidade
-                $content['operacoes_ordens_servicos_quantidade'] = OrdemServico::where('cliente_id', $this->x_cliente_id)->count();
-
-                // Quantidade Total
-                $content['operacoes_total_quantidade'] = $content['operacoes_propostas_quantidade'] + $content['operacoes_brigadas_incendios_quantidade'] + $content['operacoes_visitas_tecnicas_quantidade'] + $content['operacoes_ordens_servicos_quantidade'];
+                // Lojas Total
+                $content['lojas_total'] = $content['lojas_ocupadas'] + $content['lojas_desocupadas'];
             }
 
             // Gráfico id=16 (Cliente Documentos Exigidos)
             if ($grafico_id == 16) {
-                // Propostas Quantidade
-                $content['operacoes_propostas_quantidade'] = Proposta::where('cliente_id', $this->x_cliente_id)->count();
+                // Documentos Exigidos Pendentes
+                $content['documentos_exigidos_pendentes'] = ClienteDocumentoExigido::join('clientes_documentos', 'clientes_documentos.documento_id')->where('cliente_id', $this->x_cliente_id)->count();
 
-                // Brigadas Incêndios Quantidade
-                $content['operacoes_brigadas_incendios_quantidade'] = BrigadaIncendio::where('cliente_id', $this->x_cliente_id)->count();
+                // Documentos Exigidos Concluidos
+                $content['documentos_exigidos_concluidos'] = BrigadaIncendio::where('cliente_id', $this->x_cliente_id)->count();
 
-                // Visitas Técnicas Quantidade
-                $content['operacoes_visitas_tecnicas_quantidade'] = VisitaTecnica::where('cliente_id', $this->x_cliente_id)->count();
-
-                // Ordens de Serviços Quantidade
-                $content['operacoes_ordens_servicos_quantidade'] = OrdemServico::where('cliente_id', $this->x_cliente_id)->count();
-
-                // Quantidade Total
-                $content['operacoes_total_quantidade'] = $content['operacoes_propostas_quantidade'] + $content['operacoes_brigadas_incendios_quantidade'] + $content['operacoes_visitas_tecnicas_quantidade'] + $content['operacoes_ordens_servicos_quantidade'];
+                // Documentos Exigidos Total
+                $content['documentos_exigidos_total'] = $content['documentos_exigidos_pendentes'] + $content['documentos_exigidos_concluidos'];
             }
 
             return $this->sendResponse('Registros enviados com sucesso.', 2000, null, $content);

@@ -752,7 +752,7 @@ class ClienteController extends Controller
 
                         // Se for edição, ignorar o próprio registro
                         if ($request->operacao === 'edit') {
-                            $query->where('clientes_lojas.id', '!=', $request->id);
+                            $query->where('clientes_lojas.id', '!=', $request->cliente_loja_id);
                         }
 
                         if ($query->exists()) {
@@ -843,9 +843,10 @@ class ClienteController extends Controller
                 ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
                 ->leftJoin('clientes as subordinados_clientes', 'subordinados_clientes.id', '=', 'clientes_lojas.subordinado_cliente_id')
                 ->where('edificacoes.cliente_id', $cliente_id)
-                ->select('clientes_lojas.*', 'edificacoes.id as edificacaoId', 'edificacoes.name as edificacaoName', 'edificacoes_niveis.name as edificacaoNivelName', 'subordinados_clientes.name as subordinadoClienteName')
+                ->select('clientes_lojas.*', 'edificacoes.id as edificacaoId', 'edificacoes.name as edificacaoName', 'edificacoes_niveis.name as edificacaoNivelName', 'subordinados_clientes.name as subordinadoClienteName', 'subordinados_clientes.nome_fantasia as subordinadoClienteNomeFantasia')
                 ->orderby('edificacoes.name')
                 ->orderby('edificacoes_niveis.ordem')
+                ->orderby('clientes_lojas.luc')
                 ->orderby('clientes_lojas.ordem')
                 ->get();
 
