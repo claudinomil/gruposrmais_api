@@ -226,13 +226,19 @@ class DashboardController extends Controller
             // Gráfico id=16 (Cliente Documentos Exigidos)
             if ($grafico_id == 16) {
                 // Documentos Exigidos Pendentes
-                $content['documentos_exigidos_pendentes'] = ClienteDocumentoExigido::join('clientes_documentos', 'clientes_documentos.documento_id')->where('cliente_id', $this->x_cliente_id)->count();
+                $content['documentos_exigidos_pendentes'] = ClienteDocumentoExigido::leftjoin('clientes_documentos', 'clientes_documentos.documento_id', 'clientes_documentos_exigidos.documento_id')
+                    ->where('clientes_documentos_exigidos.cliente_id', $this->x_cliente_id)
+                    ->where('clientes_documentos.caminho', '=', null)
+                    ->count();
 
                 // Documentos Exigidos Concluidos
-                $content['documentos_exigidos_concluidos'] = BrigadaIncendio::where('cliente_id', $this->x_cliente_id)->count();
+                $content['documentos_exigidos_concluidos'] = ClienteDocumentoExigido::leftjoin('clientes_documentos', 'clientes_documentos.documento_id', 'clientes_documentos_exigidos.documento_id')
+                    ->where('clientes_documentos_exigidos.cliente_id', $this->x_cliente_id)
+                    ->where('clientes_documentos.caminho', '!=', null)
+                    ->count();
 
                 // Documentos Exigidos Total
-                $content['documentos_exigidos_total'] = $content['documentos_exigidos_pendentes'] + $content['documentos_exigidos_concluidos'];
+                $content['documentos_exigidos_total'] = ClienteDocumentoExigido::where('cliente_id', $this->x_cliente_id)->count();
             }
 
             return $this->sendResponse('Registros enviados com sucesso.', 2000, null, $content);

@@ -1089,7 +1089,7 @@ class ClienteController extends Controller
     public function clientes_rede($cliente_id)
     {
         try {
-            $registros = Cliente::select('clientes.id', 'clientes.name', 'clientes.cnpj')
+            $registros = Cliente::select('clientes.id', 'clientes.name', 'clientes.nome_fantasia', 'clientes.cnpj')
                 ->where('clientes.rede_cliente_id', $cliente_id)
                 ->orderby('clientes.name', 'ASC')
                 ->get();
@@ -1107,7 +1107,7 @@ class ClienteController extends Controller
     public function clientes_principal($cliente_id)
     {
         try {
-            $registros = Cliente::select('clientes.id', 'clientes.name', 'clientes.cnpj')
+            $registros = Cliente::select('clientes.id', 'clientes.name', 'clientes.nome_fantasia', 'clientes.cnpj')
                 ->where('clientes.principal_cliente_id', $cliente_id)
                 ->orderby('clientes.name', 'ASC')
                 ->get();
