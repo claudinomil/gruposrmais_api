@@ -419,6 +419,14 @@ class ClienteController extends Controller
 
             $registro['sistemas_preventivos'] = $sistemas_preventivos;
 
+            // Lojas
+            $lojas = ClienteLoja::join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+                ->join('edificacoes', 'edificacoes.id', 'edificacoes_niveis.edificacao_id')
+                ->where('edificacoes.cliente_id', $id)
+                ->count();
+
+            $registro['lojas'] = $lojas;
+
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
         } catch (\Exception $e) {
             if (config('app.debug')) {
