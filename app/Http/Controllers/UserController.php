@@ -38,7 +38,11 @@ class UserController extends Controller
 
     public function index()
     {
-        $registros = $this->user->join('grupos', 'grupos.id', 'users.grupo_id')->select('users.*', 'grupos.name as grupoName')->get();
+        $registros = $this->user
+            ->join('grupos', 'grupos.id', 'users.grupo_id')
+            ->leftjoin('clientes', 'clientes.id', 'users.cliente_id')
+            ->select('users.*', 'grupos.name as grupoName', 'clientes.name as clienteName')
+            ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
     }
@@ -432,8 +436,7 @@ class UserController extends Controller
                 // Dashboards que o usuário logado possui'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 if ($this->x_cliente_id == 0) {$sistema = 1;} else {$sistema = 2;}
 
-                $registros['userDashboards'] = GrupoGrafico
-                    ::join('graficos', 'graficos.id', '=', 'grupos_graficos.grafico_id')
+                $registros['userDashboards'] = GrupoGrafico::join('graficos', 'graficos.id', '=', 'grupos_graficos.grafico_id')
                     ->select('graficos.dashboard')
                     ->where('graficos.sistema', $sistema)
                     ->where('grupos_graficos.grupo_id', Auth::user()->grupo_id)
@@ -554,8 +557,7 @@ class UserController extends Controller
                     ->get();
 
                 // Submódulos Favoritos
-                $registros['submodulosFavoritos'] = UserSubmoduloFavorito
-                    ::where('user_id', Auth::user()->id)
+                $registros['submodulosFavoritos'] = UserSubmoduloFavorito::where('user_id', Auth::user()->id)
                     ->get();
 
                 return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);

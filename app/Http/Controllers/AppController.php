@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\BrigadaIncendio;
 use App\Models\Cliente;
-use App\Models\ClienteSistemaPreventivo;
 use App\Models\Edificacao;
 use App\Models\OrdemServico;
 use App\Models\Proposta;
-use App\Models\SistemaPreventivo;
 use App\Models\VisitaTecnica;
 use Illuminate\Support\Facades\DB;
 
@@ -64,11 +62,7 @@ class AppController extends Controller
             'Propostas' => Proposta::count(),
             'Brigadas Incêndios' => BrigadaIncendio::count(),
             'Visitas Técnicas' => VisitaTecnica::count(),
-            'Ordens Serviços' => OrdemServico::count(),
-            // 'Operação 7' => 20,
-            // 'Operação 8' => 30,
-            // 'Operação 9' => 40,
-            // 'Operação 10' => 50,
+            'Ordens Serviços' => OrdemServico::count()
         ]);
     }
 
@@ -84,18 +78,6 @@ class AppController extends Controller
         }
 
         return response()->json($dados);
-
-        // return response()->json([
-        //     'Propostas' => Proposta::count(),
-        //     'Brigadas Incêndios' => BrigadaIncendio::count(),
-        //     'Visitas Técnicas' => VisitaTecnica::count(),
-        //     'Ordens Serviços' => OrdemServico::count(),
-        //     // 'Operação 7' => 20,
-        //     // 'Operação 8' => 30,
-        //     // 'Operação 9' => 40,
-        //     // 'Operação 10' => 50,
-        // ]);
-
     }
     // Dashboards - Fim'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     // Dashboards - Fim'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
