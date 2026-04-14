@@ -35,10 +35,12 @@ use Illuminate\Validation\Rule;
 class ClienteController extends Controller
 {
     private $cliente;
+    private $x_cliente_id;
 
     public function __construct(Request $request, Cliente $cliente)
     {
         $this->cliente = $cliente;
+        $this->x_cliente_id = $request->header('X-Cliente-Id');
     }
 
     public function index()
@@ -50,9 +52,13 @@ class ClienteController extends Controller
             ->leftJoin('clientes as principal_clientes', 'clientes.principal_cliente_id', '=', 'principal_clientes.id')
             ->leftJoin('clientes as rede_clientes', 'clientes.rede_cliente_id', '=', 'rede_clientes.id')
             ->leftJoin('bancos', 'clientes.banco_id', '=', 'bancos.id')
-            ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'rede_clientes.name as redeClienteName', 'bancos.name as bancoName'])
-            ->orderby('clientes.name')
-            ->get();
+            ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'rede_clientes.name as redeClienteName', 'bancos.name as bancoName']);
+
+            if ($this->x_cliente_id != 0) {
+                $registros->where('clientes.principal_cliente_id', $this->x_cliente_id)->orWhere('clientes.id', $this->x_cliente_id);
+            }
+
+        $registros = $registros->orderby('clientes.name')->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
@@ -271,9 +277,13 @@ class ClienteController extends Controller
             ->leftJoin('clientes as principal_clientes', 'clientes.principal_cliente_id', '=', 'principal_clientes.id')
             ->leftJoin('clientes as rede_clientes', 'clientes.rede_cliente_id', '=', 'rede_clientes.id')
             ->leftJoin('bancos', 'clientes.banco_id', '=', 'bancos.id')
-            ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'rede_clientes.name as redeClienteName', 'bancos.name as bancoName'])
-            ->orderby('clientes.name')
-            ->where(
+            ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'rede_clientes.name as redeClienteName', 'bancos.name as bancoName']);
+
+            if ($this->x_cliente_id != 0) {
+                $registros->where('clientes.principal_cliente_id', $this->x_cliente_id)->orWhere('clientes.id', $this->x_cliente_id);
+            }
+
+            $registros = $registros->where(
                 function ($query) use ($filtros) {
                     //Variavel para controle
                     $qtdFiltros = count($filtros) / 4;
