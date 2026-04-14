@@ -360,7 +360,7 @@ class ClienteController extends Controller
                         $indexCampo = $indexCampo + 4;
                     }
                 }
-            )->get();
+            )->orderby('clientes.name')->get();
 
         //Código SQL Bruto
         //$sql = DB::getQueryLog();
