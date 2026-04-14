@@ -45,8 +45,7 @@ class ClienteController extends Controller
 
     public function index()
     {
-        $registros = $this->cliente
-            ->leftJoin('identidade_orgaos', 'clientes.identidade_orgao_id', '=', 'identidade_orgaos.id')
+        $registros = Cliente::leftJoin('identidade_orgaos', 'clientes.identidade_orgao_id', '=', 'identidade_orgaos.id')
             ->leftJoin('estados', 'clientes.identidade_estado_id', '=', 'estados.id')
             ->leftJoin('generos', 'clientes.genero_id', '=', 'generos.id')
             ->leftJoin('clientes as principal_clientes', 'clientes.principal_cliente_id', '=', 'principal_clientes.id')
@@ -55,7 +54,9 @@ class ClienteController extends Controller
             ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'rede_clientes.name as redeClienteName', 'bancos.name as bancoName']);
 
             if ($this->x_cliente_id != 0) {
-                $registros->where('clientes.principal_cliente_id', $this->x_cliente_id)->orWhere('clientes.id', $this->x_cliente_id);
+                $registros->where('clientes.principal_cliente_id', $this->x_cliente_id)
+                    ->orWhere('clientes.id', $this->x_cliente_id)
+                    ->orderByRaw("clientes.id = ? DESC", [$this->x_cliente_id]);
             }
 
         $registros = $registros->orderby('clientes.name')->get();
@@ -270,8 +271,7 @@ class ClienteController extends Controller
 
 
         //Registros
-        $registros = $this->cliente
-            ->leftJoin('identidade_orgaos', 'clientes.identidade_orgao_id', '=', 'identidade_orgaos.id')
+        $registros = Cliente::leftJoin('identidade_orgaos', 'clientes.identidade_orgao_id', '=', 'identidade_orgaos.id')
             ->leftJoin('estados', 'clientes.identidade_estado_id', '=', 'estados.id')
             ->leftJoin('generos', 'clientes.genero_id', '=', 'generos.id')
             ->leftJoin('clientes as principal_clientes', 'clientes.principal_cliente_id', '=', 'principal_clientes.id')
@@ -280,10 +280,12 @@ class ClienteController extends Controller
             ->select(['clientes.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'principal_clientes.name as principalClienteName', 'rede_clientes.name as redeClienteName', 'bancos.name as bancoName']);
 
             if ($this->x_cliente_id != 0) {
-                $registros->where('clientes.principal_cliente_id', $this->x_cliente_id)->orWhere('clientes.id', $this->x_cliente_id);
+                $registros->where('clientes.principal_cliente_id', $this->x_cliente_id)
+                    ->orWhere('clientes.id', $this->x_cliente_id)
+                    ->orderByRaw("clientes.id = ? DESC", [$this->x_cliente_id]);
             }
 
-            $registros = $registros->where(
+        $registros = $registros->where(
                 function ($query) use ($filtros) {
                     //Variavel para controle
                     $qtdFiltros = count($filtros) / 4;
