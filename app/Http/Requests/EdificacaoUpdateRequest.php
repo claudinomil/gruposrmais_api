@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+use App\Facades\SuporteFacade;
+
 class EdificacaoUpdateRequest extends FormRequest
 {
     public function authorize()
@@ -158,6 +160,14 @@ class EdificacaoUpdateRequest extends FormRequest
                 $validator->errors()->add(
                     'niveis',
                     'Existem nomes de níveis duplicados entre Pavimentos, Mezaninos, Coberturas e Áreas Técnicas.'
+                );
+            }
+
+            // Validação de quantidade_lucs------------------------------
+            if (SuporteFacade::lucsLojas(1, $this->id, $this->input('quantidade_lucs')) === false) {
+                $validator->errors()->add(
+                    'qtd_lucs',
+                    'Quantidade de LUCs cadastrados é maior que a quantidade informada de LUCs.'
                 );
             }
         });

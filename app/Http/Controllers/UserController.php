@@ -438,7 +438,7 @@ class UserController extends Controller
 
                 $registros['userDashboards'] = GrupoGrafico::join('graficos', 'graficos.id', '=', 'grupos_graficos.grafico_id')
                     ->select('graficos.dashboard')
-                    ->where('graficos.sistema', $sistema)
+                    ->where('graficos.sistema', 'like', '%' . $sistema . '%')
                     ->where('grupos_graficos.grupo_id', Auth::user()->grupo_id)
                     ->groupBy('graficos.dashboard')
                     ->get();
@@ -527,7 +527,12 @@ class UserController extends Controller
                 $registros = array();
 
                 // Dados Usuário Logado
-                $registros['userData'] = Auth::user();
+                $registros['userData'] = User::join('grupos', 'grupos.id', 'users.grupo_id')
+                    ->leftjoin('funcionarios', 'funcionarios.id', 'users.funcionario_id')
+                    ->leftjoin('clientes', 'clientes.id', 'users.cliente_id')
+                    ->select('users.*', 'grupos.name as grupoName', 'funcionarios.name as funcionarioName', 'clientes.name as clienteName')
+                    ->where('users.id', Auth::user()->id)
+                    ->first();
 
                 // Empresas Usuário Logado
                 $registros['userEmpresas'] = Empresa::all();

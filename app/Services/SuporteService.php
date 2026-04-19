@@ -7,6 +7,8 @@ use App\Models\BlockTableOrRecord;
 use App\Models\BrigadaIncendioEscala;
 use App\Models\BrigadaIncendioEscalaBrigadista;
 use App\Models\BrigadaIncendioProduto;
+use App\Models\ClienteLoja;
+use App\Models\Edificacao;
 use App\Models\EdificacaoNivel;
 use App\Models\Especialidade;
 use App\Models\ProdutoControleSituacaoItem;
@@ -1066,5 +1068,39 @@ class SuporteService
             'data_alteracao' => $data_alteracao,
             'hora_alteracao' => $hora_alteracao
         ]);
+    }
+
+    // Verificar quantidade_lucs x Quantidade LUCs cadastrados para a Edificação
+    public static function lucsLojas($op=1, $id, $quantidade_lucs=0)
+    {
+        // Vindo de Edificação Update $id recebe $edificacao_id
+        if ($op == 1) {
+            $qtd_lucs_cadastrados = ClienteLoja::join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+                ->where('edificacoes_niveis.edificacao_id', $id)->count();
+
+            if ($qtd_lucs_cadastrados > $quantidade_lucs) {
+                return false;
+            }
+        }
+
+        // Vindo de Editar Lojas create $id recebe $edificacao_nivel_id
+        if ($op == 2) {
+            // Edificação Nível
+            $edificacaoNivel = EdificacaoNivel::find($id);
+            $edificacao_id = $edificacaoNivel['edificacao_id'];
+
+            // Edificação
+            $edificacao = Edificacao::find($edificacao_id);
+            $quantidade_lucs = $edificacao['quantidade_lucs'];
+
+            $qtd_lucs_cadastrados = ClienteLoja::join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+                ->where('edificacoes_niveis.edificacao_id', $edificacao_id)->count();
+
+            if ($qtd_lucs_cadastrados >= $quantidade_lucs) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

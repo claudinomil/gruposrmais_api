@@ -819,6 +819,18 @@ class ClienteController extends Controller
                 'luc.required' => 'O LUC é obrigatório.'
             ]);
 
+            // Validação para quantidade de LUCs
+            if ($request['operacao'] == 'create') {
+                $validator->after(function ($validator) use ($request) {
+                    if (SuporteFacade::lucsLojas(2, $request->edificacao_nivel_id) === false) {
+                        $validator->errors()->add(
+                            'qtd_lucs',
+                            'Quantidade de LUCs cadastrados é maior que a quantidade informada de LUCs.'
+                        );
+                    }
+                });
+            }
+
             // Se falhar retorna
             if ($validator->fails()) {
                 $mensagens = implode("<br>", $validator->errors()->all());

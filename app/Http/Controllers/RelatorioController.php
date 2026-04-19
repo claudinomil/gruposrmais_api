@@ -30,6 +30,13 @@ use Illuminate\Support\Facades\DB;
 
 class RelatorioController extends Controller
 {
+    private $x_cliente_id;
+
+    public function __construct(Request $request)
+    {
+        $this->x_cliente_id = $request->header('X-Cliente-Id');
+    }
+
     public function index()
     {
         //Retorno
@@ -56,7 +63,9 @@ class RelatorioController extends Controller
 
     public function relatorios()
     {
-        //Retorno
+        if ($this->x_cliente_id == 0) {$sistema = 1;} else {$sistema = 2;}
+
+        // Retorno
         $content = array();
 
         $grupo_id = Auth::user()->grupo_id;
@@ -64,7 +73,7 @@ class RelatorioController extends Controller
         $content['grupo_relatorios'] = GrupoRelatorio
             ::join('relatorios', 'relatorios.id', 'grupos_relatorios.relatorio_id')
             ->select('relatorios.id as relatorio_id', 'relatorios.name as relatorio_name', 'relatorios.descricao as relatorio_descricao', 'relatorios.ordem_visualizacao as relatorio_ordem_visualizacao')
-            ->where('relatorios.sistema', 1)
+            ->where('relatorios.sistema', 'like', '%' . $sistema . '%')
             ->where('grupos_relatorios.grupo_id', $grupo_id)
             ->orderby('relatorios.ordem_visualizacao', 'ASC')
             ->get();
@@ -92,13 +101,17 @@ class RelatorioController extends Controller
             $grupo = Grupo::where('id', $grupo_id)->get();
             $relatorio_parametros .= $grupo[0]['name'];
         }
-        if ($idioma == 2) {$relatorio_parametros .= ' / '.'Inglês';}
+        if ($idioma == 2) {
+            $relatorio_parametros .= ' / ' . 'Inglês';
+        }
 
         //Registros
         $relatorio_registros = Grupo
             ::select('grupos.*')
-            ->where(function($query) use($grupo_id) {
-                if ($grupo_id != 0) {$query->where('grupos.id', $grupo_id);}
+            ->where(function ($query) use ($grupo_id) {
+                if ($grupo_id != 0) {
+                    $query->where('grupos.id', $grupo_id);
+                }
             })
             ->orderby('grupos.name')
             ->get();
@@ -135,21 +148,27 @@ class RelatorioController extends Controller
             $relatorio_parametros .= $grupo[0]['name'];
         }
         if ($situacao_id == 0) {
-            $relatorio_parametros .= ' / '.'Todos as Situações';
+            $relatorio_parametros .= ' / ' . 'Todos as Situações';
         } else {
             $situacao = Situacao::where('id', $situacao_id)->get();
-            $relatorio_parametros .= ' / '.$situacao[0]['name'];
+            $relatorio_parametros .= ' / ' . $situacao[0]['name'];
         }
-        if ($idioma == 2) {$relatorio_parametros .= ' / '.'Inglês';}
+        if ($idioma == 2) {
+            $relatorio_parametros .= ' / ' . 'Inglês';
+        }
 
         //Registros
         $relatorio_registros = User
             ::join('grupos', 'grupos.id', 'users.grupo_id')
             ->join('situacoes', 'situacoes.id', 'users.situacao_id')
             ->select('users.*', 'grupos.name as grupo', 'situacoes.name as situacao')
-            ->where(function($query) use($grupo_id, $situacao_id) {
-                if ($grupo_id != 0) {$query->where('grupos.id', $grupo_id);}
-                if ($situacao_id != 0) {$query->where('situacoes.id', $situacao_id);}
+            ->where(function ($query) use ($grupo_id, $situacao_id) {
+                if ($grupo_id != 0) {
+                    $query->where('grupos.id', $grupo_id);
+                }
+                if ($situacao_id != 0) {
+                    $query->where('situacoes.id', $situacao_id);
+                }
             })
             ->orderby('users.name')
             ->get();
@@ -183,34 +202,50 @@ class RelatorioController extends Controller
             $relatorio_parametros .= SuporteFacade::getDataFormatada(1, $data);
         }
         if ($user_id == 0) {
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= 'Todos os Usuários';
         } else {
             $user = User::where('id', $user_id)->get();
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= $user[0]['name'];
         }
         if ($submodulo_id == 0) {
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= 'Todos os Submódulos';
         } else {
             $submodulo = Submodulo::where('id', $submodulo_id)->get();
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= $submodulo[0]['name'];
         }
         if ($operacao_id == 0) {
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= 'Todas as Operações';
         } else {
             $operacao = Operacao::where('id', $operacao_id)->get();
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= $operacao[0]['name'];
         }
         if ($dado != 'xxxyyyzzz') {
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= $dado;
         }
-        if ($idioma == 2) {$relatorio_parametros .= ' / '.'Inglês';}
+        if ($idioma == 2) {
+            $relatorio_parametros .= ' / ' . 'Inglês';
+        }
 
         //Registros
         $relatorio_registros = Transacao
@@ -218,12 +253,22 @@ class RelatorioController extends Controller
             ->join('submodulos', 'submodulos.id', 'transacoes.submodulo_id')
             ->join('operacoes', 'operacoes.id', 'transacoes.operacao_id')
             ->select('transacoes.*', 'users.name as user', 'submodulos.name as submodulo', 'operacoes.name as operacao')
-            ->where(function($query) use($data, $user_id, $submodulo_id, $operacao_id, $dado) {
-                if ($data != 'xxxyyyzzz') {$query->where('transacoes.date', $data);}
-                if ($user_id != 0) {$query->where('transacoes.user_id', $user_id);}
-                if ($submodulo_id != 0) {$query->where('transacoes.submodulo_id', $submodulo_id);}
-                if ($operacao_id != 0) {$query->where('transacoes.operacao_id', $operacao_id);}
-                if ($dado != 'xxxyyyzzz') {$query->where('transacoes.dados', 'LIKE', '%'.$dado.'%');}
+            ->where(function ($query) use ($data, $user_id, $submodulo_id, $operacao_id, $dado) {
+                if ($data != 'xxxyyyzzz') {
+                    $query->where('transacoes.date', $data);
+                }
+                if ($user_id != 0) {
+                    $query->where('transacoes.user_id', $user_id);
+                }
+                if ($submodulo_id != 0) {
+                    $query->where('transacoes.submodulo_id', $submodulo_id);
+                }
+                if ($operacao_id != 0) {
+                    $query->where('transacoes.operacao_id', $operacao_id);
+                }
+                if ($dado != 'xxxyyyzzz') {
+                    $query->where('transacoes.dados', 'LIKE', '%' . $dado . '%');
+                }
             })
             ->orderby('transacoes.date')
             ->orderby('submodulos.name')
@@ -254,10 +299,12 @@ class RelatorioController extends Controller
         $relatorio_nome = $relatorio[0]['name'];
 
         //Parâmetros
-        $relatorio_parametros = SuporteFacade::getDataFormatada(1, $data_inicio).' até ';
-        $relatorio_parametros .= SuporteFacade::getDataFormatada(1, $data_fim).' / ';
+        $relatorio_parametros = SuporteFacade::getDataFormatada(1, $data_inicio) . ' até ';
+        $relatorio_parametros .= SuporteFacade::getDataFormatada(1, $data_fim) . ' / ';
         $relatorio_parametros .= $cidade;
-        if ($idioma == 2) {$relatorio_parametros .= ' / '.'Inglês';}
+        if ($idioma == 2) {
+            $relatorio_parametros .= ' / ' . 'Inglês';
+        }
 
         //Registros
         $relatorio_registros = ['data_inicio' => $data_inicio, 'data_fim' => $data_fim, 'cidade_id' => $cidade_id, 'cidade' => $cidade];
@@ -294,23 +341,33 @@ class RelatorioController extends Controller
             $relatorio_parametros .= $ponto_tipo[0]['name'];
         }
         if ($ponto_natureza_id == 0) {
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= 'Todos as Naturezas';
         } else {
             $ponto_natureza = PontoNatureza::where('id', $ponto_natureza_id)->get();
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= $ponto_natureza[0]['name'];
         }
-        if ($idioma == 2) {$relatorio_parametros .= ' / '.'Inglês';}
+        if ($idioma == 2) {
+            $relatorio_parametros .= ' / ' . 'Inglês';
+        }
 
         // Registros
         $relatorio_registros = PontoInteresse
             ::join('pontos_tipos', 'pontos_tipos.id', 'pontos_interesse.ponto_tipo_id')
             ->leftjoin('pontos_naturezas', 'pontos_naturezas.id', 'pontos_interesse.ponto_natureza_id')
             ->select('pontos_interesse.*', 'pontos_tipos.name as ponto_tipo', 'pontos_naturezas.name as ponto_natureza')
-            ->where(function($query) use($ponto_tipo_id, $ponto_natureza_id) {
-                if ($ponto_tipo_id != 0) {$query->where('pontos_tipos.id', $ponto_tipo_id);}
-                if ($ponto_natureza_id != 0) {$query->where('pontos_naturezas.id', $ponto_natureza_id);}
+            ->where(function ($query) use ($ponto_tipo_id, $ponto_natureza_id) {
+                if ($ponto_tipo_id != 0) {
+                    $query->where('pontos_tipos.id', $ponto_tipo_id);
+                }
+                if ($ponto_natureza_id != 0) {
+                    $query->where('pontos_naturezas.id', $ponto_natureza_id);
+                }
             })
             ->orderby('pontos_interesse.name')
             ->get();
@@ -352,7 +409,9 @@ class RelatorioController extends Controller
 
         // Parâmetros
         $relatorio_parametros = '';
-        if ($idioma == 2) {$relatorio_parametros .= ' / '.'Inglês';}
+        if ($idioma == 2) {
+            $relatorio_parametros .= ' / ' . 'Inglês';
+        }
 
         // Registros
         $relatorio_registros = [];
@@ -387,45 +446,59 @@ class RelatorioController extends Controller
             //$relatorio_parametros .= 'Todos os Materiais';
         } else {
             $produto = Produto::where('id', $produto_id)->get();
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= $produto[0]['name'];
         }
         if ($produto_categoria_id == 0) {
             //$relatorio_parametros .= 'Todas as Categorias';
         } else {
             $produto_categoria = ProdutoCategoria::where('id', $produto_categoria_id)->get();
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= $produto_categoria[0]['name'];
         }
         if ($estoque_local_id == 0) {
             //$relatorio_parametros .= 'Todos os Locais';
         } else {
             $estoque_local = EstoqueLocal::where('id', $estoque_local_id)->get();
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= $estoque_local[0]['name'];
         }
         if ($empresa_id == 0) {
             //$relatorio_parametros .= 'Todas as Empresas';
         } else {
             $empresa = Empresa::where('id', $empresa_id)->get();
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= $empresa[0]['name'];
         }
         if ($cliente_id == 0) {
             //$relatorio_parametros .= 'Todos os Clientes';
         } else {
             $cliente = Cliente::where('id', $cliente_id)->get();
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= $cliente[0]['name'];
         }
         if ($produto_situacao_id == 0) {
             //$relatorio_parametros .= 'Todas as Situações';
         } else {
             $produto_situacao = ProdutoSituacao::where('id', $produto_situacao_id)->get();
-            if ($relatorio_parametros != '') {$relatorio_parametros .= ' / ';}
+            if ($relatorio_parametros != '') {
+                $relatorio_parametros .= ' / ';
+            }
             $relatorio_parametros .= $produto_situacao[0]['name'];
         }
-        if ($idioma == 2) {$relatorio_parametros .= ' / '.'Inglês';}
+        if ($idioma == 2) {
+            $relatorio_parametros .= ' / ' . 'Inglês';
+        }
 
         // Registros
         $relatorio_registros = ProdutoEntrada

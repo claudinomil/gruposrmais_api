@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 
 class Edificacao extends Model
 {
@@ -36,7 +35,8 @@ class Edificacao extends Model
         'ocupacao_uso',
         'divisao',
         'descricao',
-        'definicao'
+        'definicao',
+        'quantidade_lucs'
     ];
 
     public function setNameAttribute($value) {$this->attributes['name'] = mb_strtoupper($value);}

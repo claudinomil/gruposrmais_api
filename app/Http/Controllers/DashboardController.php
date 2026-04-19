@@ -26,7 +26,7 @@ class DashboardController extends Controller
         $this->x_cliente_id = $request->header('X-Cliente-Id');
     }
 
-    public function graficos()
+    public function graficos($grafico_grupo_id=0)
     {
         try {
             if ($this->x_cliente_id == 0) {$sistema = 1;} else {$sistema = 2;}
@@ -34,14 +34,37 @@ class DashboardController extends Controller
             // array
             $content = array();
 
-            // Grupos Gráficos
-            $content['grupos_graficos'] = GrupoGrafico::join('graficos', 'graficos.id', 'grupos_graficos.grafico_id')
-                ->select('graficos.id as grafico_id', 'graficos.name as grafico_name', 'graficos.tipo as grafico_tipo', 'graficos.ordem_visualizacao as grafico_ordem_visualizacao')
-                ->where('graficos.sistema', $sistema)
+            // Gráfico Grupos
+            $content['grafico_grupos'] = GrupoGrafico::join('graficos', 'graficos.id', 'grupos_graficos.grafico_id')
+                ->join('grafico_grupos', 'grafico_grupos.id', 'graficos.grafico_grupo_id')
+                ->select('grafico_grupos.*')
                 ->where('grupos_graficos.grupo_id', Auth::user()->grupo_id)
                 ->where('graficos.dashboard', 1)
-                ->orderby('graficos.ordem_visualizacao', 'ASC')
+                ->orderBy('grafico_grupos.ordem_visualizacao')
+                ->distinct()
                 ->get();
+
+            // Grupo Gráficos
+            $content['grupo_graficos'] = GrupoGrafico::join('graficos', 'graficos.id', 'grupos_graficos.grafico_id')
+                ->join('grafico_grupos', 'grafico_grupos.id', 'graficos.grafico_grupo_id')
+                ->select(
+                    'graficos.id as grafico_id',
+                    'graficos.name as grafico_name',
+                    'graficos.tipo as grafico_tipo',
+                    'graficos.ordem_visualizacao as grafico_ordem_visualizacao',
+                    'grafico_grupos.id as graficoGrupoId',
+                    'grafico_grupos.name as graficoGrupoName'
+                )
+                ->where('graficos.sistema', 'like', '%' . $sistema . '%')
+                ->where('grupos_graficos.grupo_id', Auth::user()->grupo_id)
+                ->where('graficos.dashboard', 1)
+                ->when($grafico_grupo_id != 0, function ($query) use ($grafico_grupo_id) {
+                    $query->where('grafico_grupos.id', $grafico_grupo_id);
+                })
+                ->orderBy('grafico_grupos.ordem_visualizacao')
+                ->orderBy('graficos.ordem_visualizacao')
+                ->get();
+
 
             return $this->sendResponse('Registros enviados com sucesso.', 2000, null, $content);
         } catch (\Exception $e) {
@@ -80,46 +103,104 @@ class DashboardController extends Controller
             // Gráfico id=3 (Funcionários Contratações)
             if ($grafico_id == 3) {
                 // Funcionarios Quantidade
-                $content['funcionarios_quantidade'] = Funcionario::count();
+                $count = Funcionario::when($this->x_cliente_id != 0, function ($query) {
+                    $query->where('tomador_servico_cliente_id', $this->x_cliente_id);
+                })->count();
+
+                $content['funcionarios_quantidade'] = $count;
 
                 // Funcionários Distribuição por Contratações
-                $content['funcionarios_contratacoes'] = DB::select("SELECT contratacao_tipos.name, count(funcionarios.id) as quantidade FROM funcionarios INNER JOIN contratacao_tipos ON funcionarios.contratacao_tipo_id=contratacao_tipos.id GROUP BY contratacao_tipos.name ORDER BY contratacao_tipos.name");
+                $query = "SELECT contratacao_tipos.name, COUNT(funcionarios.id) AS quantidade
+                            FROM funcionarios
+                            INNER JOIN contratacao_tipos ON funcionarios.contratacao_tipo_id = contratacao_tipos.id ";
+
+                if ($this->x_cliente_id != 0) {$query .= "WHERE funcionarios.tomador_servico_cliente_id=".$this->x_cliente_id." ";}
+
+                $query .= "GROUP BY contratacao_tipos.name ORDER BY contratacao_tipos.name";
+
+                $content['funcionarios_contratacoes'] = DB::select($query);
             }
 
             // Gráfico id=4 (Funcionários Funções)
             if ($grafico_id == 4) {
                 // Funcionarios Quantidade
-                $content['funcionarios_quantidade'] = Funcionario::count();
+                $count = Funcionario::when($this->x_cliente_id != 0, function ($query) {
+                    $query->where('tomador_servico_cliente_id', $this->x_cliente_id);
+                })->count();
+
+                $content['funcionarios_quantidade'] = $count;
 
                 // Funcionários Distribuição por Funções
-                $content['funcionarios_funcoes'] = DB::select("SELECT funcoes.name, count(funcionarios.id) as quantidade FROM funcionarios INNER JOIN funcoes ON funcionarios.funcao_id=funcoes.id GROUP BY funcoes.name ORDER BY funcoes.name");
+                $query = "SELECT funcoes.name, count(funcionarios.id) as quantidade
+                            FROM funcionarios
+                            INNER JOIN funcoes ON funcionarios.funcao_id=funcoes.id ";
+
+                if ($this->x_cliente_id != 0) {$query .= "WHERE funcionarios.tomador_servico_cliente_id=".$this->x_cliente_id." ";}
+
+                $query .= "GROUP BY funcoes.name ORDER BY funcoes.name";
+
+                $content['funcionarios_funcoes'] = DB::select($query);
             }
 
             // Gráfico id=5 (Funcionários Gêneros)
             if ($grafico_id == 5) {
                 // Funcionarios Quantidade
-                $content['funcionarios_quantidade'] = Funcionario::count();
+                $count = Funcionario::when($this->x_cliente_id != 0, function ($query) {
+                    $query->where('tomador_servico_cliente_id', $this->x_cliente_id);
+                })->count();
+
+                $content['funcionarios_quantidade'] = $count;
 
                 // Funcionários Distribuição por Gêneros
-                $content['funcionarios_generos'] = DB::select("SELECT generos.name, count(funcionarios.id) as quantidade FROM funcionarios INNER JOIN generos ON funcionarios.genero_id=generos.id GROUP BY generos.name ORDER BY generos.name");
+                $query = "SELECT generos.name, count(funcionarios.id) as quantidade
+                            FROM funcionarios
+                            INNER JOIN generos ON funcionarios.genero_id=generos.id ";
+
+                if ($this->x_cliente_id != 0) {$query .= "WHERE funcionarios.tomador_servico_cliente_id=".$this->x_cliente_id." ";}
+
+                $query .= "GROUP BY generos.name ORDER BY generos.name";
+
+                $content['funcionarios_generos'] = DB::select($query);
             }
 
             // Gráfico id=6 (Clientes Status)
             if ($grafico_id == 6) {
                 // Clientes Quantidades
-                $content['clientes_quantidade'] = Cliente::count();
+                $count = Cliente::when($this->x_cliente_id != 0, function ($query) {
+                    $query->where('principal_cliente_id', $this->x_cliente_id);
+                })->count();
+
+                $content['clientes_quantidade'] = $count;
 
                 // Clientes Distribuição por Status
-                $content['clientes_status'] = DB::select("SELECT CASE WHEN status=1 THEN 'ATIVO' WHEN status=2 THEN 'INATIVO' ELSE 'DESCONHECIDO' END AS name, count(clientes.id) as quantidade FROM clientes GROUP BY status ORDER BY status");
+                $query = "SELECT CASE WHEN status=1 THEN 'ATIVO' WHEN status=2 THEN 'INATIVO' ELSE 'DESCONHECIDO' END AS name, count(clientes.id) as quantidade
+                            FROM clientes ";
+
+                if ($this->x_cliente_id != 0) {$query .= "WHERE clientes.principal_cliente_id=".$this->x_cliente_id." ";}
+
+                $query .= "GROUP BY status ORDER BY status";
+
+                $content['clientes_status'] = DB::select($query);
             }
 
             // Gráfico id=7 (Clientes Tipos)
             if ($grafico_id == 7) {
                 // Clientes Quantidades
-                $content['clientes_quantidade'] = Cliente::count();
+                $count = Cliente::when($this->x_cliente_id != 0, function ($query) {
+                    $query->where('principal_cliente_id', $this->x_cliente_id);
+                })->count();
+
+                $content['clientes_quantidade'] = $count;
 
                 // Clientes Distribuição por Tipos
-                $content['clientes_tipos'] = DB::select("SELECT CASE WHEN tipo=1 THEN 'PESSOA JURÍDICA' WHEN tipo=2 THEN 'PESSOA FÍSICA' ELSE 'DESCONHECIDO' END AS name, count(clientes.id) as quantidade FROM clientes GROUP BY tipo ORDER BY tipo");
+                $query = "SELECT CASE WHEN tipo=1 THEN 'PESSOA JURÍDICA' WHEN tipo=2 THEN 'PESSOA FÍSICA' ELSE 'DESCONHECIDO' END AS name, count(clientes.id) as quantidade
+                            FROM clientes ";
+
+                if ($this->x_cliente_id != 0) {$query .= "WHERE clientes.principal_cliente_id=".$this->x_cliente_id." ";}
+
+                $query .= "GROUP BY tipo ORDER BY tipo";
+
+                $content['clientes_tipos'] = DB::select($query);
             }
 
             // Gráfico id=8 (Transações Operações)
@@ -143,103 +224,76 @@ class DashboardController extends Controller
             // Gráfico id=10 (Operações)
             if ($grafico_id == 10) {
                 // Propostas Quantidade
-                $content['operacoes_propostas_quantidade'] = Proposta::count();
+                $count = Proposta::when($this->x_cliente_id != 0, function ($query) {
+                    $query->where('cliente_id', $this->x_cliente_id);
+                })->count();
+
+                $content['operacoes_propostas_quantidade'] = $count;
 
                 // Brigadas Incêndios Quantidade
-                $content['operacoes_brigadas_incendios_quantidade'] = BrigadaIncendio::count();
+                $count = BrigadaIncendio::when($this->x_cliente_id != 0, function ($query) {
+                    $query->where('cliente_id', $this->x_cliente_id);
+                })->count();
+
+                $content['operacoes_brigadas_incendios_quantidade'] = $count;
 
                 // Visitas Técnicas Quantidade
-                $content['operacoes_visitas_tecnicas_quantidade'] = VisitaTecnica::count();
+                $count = VisitaTecnica::when($this->x_cliente_id != 0, function ($query) {
+                    $query->where('cliente_id', $this->x_cliente_id);
+                })->count();
+
+                $content['operacoes_visitas_tecnicas_quantidade'] = $count;
 
                 // Ordens de Serviços Quantidade
-                $content['operacoes_ordens_servicos_quantidade'] = OrdemServico::count();
+                $count = OrdemServico::when($this->x_cliente_id != 0, function ($query) {
+                    $query->where('cliente_id', $this->x_cliente_id);
+                })->count();
+
+                $content['operacoes_ordens_servicos_quantidade'] = $count;
 
                 // Quantidade Total
                 $content['operacoes_total_quantidade'] = $content['operacoes_propostas_quantidade'] + $content['operacoes_brigadas_incendios_quantidade'] + $content['operacoes_visitas_tecnicas_quantidade'] + $content['operacoes_ordens_servicos_quantidade'];
             }
 
-            // Gráfico id=11 (Funcionários Contratações)
-            if ($grafico_id == 11) {
-                // Funcionarios Quantidade
-                $content['funcionarios_quantidade'] = Funcionario::where('tomador_servico_cliente_id', $this->x_cliente_id)->count();
 
-                // Funcionários Distribuição por Contratações
-                $content['funcionarios_contratacoes'] = DB::select("SELECT contratacao_tipos.name, count(funcionarios.id) as quantidade FROM funcionarios INNER JOIN contratacao_tipos ON funcionarios.contratacao_tipo_id=contratacao_tipos.id WHERE funcionarios.tomador_servico_cliente_id=" . $this->x_cliente_id . " GROUP BY contratacao_tipos.name ORDER BY contratacao_tipos.name");
-            }
 
-            // Gráfico id=12 (Funcionários Funções)
-            if ($grafico_id == 12) {
-                // Funcionarios Quantidade
-                $content['funcionarios_quantidade'] = Funcionario::where('tomador_servico_cliente_id', $this->x_cliente_id)->count();
+            // // Gráfico id=15 (Cliente Edificação Lojas)
+            // if ($grafico_id == 15) {
+            //     // Lojas Ocupadas
+            //     $content['lojas_ocupadas'] = ClienteLoja::join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+            //         ->join('edificacoes', 'edificacoes.id', 'edificacoes_niveis.edificacao_id')
+            //         ->where('edificacoes.cliente_id', $this->x_cliente_id)
+            //         ->where('clientes_lojas.subordinado_cliente_id', '!=', null)
+            //         ->count();
 
-                // Funcionários Distribuição por Funções
-                $content['funcionarios_funcoes'] = DB::select("SELECT funcoes.name, count(funcionarios.id) as quantidade FROM funcionarios INNER JOIN funcoes ON funcionarios.funcao_id=funcoes.id WHERE funcionarios.tomador_servico_cliente_id=" . $this->x_cliente_id . " GROUP BY funcoes.name ORDER BY funcoes.name");
-            }
+            //     // Lojas Desocupadas
+            //     $content['lojas_desocupadas'] = ClienteLoja::join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
+            //         ->join('edificacoes', 'edificacoes.id', 'edificacoes_niveis.edificacao_id')
+            //         ->where('edificacoes.cliente_id', $this->x_cliente_id)
+            //         ->where('clientes_lojas.subordinado_cliente_id', '=', null)
+            //         ->count();
 
-            // Gráfico id=13 (Funcionários Gêneros)
-            if ($grafico_id == 13) {
-                // Funcionarios Quantidade
-                $content['funcionarios_quantidade'] = Funcionario::where('tomador_servico_cliente_id', $this->x_cliente_id)->count();
+            //     // Lojas Total
+            //     $content['lojas_total'] = $content['lojas_ocupadas'] + $content['lojas_desocupadas'];
+            // }
 
-                // Funcionários Distribuição por Gêneros
-                $content['funcionarios_generos'] = DB::select("SELECT generos.name, count(funcionarios.id) as quantidade FROM funcionarios INNER JOIN generos ON funcionarios.genero_id=generos.id WHERE funcionarios.tomador_servico_cliente_id=" . $this->x_cliente_id . " GROUP BY generos.name ORDER BY generos.name");
-            }
+            // // Gráfico id=16 (Cliente Documentos Exigidos)
+            // if ($grafico_id == 16) {
+            //     // Documentos Exigidos Pendentes
+            //     $content['documentos_exigidos_pendentes'] = ClienteDocumentoExigido::leftjoin('clientes_documentos', 'clientes_documentos.documento_id', 'clientes_documentos_exigidos.documento_id')
+            //         ->where('clientes_documentos_exigidos.cliente_id', $this->x_cliente_id)
+            //         ->where('clientes_documentos.caminho', '=', null)
+            //         ->count();
 
-            // Gráfico id=14 (Operações)
-            if ($grafico_id == 14) {
-                // Propostas Quantidade
-                $content['operacoes_propostas_quantidade'] = Proposta::where('cliente_id', $this->x_cliente_id)->count();
+            //     // Documentos Exigidos Concluidos
+            //     $content['documentos_exigidos_concluidos'] = ClienteDocumentoExigido::leftjoin('clientes_documentos', 'clientes_documentos.documento_id', 'clientes_documentos_exigidos.documento_id')
+            //         ->where('clientes_documentos_exigidos.cliente_id', $this->x_cliente_id)
+            //         ->where('clientes_documentos.caminho', '!=', null)
+            //         ->count();
 
-                // Brigadas Incêndios Quantidade
-                $content['operacoes_brigadas_incendios_quantidade'] = BrigadaIncendio::where('cliente_id', $this->x_cliente_id)->count();
-
-                // Visitas Técnicas Quantidade
-                $content['operacoes_visitas_tecnicas_quantidade'] = VisitaTecnica::where('cliente_id', $this->x_cliente_id)->count();
-
-                // Ordens de Serviços Quantidade
-                $content['operacoes_ordens_servicos_quantidade'] = OrdemServico::where('cliente_id', $this->x_cliente_id)->count();
-
-                // Quantidade Total
-                $content['operacoes_total_quantidade'] = $content['operacoes_propostas_quantidade'] + $content['operacoes_brigadas_incendios_quantidade'] + $content['operacoes_visitas_tecnicas_quantidade'] + $content['operacoes_ordens_servicos_quantidade'];
-            }
-
-            // Gráfico id=15 (Cliente Edificação Lojas)
-            if ($grafico_id == 15) {
-                // Lojas Ocupadas
-                $content['lojas_ocupadas'] = ClienteLoja::join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
-                    ->join('edificacoes', 'edificacoes.id', 'edificacoes_niveis.edificacao_id')
-                    ->where('edificacoes.cliente_id', $this->x_cliente_id)
-                    ->where('clientes_lojas.subordinado_cliente_id', '!=', null)
-                    ->count();
-
-                // Lojas Desocupadas
-                $content['lojas_desocupadas'] = ClienteLoja::join('edificacoes_niveis', 'edificacoes_niveis.id', 'clientes_lojas.edificacao_nivel_id')
-                    ->join('edificacoes', 'edificacoes.id', 'edificacoes_niveis.edificacao_id')
-                    ->where('edificacoes.cliente_id', $this->x_cliente_id)
-                    ->where('clientes_lojas.subordinado_cliente_id', '=', null)
-                    ->count();
-
-                // Lojas Total
-                $content['lojas_total'] = $content['lojas_ocupadas'] + $content['lojas_desocupadas'];
-            }
-
-            // Gráfico id=16 (Cliente Documentos Exigidos)
-            if ($grafico_id == 16) {
-                // Documentos Exigidos Pendentes
-                $content['documentos_exigidos_pendentes'] = ClienteDocumentoExigido::leftjoin('clientes_documentos', 'clientes_documentos.documento_id', 'clientes_documentos_exigidos.documento_id')
-                    ->where('clientes_documentos_exigidos.cliente_id', $this->x_cliente_id)
-                    ->where('clientes_documentos.caminho', '=', null)
-                    ->count();
-
-                // Documentos Exigidos Concluidos
-                $content['documentos_exigidos_concluidos'] = ClienteDocumentoExigido::leftjoin('clientes_documentos', 'clientes_documentos.documento_id', 'clientes_documentos_exigidos.documento_id')
-                    ->where('clientes_documentos_exigidos.cliente_id', $this->x_cliente_id)
-                    ->where('clientes_documentos.caminho', '!=', null)
-                    ->count();
-
-                // Documentos Exigidos Total
-                $content['documentos_exigidos_total'] = ClienteDocumentoExigido::where('cliente_id', $this->x_cliente_id)->count();
-            }
+            //     // Documentos Exigidos Total
+            //     $content['documentos_exigidos_total'] = ClienteDocumentoExigido::where('cliente_id', $this->x_cliente_id)->count();
+            // }
 
             return $this->sendResponse('Registros enviados com sucesso.', 2000, null, $content);
         } catch (\Exception $e) {
