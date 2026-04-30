@@ -23,8 +23,5 @@ class Z_Faker6Seeder extends Seeder
         GrupoGrafico::create(['grupo_id' => 11, 'grafico_id' => 15]);
         GrupoGrafico::create(['grupo_id' => 11, 'grafico_id' => 16]);
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-
-
     }
 }

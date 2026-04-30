@@ -204,7 +204,7 @@ class Z_Faker5Seeder extends Seeder
             'cliente_logradouro' => $cliente->logradouro,
             'cliente_bairro' => $cliente->bairro,
             'cliente_cidade' => $cliente->cidade,
-            'name' => 'Edificação Principal',
+            'name' => 'Edificação Secundária',
             'pavimentos' => 2,
             'mezaninos' => 2,
             'coberturas' => 1,

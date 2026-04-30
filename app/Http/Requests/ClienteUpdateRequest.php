@@ -44,11 +44,8 @@ class ClienteUpdateRequest extends FormRequest
                 Rule::unique('clientes')->ignore($this->id),
                 'cpf'
             ],
-            'cnpj' => [
-                'nullable',
-                Rule::unique('clientes')->ignore($this->id),
-                'cnpj'
-            ],
+            //'cnpj' => ['nullable', Rule::unique('clientes')->ignore($this->id), 'cnpj'],
+            'cnpj' => ['nullable', 'cnpj'],
             'identidade_estado_id' => ['nullable', 'integer', 'numeric'],
             'identidade_orgao_id' => ['nullable', 'integer', 'numeric'],
             'personal_identidade_numero' => ['nullable', 'numeric'],

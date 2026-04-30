@@ -651,9 +651,25 @@ class ClienteController extends Controller
             $validator = Validator::make($request->all(), [
                 'operacao' => ['required'],
                 'cliente_id' => ['required'],
-                'documento_id' => ['required'],
+                'documento_id' => [
+                    'required',
+                    function ($attribute, $value, $fail) use ($request) {
+
+                        $query = ClienteDocumento::where('edificacao_id', $request->edificacao_id)
+                            ->where('documento_id', $value);
+
+                        // Se estiver editando, ignora o próprio registro atual
+                        if ($request['operacao'] == 'edit') {
+                            $query->where('id', '!=', $request->cliente_documento_id);
+                        }
+
+                        if ($query->exists()) {
+                            $fail('Já existe este documento para a Edificação informada.');
+                        }
+                    }
+                ],
                 'edificacao_id' => [
-                    'nullable',
+                    'required',
                     function ($attribute, $value, $fail) use ($request) {
                         if ($value) {
                             $exists = Edificacao::where('id', $value)
@@ -666,14 +682,15 @@ class ClienteController extends Controller
                         }
                     }
                 ],
-                'data_emissao' => ['nullable', 'date'],
-                'data_vencimento' => ['nullable', 'date'],
+                'data_emissao' => ['nullable', 'date_format:d/m/Y'],
+                'data_vencimento' => ['nullable', 'date_format:d/m/Y'],
             ], [
                 'operacao.required' => 'A operação é obrigatória.',
                 'cliente_id.required' => 'O cliente é obrigatório.',
+                'edificacao_id.required' => 'A Edificação é obrigatória.',
                 'documento_id.required' => 'O documento é obrigatório.',
-                'data_emissao.date' => 'A data de emissão é inválida.',
-                'data_vencimento.date' => 'A data de vencimento é inválida.',
+                'data_emissao.date_format' => 'A data de emissão é inválida.',
+                'data_vencimento.date_format' => 'A data de vencimento é inválida.',
             ]);
 
             // Se falhar retorna
@@ -940,7 +957,7 @@ class ClienteController extends Controller
                         ->ignore($request->cliente_sistema_preventivo_id),
                 ],
                 'edificacao_local_id' => [
-                    'nullable',
+                    'required',
                     function ($attribute, $value, $fail) use ($request) {
                         if ($value) {
                             $exists = EdificacaoLocal::where('edificacoes_locais.id', $value)
@@ -958,6 +975,7 @@ class ClienteController extends Controller
             ], [
                 'operacao.required' => 'A operação é obrigatória.',
                 'cliente_id.required' => 'O cliente é obrigatório.',
+                'edificacao_local_id.required' => 'A Edificação Local é obrigatório.',
                 'sistema_preventivo_id.required' => 'O Sistema Preventivo é obrigatório.',
                 'sistema_preventivo_numero.required' => 'O Número é obrigatório',
                 'sistema_preventivo_numero.unique' => 'Este número já está cadastrado.'

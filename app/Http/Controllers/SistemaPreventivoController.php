@@ -21,17 +21,14 @@ class SistemaPreventivoController extends Controller
 
     public function index()
     {
-        // $registros = $this->sistema_preventivo
-        //     ->Join('medidas_seguranca', 'medidas_seguranca.id', '=', 'sistemas_preventivos.medida_seguranca_id')
-        //     ->select(['sistemas_preventivos.*', 'medidas_seguranca.name as medidaSegurancaName'])
-        //     ->get();
-
         $registros = $this->sistema_preventivo
             ->with([
                 'medidaSeguranca:id,name',
                 'equipamentos.equipamento:id,name'
             ])
             ->get()
+            ->sortBy('medidaSeguranca.name')
+            ->sortBy('sistemas_preventivos.name')
             ->map(function ($item) {
 
                 $data = $item->toArray();
