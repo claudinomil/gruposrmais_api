@@ -794,6 +794,16 @@ class Transacoes
                     $dados .= $this->retornaDado(1, $dadosAnterior['equipe_funcionario_funcao'], $dadosAtual['equipe_funcionario_funcao'], 'Equipe Funcionário Função', '', '');
                     $dados .= $this->retornaDado(10, $dadosAnterior['equipe_funcionario_veiculo_id'], $dadosAtual['equipe_funcionario_veiculo_id'], 'Veículo', '', '');
                 }
+
+                //Tabela ordens_servicos_funcionarios
+                if ($op == 7) {
+                    $dados .= '<b>:: Ordens Serviços Funcionários</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(9, $dadosAnterior['ordem_servico_id'], $dadosAtual['ordem_servico_id'], 'Cliente/Data/Número', '', '');
+                    $dados .= $this->retornaDado(2, $dadosAnterior['funcionario_id'], $dadosAtual['funcionario_id'], 'Funcionário', Funcionario::class, 'name');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['funcionario_item'], $dadosAtual['funcionario_item'], 'Funcionário Item', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['funcionario_nome'], $dadosAtual['funcionario_nome'], 'Funcionário Nome', '', '');
+                    $dados .= $this->retornaDado(10, $dadosAnterior['funcionario_veiculo_id'], $dadosAtual['funcionario_veiculo_id'], 'Veículo', '', '');
+                }
             }
 
             //veiculos

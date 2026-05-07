@@ -16,6 +16,7 @@ use App\Models\ProdutoEntradaItem;
 use App\Models\OrdemServicoDestino;
 use App\Models\OrdemServicoEquipe;
 use App\Models\OrdemServicoExecutivo;
+use App\Models\OrdemServicoFuncionario;
 use App\Models\OrdemServicoServico;
 use App\Models\OrdemServicoVeiculo;
 use App\Models\PontoInteresseEspecialidade;
@@ -627,6 +628,10 @@ class SuporteService
                         $dadosAtual['servico_valor'] = null;
                         $dadosAtual['servico_quantidade'] = null;
                         $dadosAtual['servico_valor_total'] = null;
+                    } else if ($request['ordem_servico_tipo_id'] == 4) {
+                        $dadosAtual['servico_valor'] = null;
+                        $dadosAtual['servico_quantidade'] = null;
+                        $dadosAtual['servico_valor_total'] = null;
                     }
 
                     //Incluir
@@ -738,6 +743,54 @@ class SuporteService
         }
     }
 
+
+    /*
+     * Editar dados na tabela ordens_servicos_funcionarios
+     *
+     * @PARAM op=1 : Incluir funcionarios na Ordens Servicos
+     * @PARAM op=2 : Excluir funcionarios da Ordens Servicos (Todos)
+     * @PARAM op=3 : Excluir funcionarios da Ordens Servicos (Todos) e Incluir funcionarios na Ordens Servicos
+     */
+    public function editOrdemServicoFuncionario($op, $ordem_servico_id, $request)
+    {
+        //Excluir
+        if ($op == 2 or $op == 3) {
+            //Verificar os funcionarios da ordem_servico
+            $ordemServicoFuncionarios = OrdemServicoFuncionario::where('ordem_servico_id', $ordem_servico_id)->get();
+
+            foreach ($ordemServicoFuncionarios as $ordemServicoFuncionario) {
+                //Dados Anterior
+                $dadosAnterior = $ordemServicoFuncionario;
+
+                //Excluir
+                OrdemServicoFuncionario::where('id', $ordemServicoFuncionario['id'])->delete();
+
+                //gravar transacao
+                Transacoes::transacaoRecord(7, 3, 'ordens_servicos', $dadosAnterior, $dadosAnterior);
+            }
+        }
+
+        //Incluir
+        if ($op == 1 || $op == 3) {
+            for ($i = 0; $i <= 50; $i++) {
+                if (isset($request['funcionario_id'][$i])) {
+                    //Dados Atual
+                    $dadosAtual = array();
+                    $dadosAtual['ordem_servico_id'] = $ordem_servico_id;
+                    $dadosAtual['funcionario_id'] = $request['funcionario_id'][$i];
+                    $dadosAtual['funcionario_item'] = $request['funcionario_item'][$i];
+                    $dadosAtual['funcionario_nome'] = $request['funcionario_nome'][$i];
+                    $dadosAtual['funcionario_veiculo_id'] = $request['funcionario_veiculo_id'][$i];
+
+                    //Incluir
+                    OrdemServicoFuncionario::create($dadosAtual);
+
+                    //gravar transacao
+                    Transacoes::transacaoRecord(7, 1, 'ordens_servicos', $dadosAtual, $dadosAtual);
+                }
+            }
+        }
+    }
 
     /*
      * Editar dados na tabela ordens_servicos_equipes

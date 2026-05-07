@@ -13,6 +13,7 @@ use App\Models\Funcionario;
 use App\Models\OrdemServicoDestino;
 use App\Models\OrdemServicoEquipe;
 use App\Models\OrdemServicoExecutivo;
+use App\Models\OrdemServicoFuncionario;
 use App\Models\OrdemServicoPrioridade;
 use App\Models\OrdemServicoServico;
 use App\Models\OrdemServicoStatus;
@@ -21,7 +22,6 @@ use App\Models\OrdemServicoVeiculo;
 use App\Models\Servico;
 use App\Models\Veiculo;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Models\OrdemServico;
 
 class OrdemServicoController extends Controller
@@ -74,6 +74,9 @@ class OrdemServicoController extends Controller
                 //buscar dados dos executivos para a ordem_servico
                 $registro['ordem_servico_executivos'] = OrdemServicoExecutivo::where('ordem_servico_id', '=', $id)->get();
 
+                //buscar dados dos funcionarios para a ordem_servico
+                $registro['ordem_servico_funcionarios'] = OrdemServicoFuncionario::where('ordem_servico_id', '=', $id)->get();
+
                 //buscar dados das equipes para a ordem_servico
                 $registro['ordem_servico_equipes'] = OrdemServicoEquipe::where('ordem_servico_id', '=', $id)->get();
 
@@ -103,8 +106,7 @@ class OrdemServicoController extends Controller
             $registros['servicos'] = Servico::all();
 
             //Funcionários
-            $funcionarios = Funcionario
-                ::leftJoin('funcoes', 'funcionarios.funcao_id', '=', 'funcoes.id')
+            $funcionarios = Funcionario::leftJoin('funcoes', 'funcionarios.funcao_id', '=', 'funcoes.id')
                 ->select(['funcionarios.*', 'funcoes.name as funcaoName'])
                 ->get();
 
@@ -129,8 +131,7 @@ class OrdemServicoController extends Controller
             $registros['clientes_executivos'] = ClienteExecutivo::all();
 
             //Veiculos
-            $veiculos = Veiculo
-                ::leftJoin('veiculo_marcas', 'veiculos.veiculo_marca_id', '=', 'veiculo_marcas.id')
+            $veiculos = Veiculo::leftJoin('veiculo_marcas', 'veiculos.veiculo_marca_id', '=', 'veiculo_marcas.id')
                 ->leftJoin('veiculo_modelos', 'veiculos.veiculo_modelo_id', '=', 'veiculo_modelos.id')
                 ->leftJoin('veiculo_combustiveis', 'veiculos.veiculo_combustivel_id', '=', 'veiculo_combustiveis.id')
                 ->leftJoin('veiculo_categorias', 'veiculos.veiculo_categoria_id', '=', 'veiculo_categorias.id')
@@ -199,6 +200,9 @@ class OrdemServicoController extends Controller
             //Editar dados na tabela ordens_servicos_executivos
             SuporteFacade::editOrdemServicoExecutivo(1, $registro['id'], $request);
 
+            //Editar dados na tabela ordens_servicos_funcionarios
+            SuporteFacade::editOrdemServicoFuncionario(1, $registro['id'], $request);
+
             //Editar dados na tabela ordens_servicos_equipes
             SuporteFacade::editOrdemServicoEquipe(1, $registro['id'], $request);
 
@@ -235,6 +239,9 @@ class OrdemServicoController extends Controller
 
                 //Editar dados na tabela ordens_servicos_executivos
                 SuporteFacade::editOrdemServicoExecutivo(3, $registro['id'], $request);
+
+                //Editar dados na tabela ordens_servicos_funcionarios
+                SuporteFacade::editOrdemServicoFuncionario(3, $registro['id'], $request);
 
                 //Editar dados na tabela ordens_servicos_equipes
                 SuporteFacade::editOrdemServicoEquipe(3, $registro['id'], $request);
@@ -274,6 +281,9 @@ class OrdemServicoController extends Controller
                 //Editar dados na tabela ordens_servicos_executivos
                 SuporteFacade::editOrdemServicoExecutivo(2, $registro['id'], '');
 
+                //Editar dados na tabela ordens_servicos_funcionarios
+                SuporteFacade::editOrdemServicoFuncionario(2, $registro['id'], '');
+
                 //Editar dados na tabela ordens_servicos_equipes
                 SuporteFacade::editOrdemServicoEquipe(2, $registro['id'], '');
 
@@ -296,10 +306,6 @@ class OrdemServicoController extends Controller
     {
         //Filtros enviados pelo Client
         $filtros = explode(',', $array_dados);
-
-        //Limpar Querys executadas
-        //DB::enableQueryLog();
-
 
         //Registros
         $registros = $this->ordem_servico
@@ -350,9 +356,6 @@ class OrdemServicoController extends Controller
                 }
             }
             )->get();
-
-        //Código SQL Bruto
-        //$sql = DB::getQueryLog();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }

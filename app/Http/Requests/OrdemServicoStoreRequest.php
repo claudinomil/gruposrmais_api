@@ -15,13 +15,13 @@ class OrdemServicoStoreRequest extends FormRequest
     {
         return [
             'ordem_servico_tipo_id' => ['required'],
-            'cliente_id' => ['required_if:ordem_servico_tipo_id,2,3'],
+            'cliente_id' => ['required_if:ordem_servico_tipo_id,2,3,4'],
             'ordem_servico_prioridade_id' => ['required'],
-            'servico_id' => ['required_if:ordem_servico_tipo_id,1,2,3'],
-            'destino_cep' => ['required_if:ordem_servico_tipo_id,3'],
-            'veiculo_id' => ['required_if:ordem_servico_tipo_id,3'],
+            'servico_id' => ['required_if:ordem_servico_tipo_id,1,2,3,4'],
+            'destino_cep' => ['required_if:ordem_servico_tipo_id,3,4'],
+            'veiculo_id' => ['required_if:ordem_servico_tipo_id,3,4'],
             'cliente_executivo_id' => ['required_if:ordem_servico_tipo_id,3'],
-            'equipe_funcionario_id' => ['required_if:ordem_servico_tipo_id,3'],
+            'equipe_funcionario_id' => ['required_if:ordem_servico_tipo_id,3,4'],
         ];
     }
 
