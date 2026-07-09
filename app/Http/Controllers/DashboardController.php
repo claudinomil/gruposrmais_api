@@ -180,17 +180,14 @@ class DashboardController extends Controller
                 // Documentos Exigidos não Vencidos
                 $content['documentos_exigidos_nao_vencidos'] = $this->getCount(4);
 
-                // LUCs Quantidade
-                $content['lucs_quantidade'] = $this->getCount(5);
+                // Lojas Quantidade
+                $content['lojas_quantidade'] = $this->getCount(5);
 
-                // LUCs Ocupadas
-                $content['lucs_ocupadas'] = $this->getCount(6);
+                // Lojas Ocupadas
+                $content['lojas_ocupadas'] = $this->getCount(6);
 
-                // LUCs Desocupadas
-                $content['lucs_desocupadas'] = $content['lucs_quantidade'] - $content['lucs_ocupadas'];
-
-                // Quantidade Lojas
-                $content['quantidade_lojas'] = $this->getCount(7);
+                // Lojas Desocupadas
+                $content['lojas_desocupadas'] = $content['lojas_quantidade'] - $content['lojas_ocupadas'];
 
                 // Quantidade Sistemas Preventivos
                 $content['quantidade_sistemas_preventivos'] = $this->getCount(16);
@@ -463,7 +460,7 @@ class DashboardController extends Controller
         }
     }
 
-    // Gráfico id=11 (Cliente Edificação - LUCs Ocupados)
+    // Gráfico id=11 (Cliente Edificação - Lojas Ocupados)
     public function grafico_11_dados($cliente_id, $edificacao_id, $edificacao_nivel_id)
     {
         try {
@@ -474,14 +471,14 @@ class DashboardController extends Controller
             // array
             $content = array();
 
-            // LUCs Quantidade
-            $content['lucs_quantidade'] = $this->getCount(5);
+            // Lojas Quantidade
+            $content['lojas_quantidade'] = $this->getCount(5);
 
-            // LUCs Ocupadas
-            $content['lucs_ocupadas'] = $this->getCount(6);
+            // Lojas Ocupadas
+            $content['lojas_ocupadas'] = $this->getCount(6);
 
-            // LUCs Desocupadas
-            $content['lucs_desocupadas'] = $content['lucs_quantidade'] - $content['lucs_ocupadas'];
+            // Lojas Desocupadas
+            $content['lojas_desocupadas'] = $content['lojas_quantidade'] - $content['lojas_ocupadas'];
 
             return $this->sendResponse('Registros enviados com sucesso.', 2000, null, $content);
         } catch (\Exception $e) {
@@ -553,12 +550,40 @@ class DashboardController extends Controller
         }
     }
 
-    public function grafico_14_dados()
+    // Gráfico id=14 (Cliente Edificação - Distribuição de Lojas por Nível)
+    public function grafico_14_dados($cliente_id, $edificacao_id, $edificacao_nivel_id)
     {
         try {
+            $this->cliente_id = $cliente_id;
+            $this->edificacao_id = $edificacao_id;
+            $this->edificacao_nivel_id = $edificacao_nivel_id;
+
             // array
             $content = array();
 
+            // Lojas Quantidade
+            $content['lojas_quantidade'] = $this->getCount(5);
+
+            // Distribuição de Lojas por Nível
+            $query = "SELECT edificacoes_niveis.name, count(edificacoes_niveis.id) as quantidade FROM clientes_lojas ";
+            $query .= "INNER JOIN edificacoes_niveis ON edificacoes_niveis.id=clientes_lojas.edificacao_nivel_id ";
+            $query .= "INNER JOIN edificacoes ON edificacoes.id=edificacoes_niveis.edificacao_id ";
+            $query .= "WHERE edificacoes.cliente_id=".$this->cliente_id." ";
+
+            if ($this->edificacao_id != 0) {
+                $query .= "AND edificacoes.id=".$this->edificacao_id." ";
+            }
+
+            if ($this->edificacao_nivel_id != 0) {
+                $query .= "AND edificacoes_niveis.id=".$this->edificacao_nivel_id." ";
+            }
+
+            $query .= "GROUP BY edificacoes_niveis.name ";
+            $query .= "ORDER BY MIN(edificacoes_niveis.nivel), MIN(edificacoes_niveis.ordem) ";
+
+            $content['lojas_niveis'] = DB::select($query);
+
+            return $this->sendResponse('Registros enviados com sucesso.', 2000, null, $content);
         } catch (\Exception $e) {
             if (config('app.debug')) {return $this->sendResponse($e->getMessage(), 5000, null, null);}
 
@@ -566,14 +591,62 @@ class DashboardController extends Controller
         }
     }
 
-    public function grafico_15_dados()
+    // Gráfico id=15 (Cliente Edificação - Documentos Exigidos por Tipo)
+    public function grafico_15_dados($cliente_id, $edificacao_id, $edificacao_nivel_id)
     {
         try {
-            // array
+            $this->cliente_id = $cliente_id;
+            $this->edificacao_id = $edificacao_id;
+            $this->edificacao_nivel_id = $edificacao_nivel_id;
+
+            // Array retorno
             $content = array();
 
+            // Quantidade total
+            $content['lojas_quantidade'] = $this->getCount(5);
+
+            // Query
+            $query = "SELECT documentos.name, COUNT(documentos.id) AS quantidade FROM clientes_documentos ";
+            $query .= "INNER JOIN documentos ON documentos.id = clientes_documentos.documento_id ";
+            $query .= "INNER JOIN clientes_documentos_exigidos ON clientes_documentos_exigidos.documento_id = clientes_documentos.documento_id ";
+            $query .= "INNER JOIN edificacoes ON edificacoes.cliente_id = clientes_documentos_exigidos.cliente_id ";
+            $query .= "INNER JOIN edificacoes_niveis ON edificacoes_niveis.edificacao_id = edificacoes.id ";
+            $query .= "WHERE edificacoes.cliente_id = ".$this->cliente_id." ";
+
+            // Filtro Edificação
+            if ($this->edificacao_id != 0) {
+                $query .= "AND edificacoes.id = ".$this->edificacao_id." ";
+            }
+
+            // Filtro Nível
+            if ($this->edificacao_nivel_id != 0) {
+                $query .= "AND edificacoes_niveis.id = ".$this->edificacao_nivel_id." ";
+            }
+
+            // Agrupamento
+            $query .= "GROUP BY documentos.name ";
+
+            // Ordenação
+            $query .= "ORDER BY documentos.name ";
+
+            // Resultados
+            $resultados = DB::select($query);
+
+            $content['lojas_niveis'] = array_map(function ($item) {
+                return [
+                    'name' => $item->name,
+                    'series' => [
+                        'Quantidade' => (int) $item->quantidade
+                    ]
+                ];
+            }, $resultados);
+
+            // Response
+            return $this->sendResponse('Registros enviados com sucesso.', 2000, null, $content);
         } catch (\Exception $e) {
-            if (config('app.debug')) {return $this->sendResponse($e->getMessage(), 5000, null, null);}
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
 
             return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
         }
@@ -653,9 +726,8 @@ class DashboardController extends Controller
                         ->count();
         }
 
-        // LUCs Quantidade
+        // Lojas Quantidade
         if ($op == 5) {
-            //return Edificacao::where('id', $this->edificacao_id)->value('quantidade_lucs');
             return Edificacao::where('cliente_id', $this->cliente_id)
                         ->when($this->edificacao_id != 0, function ($q) {
                             $q->where('id', $this->edificacao_id);
@@ -663,7 +735,7 @@ class DashboardController extends Controller
                         ->sum('quantidade_lucs');
         }
 
-        // LUCs Ocupadas
+        // Lojas Ocupadas
         if ($op == 6) {
             return ClienteLoja::query()
                         ->leftjoin('edificacoes_niveis', 'edificacoes_niveis.id', '=', 'clientes_lojas.edificacao_nivel_id')
@@ -677,24 +749,6 @@ class DashboardController extends Controller
                         })
                         ->whereNotNull('clientes_lojas.subordinado_cliente_id')
                         ->distinct('clientes_lojas.id')
-                        ->count();
-        }
-
-        // Quantidade Lojas
-        if ($op == 7) {
-            return ClienteLoja::query()
-                        ->join('edificacoes_niveis', 'edificacoes_niveis.id', '=', 'clientes_lojas.edificacao_nivel_id')
-                        ->join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
-                        ->where('edificacoes.cliente_id', $this->cliente_id)
-                        ->when($this->edificacao_id != 0, function ($q) {
-                            $q->where('edificacoes.id', $this->edificacao_id);
-                        })
-                        ->when($this->edificacao_nivel_id != 0, function ($q) {
-                            $q->where('edificacoes_niveis.id', $this->edificacao_nivel_id);
-                        })
-                        ->whereNotNull('clientes_lojas.subordinado_cliente_id')
-                        ->distinct('clientes_lojas.id')
-                        //->distinct('clientes_lojas.subordinado_cliente_id')
                         ->count();
         }
 

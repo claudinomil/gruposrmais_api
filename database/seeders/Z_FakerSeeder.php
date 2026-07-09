@@ -195,23 +195,23 @@ class Z_FakerSeeder extends Seeder
         }
 
         //Veículos
-        $cores = ['Branco', 'Preto', 'Prata', 'Cinza', 'Vermelho', 'Azul', 'Verde', 'Amarelo', 'Laranja', 'Marrom'];
-        for($i=1; $i<=10; $i++) {
-            Veiculo::create([
-                'veiculo_marca_id' => $faker->numberBetween(1, 6),
-                'veiculo_modelo_id' => $faker->numberBetween(1, 6),
-                'placa' => $faker->regexify('[A-Z]{3}[0-9][A-Z][0-9]{2}'),
-                'renavam' => $renavam = $faker->numerify('###########'),
-                'chassi' => $chassi = $faker->regexify('[A-HJ-NPR-Z0-9]{17}'),
-                'ano_modelo' => '2025',
-                'ano_fabricacao' => '2024',
-                'cor' => $faker->randomElement($cores),
-                'veiculo_combustivel_id' => $faker->numberBetween(1, 4),
-                'gnv' => $faker->numberBetween(1, 2),
-                'blindado' => $faker->numberBetween(1, 2),
-                'veiculo_categoria_id' => $faker->numberBetween(1, 3)
-            ]);
-        }
+        // $cores = ['Branco', 'Preto', 'Prata', 'Cinza', 'Vermelho', 'Azul', 'Verde', 'Amarelo', 'Laranja', 'Marrom'];
+        // for($i=1; $i<=10; $i++) {
+        //     Veiculo::create([
+        //         'veiculo_marca_id' => $faker->numberBetween(1, 6),
+        //         'veiculo_modelo_id' => $faker->numberBetween(1, 6),
+        //         'placa' => $faker->regexify('[A-Z]{3}[0-9][A-Z][0-9]{2}'),
+        //         'renavam' => $renavam = $faker->numerify('###########'),
+        //         'chassi' => $chassi = $faker->regexify('[A-HJ-NPR-Z0-9]{17}'),
+        //         'ano_modelo' => '2025',
+        //         'ano_fabricacao' => '2024',
+        //         'cor' => $faker->randomElement($cores),
+        //         'veiculo_combustivel_id' => $faker->numberBetween(1, 4),
+        //         'gnv' => $faker->numberBetween(1, 2),
+        //         'blindado' => $faker->numberBetween(1, 2),
+        //         'veiculo_categoria_id' => $faker->numberBetween(1, 3)
+        //     ]);
+        // }
 
         //Clientes Executivos
         $funcoes = [

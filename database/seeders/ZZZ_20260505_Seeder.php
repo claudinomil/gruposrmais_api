@@ -32,15 +32,15 @@ class ZZZ_20260505_Seeder extends Seeder
         VeiculoCategoria::create(['id' => 5, 'name' => 'Taxi']);
 
         // Veículo Marcas
-        VeiculoMarca::create(['id' => 21, 'name' => 'UBER']);
-        VeiculoMarca::create(['id' => 22, 'name' => 'Taxi']);
+        VeiculoMarca::create(['id' => 22, 'name' => 'UBER']);
+        VeiculoMarca::create(['id' => 23, 'name' => 'Taxi']);
 
         // Veículo Modelos
-        VeiculoModelo::create(['id' => 70, 'veiculo_marca_id' => 21, 'name' => 'UBER']);
-        VeiculoModelo::create(['id' => 71, 'veiculo_marca_id' => 22, 'name' => 'Taxi']);
+        VeiculoModelo::create(['id' => 76, 'veiculo_marca_id' => 22, 'name' => 'UBER']);
+        VeiculoModelo::create(['id' => 77, 'veiculo_marca_id' => 23, 'name' => 'Taxi']);
 
         // Veículo
-        Veiculo::create(['veiculo_marca_id' => 21, 'veiculo_modelo_id' => 70, 'placa' => 'ZZZ9999', 'renavam' => '9999999999', 'chassi' => '999999999999999', 'ano_modelo' => '9999', 'ano_fabricacao' => '9999', 'cor' => 'PRETO', 'veiculo_combustivel_id' => 8, 'gnv' => 2, 'blindado' => 2, 'veiculo_categoria_id' => 4]);
-        Veiculo::create(['veiculo_marca_id' => 22, 'veiculo_modelo_id' => 71, 'placa' => 'ZZZ8888', 'renavam' => '8888888888', 'chassi' => '888888888888888', 'ano_modelo' => '8888', 'ano_fabricacao' => '8888', 'cor' => 'PRETO', 'veiculo_combustivel_id' => 8, 'gnv' => 2, 'blindado' => 2, 'veiculo_categoria_id' => 5]);
+        Veiculo::create(['id' => 6, 'veiculo_marca_id' => 22, 'veiculo_modelo_id' => 76, 'placa' => 'ZZZ9999', 'renavam' => '9999999999', 'chassi' => '999999999999999', 'ano_modelo' => '9999', 'ano_fabricacao' => '9999', 'cor' => 'PRETO', 'veiculo_combustivel_id' => 8, 'gnv' => 2, 'blindado' => 2, 'veiculo_categoria_id' => 4]);
+        Veiculo::create(['id' => 7, 'veiculo_marca_id' => 23, 'veiculo_modelo_id' => 77, 'placa' => 'ZZZ8888', 'renavam' => '8888888888', 'chassi' => '888888888888888', 'ano_modelo' => '8888', 'ano_fabricacao' => '8888', 'cor' => 'PRETO', 'veiculo_combustivel_id' => 8, 'gnv' => 2, 'blindado' => 2, 'veiculo_categoria_id' => 5]);
     }
 }
