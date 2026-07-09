@@ -71,7 +71,7 @@ class ClienteUpdateRequest extends FormRequest
             'telefone_2' => ['nullable', 'numeric', 'digits:10'],
             'celular_1' => ['nullable', 'numeric', 'digits:11'],
             'celular_2' => ['nullable', 'numeric', 'digits:11'],
-            'dominio' => ['nullable', 'unique:clientes,dominio']
+            'dominio' => ['nullable', Rule::unique('clientes', 'dominio')->ignore($this->route('id'))]
         ];
     }
 
