@@ -139,7 +139,7 @@ class IdentidadeOrgaoController extends Controller
 
         //Registros
         $registros = $this->identidadeOrgao
-            ->select(['identidades_orgaos.*'])
+            ->select(['identidade_orgaos.*'])
             ->where(function($query) use($filtros) {
                 //Variavel para controle
                 $qtdFiltros = count($filtros) / 4;

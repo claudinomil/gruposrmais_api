@@ -62,6 +62,20 @@ return [
             ]) : [],
         ],
 
+        'previnir' => [
+            'driver' => 'mysql',
+            'host' => env('PREVINIR_HOST'),
+            'port' => env('PREVINIR_PORT'),
+            'database' => env('PREVINIR_DATABASE'),
+            'username' => env('PREVINIR_USERNAME'),
+            'password' => env('PREVINIR_PASSWORD'),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

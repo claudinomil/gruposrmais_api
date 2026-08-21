@@ -9,6 +9,7 @@ use App\Models\BrigadaIncendioEscalaBrigadista;
 use App\Models\BrigadaIncendioProduto;
 use App\Models\ClienteLoja;
 use App\Models\Edificacao;
+use App\Models\EdificacaoLocal;
 use App\Models\EdificacaoNivel;
 use App\Models\Especialidade;
 use App\Models\ProdutoControleSituacaoItem;
@@ -997,72 +998,196 @@ class SuporteService
         }
     }
 
-    public function editEdificacoesNiveis($edificacao_id, $request)
+    public function podeEditarEdificacoesNiveis($edificacao_id, $request)
     {
-        // Mapeamento de grupos -> código numérico do campo_nivel
         $mapaNiveis = [
-            'pavimentos' => 1,
-            'mezaninos' => 2,
-            'coberturas' => 3,
+            'pavimentos'     => 1,
+            'mezaninos'      => 2,
+            'coberturas'     => 3,
             'areas_tecnicas' => 4,
         ];
 
+        $idsMantidos = [];
+
         foreach ($mapaNiveis as $grupo => $campo_nivel) {
 
-            // Obtém todos os níveis existentes do grupo (nivel numérico!)
-            $niveisExistentes = EdificacaoNivel::where('edificacao_id', $edificacao_id)
-                ->where('nivel', $campo_nivel)
-                ->get()
-                ->keyBy('ordem'); // chaveado pela ordem interna (1, 2, 3...)
+            $total = (int) $request->input($grupo, 0);
+
+            for ($i = 1; $i <= $total; $i++) {
+
+                $id = $request->input("nivel_id_{$grupo}_{$i}");
+                $nome = $request->input("nivel_nome_{$grupo}_{$i}");
+                $area = $request->input("nivel_area_construida_{$grupo}_{$i}");
+
+                // Ignora linhas vazias
+                if (blank($nome) && blank($area)) {
+                    continue;
+                }
+
+                if (!empty($id)) {
+                    $idsMantidos[] = $id;
+                }
+            }
+        }
+
+        // IDs que serão excluídos
+        $idsExcluir = EdificacaoNivel::where('edificacao_id', $edificacao_id)
+            ->whereNotIn('id', $idsMantidos)
+            ->pluck('id');
+
+        if ($idsExcluir->isEmpty()) {
+            return true;
+        }
+
+        // Verifica relacionamentos
+        $possuiRelacionamento =
+            EdificacaoLocal::whereIn('edificacao_nivel_id', $idsExcluir)->exists() ||
+            ClienteLoja::whereIn('edificacao_nivel_id', $idsExcluir)->exists();
+
+        return !$possuiRelacionamento;
+    }
+
+    public function editEdificacoesNiveis($edificacao_id, $request)
+    {
+        $mapaNiveis = [
+            'pavimentos'      => 1,
+            'mezaninos'       => 2,
+            'coberturas'      => 3,
+            'areas_tecnicas'  => 4,
+        ];
+
+        foreach ($mapaNiveis as $grupo => $campo_nivel) {
 
             $total = (int) $request->input($grupo, 0);
             $idsMantidos = [];
 
             for ($i = 1; $i <= $total; $i++) {
-                $campoNome = "nivel_nome_{$grupo}_{$i}";
-                $campoArea = "nivel_area_construida_{$grupo}_{$i}";
 
-                $nome = $request->input($campoNome);
-                $area = $request->input($campoArea);
+                $id = $request->input("nivel_id_{$grupo}_{$i}");
+                $nome = $request->input("nivel_nome_{$grupo}_{$i}");
+                $area = $request->input("nivel_area_construida_{$grupo}_{$i}");
 
-                // Ignora se não vier nome nem área
-                if (is_null($nome) && is_null($area)) {
+                // Ignora linha totalmente vazia
+                if (blank($nome) && blank($area)) {
                     continue;
                 }
 
-                if ($niveisExistentes->has($i)) {
-                    // Atualiza o existente (ordem = $i)
-                    $nivel = $niveisExistentes->get($i);
-                    $nivel->update([
-                        'name' => $nome,
-                        'area_construida' => $area,
-                    ]);
-                } else {
-                    // Cria novo registro
-                    $nivel = EdificacaoNivel::create([
-                        'edificacao_id' => $edificacao_id,
-                        'ordem' => $i,
-                        'nivel' => $campo_nivel,
-                        'name' => $nome,
-                        'area_construida' => $area,
-                    ]);
+                if (!empty($id)) {
+
+                    $nivel = EdificacaoNivel::where('id', $id)
+                        ->where('edificacao_id', $edificacao_id)
+                        ->where('nivel', $campo_nivel)
+                        ->first();
+
+                    if ($nivel) {
+                        $nivel->update([
+                            'name' => $nome,
+                            'area_construida' => $area,
+                        ]);
+
+                        $idsMantidos[] = $nivel->id;
+                        continue;
+                    }
                 }
+
+                // Novo registro
+                $nivel = EdificacaoNivel::create([
+                    'edificacao_id' => $edificacao_id,
+                    'ordem' => $i,
+                    'nivel' => $campo_nivel,
+                    'name' => $nome,
+                    'area_construida' => $area,
+                ]);
 
                 $idsMantidos[] = $nivel->id;
             }
 
-            // Busca os que precisam ser excluídos individualmente
-            $niveisParaExcluir = EdificacaoNivel::where('edificacao_id', $edificacao_id)
+            // Remove registros excluídos pelo usuário
+            EdificacaoNivel::where('edificacao_id', $edificacao_id)
                 ->where('nivel', $campo_nivel)
                 ->whereNotIn('id', $idsMantidos)
+                ->delete();
+
+            // Opcional: reorganiza a ordem
+            $niveis = EdificacaoNivel::where('edificacao_id', $edificacao_id)
+                ->where('nivel', $campo_nivel)
+                ->orderBy('ordem')
                 ->get();
 
-            foreach ($niveisParaExcluir as $nivel) {
-                // Aqui você pode registrar log se desejar
-                $nivel->delete();
+            foreach ($niveis as $ordem => $nivel) {
+                $nivel->update([
+                    'ordem' => $ordem + 1
+                ]);
             }
         }
     }
+
+    // public function editEdificacoesNiveis($edificacao_id, $request)
+    // {
+    //     // Mapeamento de grupos -> código numérico do campo_nivel
+    //     $mapaNiveis = [
+    //         'pavimentos' => 1,
+    //         'mezaninos' => 2,
+    //         'coberturas' => 3,
+    //         'areas_tecnicas' => 4,
+    //     ];
+
+    //     foreach ($mapaNiveis as $grupo => $campo_nivel) {
+
+    //         // Obtém todos os níveis existentes do grupo (nivel numérico!)
+    //         $niveisExistentes = EdificacaoNivel::where('edificacao_id', $edificacao_id)
+    //             ->where('nivel', $campo_nivel)
+    //             ->get()
+    //             ->keyBy('ordem'); // chaveado pela ordem interna (1, 2, 3...)
+
+    //         $total = (int) $request->input($grupo, 0);
+    //         $idsMantidos = [];
+
+    //         for ($i = 1; $i <= $total; $i++) {
+    //             $campoNome = "nivel_nome_{$grupo}_{$i}";
+    //             $campoArea = "nivel_area_construida_{$grupo}_{$i}";
+
+    //             $nome = $request->input($campoNome);
+    //             $area = $request->input($campoArea);
+
+    //             // Ignora se não vier nome nem área
+    //             if (is_null($nome) && is_null($area)) {
+    //                 continue;
+    //             }
+
+    //             if ($niveisExistentes->has($i)) {
+    //                 // Atualiza o existente (ordem = $i)
+    //                 $nivel = $niveisExistentes->get($i);
+    //                 $nivel->update([
+    //                     'name' => $nome,
+    //                     'area_construida' => $area,
+    //                 ]);
+    //             } else {
+    //                 // Cria novo registro
+    //                 $nivel = EdificacaoNivel::create([
+    //                     'edificacao_id' => $edificacao_id,
+    //                     'ordem' => $i,
+    //                     'nivel' => $campo_nivel,
+    //                     'name' => $nome,
+    //                     'area_construida' => $area,
+    //                 ]);
+    //             }
+
+    //             $idsMantidos[] = $nivel->id;
+    //         }
+
+    //         // Busca os que precisam ser excluídos individualmente
+    //         $niveisParaExcluir = EdificacaoNivel::where('edificacao_id', $edificacao_id)
+    //             ->where('nivel', $campo_nivel)
+    //             ->whereNotIn('id', $idsMantidos)
+    //             ->get();
+
+    //         foreach ($niveisParaExcluir as $nivel) {
+    //             // Aqui você pode registrar log se desejar
+    //             $nivel->delete();
+    //         }
+    //     }
+    // }
 
     /*
      * Verificar/Bloquear/Desbloquear Tabela para Edição

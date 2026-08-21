@@ -27,6 +27,7 @@ use App\Models\EdificacaoNivel;
 use App\Models\GrupoPermissao;
 use App\Models\SistemaPreventivo;
 use App\Models\VisitaTecnica;
+// use App\Services\ClienteSyncService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -68,7 +69,7 @@ class ClienteController extends Controller
                     ->orderByRaw("clientes.id = ? DESC", [$this->x_cliente_id]);
             }
 
-        $registros = $registros->orderby('clientes.name')->get();
+        $registros = $registros->orderby('clientes.name')->orderby('clientes.nome_fantasia')->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
@@ -162,6 +163,9 @@ class ClienteController extends Controller
             //Incluindo registro
             $registro = $this->cliente->create($request->all());
 
+            // Banco previnir
+            // app(ClienteSyncService::class)->insert($registro);
+
             //Return
             return $this->sendResponse('Registro criado com sucesso.', 2010, null, null);
         } catch (\Exception $e) {
@@ -183,6 +187,9 @@ class ClienteController extends Controller
             } else {
                 //Alterando registro
                 $registro->update($request->all());
+
+                // Banco previnir
+                // app(ClienteSyncService::class)->update($registro->fresh());
 
                 return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
             }
@@ -217,6 +224,11 @@ class ClienteController extends Controller
                 //Tabela propostas
                 if (SuporteFacade::verificarRelacionamento('propostas', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Propostas.', 2040, null, null);
+                }
+
+                //Tabela brigadas_incendios
+                if (SuporteFacade::verificarRelacionamento('brigadas_incendios', 'cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Brigadas Incêndios.', 2040, null, null);
                 }
 
                 //Tabela clientes_executivos
@@ -257,6 +269,9 @@ class ClienteController extends Controller
 
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 $registro->delete();
+
+                // Banco previnir
+                // app(ClienteSyncService::class)->delete($id);
 
                 return $this->sendResponse('Registro excluído com sucesso.', 2000, null, null);
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -378,7 +393,7 @@ class ClienteController extends Controller
                         $indexCampo = $indexCampo + 4;
                     }
                 }
-            )->orderby('clientes.name')->get();
+            )->orderby('clientes.name')->orderby('clientes.nome_fantasia')->get();
 
         //Código SQL Bruto
         //$sql = DB::getQueryLog();

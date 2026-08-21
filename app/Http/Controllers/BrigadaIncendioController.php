@@ -148,7 +148,7 @@ class BrigadaIncendioController extends Controller
             $registro = $this->brigada_incendio->create($request->all());
 
             //Editar dados na tabela brigadas_incendios_produtos
-            SuporteFacade::editBrigadaIncendioProduto(1, $registro['id'], $request);
+            //SuporteFacade::editBrigadaIncendioProduto(1, $registro['id'], $request);
 
             //Editar dados na tabela brigadas_incendios_escalas
             SuporteFacade::editBrigadaIncendioEscala(1, $registro['id'], $request);
@@ -178,7 +178,7 @@ class BrigadaIncendioController extends Controller
                 $registro->update($request->all());
 
                 //Editar dados na tabela brigadas_incendios_produtos
-                SuporteFacade::editBrigadaIncendioProduto(3, $registro['id'], $request);
+                //SuporteFacade::editBrigadaIncendioProduto(3, $registro['id'], $request);
 
                 //Editar dados na tabela brigadas_incendios_escalas
                 SuporteFacade::editBrigadaIncendioEscala(3, $registro['id'], $request);
@@ -209,7 +209,7 @@ class BrigadaIncendioController extends Controller
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 //Editar dados na tabela brigadas_incendios_produtos
-                SuporteFacade::editBrigadaIncendioProduto(2, $registro['id'], '');
+                //SuporteFacade::editBrigadaIncendioProduto(2, $registro['id'], '');
 
                 //Editar dados na tabela brigadas_incendios_escalas
                 SuporteFacade::editBrigadaIncendioEscala(2, $registro['id'], '');

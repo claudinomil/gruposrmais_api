@@ -118,6 +118,12 @@ class EdificacaoController extends Controller
 
                 return $this->sendResponse('Registro não encontrado.', 4040, null, null);
             } else {
+                // Verificar se alterou os níveis e removeu algum com relacionamento''''''''''''''''''''''''''''''
+                if (!SuporteFacade::podeEditarEdificacoesNiveis($id, $request)) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Edificações Locais e/ou Clientes Lojas.', 2040, null, null);
+                }
+                //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
                 //Alterando registro
                 $registro->update($request->all());
 
@@ -175,6 +181,14 @@ class EdificacaoController extends Controller
                         //''''''''''''''''''''''''''''''''''''''''''''''''
 
                         return $this->sendResponse('Náo é possível excluir. Registro relacionado com Edificações Locais.', 2040, null, null);
+                    }
+
+                    if (SuporteFacade::verificarRelacionamento('clientes_lojas', 'edificacao_nivel_id', $nivelId) > 0) {
+                        // Verificar/Bloquear/Desbloquear Tabela''''''''''
+                        SuporteFacade::bloquearTabela(3, 'edificacoes');
+                        //''''''''''''''''''''''''''''''''''''''''''''''''
+
+                        return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Lojas.', 2040, null, null);
                     }
                 }
 
@@ -273,6 +287,7 @@ class EdificacaoController extends Controller
     public function edificacao_niveis($edificacao_id)
     {
         $registros = EdificacaoNivel::select(
+                'edificacoes_niveis.id as edificacaoNivelId',
                 'edificacoes_niveis.name as edificacaoNivelName',
                 'edificacoes_niveis.area_construida as edificacaoNivelAreaConstruida',
                 'edificacoes_niveis.ordem as edificacaoNivelOrdem',

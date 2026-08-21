@@ -23,7 +23,7 @@ class EdificacaoLocalController extends Controller
             ->Join('edificacoes_niveis', 'edificacoes_niveis.id', '=', 'edificacoes_locais.edificacao_nivel_id')
             ->Join('edificacoes', 'edificacoes.id', '=', 'edificacoes_niveis.edificacao_id')
             ->Join('clientes', 'clientes.id', '=', 'edificacoes.cliente_id')
-            ->select(['edificacoes_locais.*', 'edificacoes_niveis.name as edificacaoNivelName', 'edificacoes.name as edificacaoName', 'clientes.name as clienteName'])
+            ->select(['edificacoes_locais.*', 'edificacoes_niveis.name as edificacaoNivelName', 'edificacoes.name as edificacaoName', 'clientes.name as clienteName', 'clientes.nome_fantasia as clienteNomeFantasia'])
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);

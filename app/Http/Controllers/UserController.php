@@ -299,11 +299,6 @@ class UserController extends Controller
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
                 //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                //Tabela visitas_tecnicas
-                if (SuporteFacade::verificarRelacionamento('visitas_tecnicas', 'executado_user_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Visitas Técnicas.', 2040, null, null);
-                }
-
                 //Tabela transacoes
                 if (SuporteFacade::verificarRelacionamento('transacoes', 'user_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir.<br>Registro relacionado com Transações.', 2040, null, null);
