@@ -26,7 +26,7 @@ class EdificacaoController extends Controller
             ->leftJoin('clientes', 'clientes.id', '=', 'edificacoes.cliente_id')
             ->leftJoin('incendio_riscos', 'incendio_riscos.id', '=', 'edificacoes.incendio_risco_id')
             ->leftJoin('edificacao_classificacoes', 'edificacao_classificacoes.id', '=', 'edificacoes.edificacao_classificacao_id')
-            ->select(['edificacoes.*', 'clientes.name as clienteName', 'incendio_riscos.name as incendioRiscoName'])
+            ->select(['edificacoes.*', 'clientes.name as clienteName', 'clientes.nome_fantasia as clienteNomeFantasia', 'incendio_riscos.name as incendioRiscoName'])
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
