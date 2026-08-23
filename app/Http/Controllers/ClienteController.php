@@ -210,62 +210,87 @@ class ClienteController extends Controller
             if (!$registro) {
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                //Tabela clientes
+                // Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                // Tabela clientes
                 if (SuporteFacade::verificarRelacionamento('clientes', 'principal_cliente_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes.', 2040, null, null);
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes (Principal).', 2040, null, null);
                 }
 
-                //Tabela clientes
+                // Tabela clientes
                 if (SuporteFacade::verificarRelacionamento('clientes', 'rede_cliente_id', $id) > 0) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes.', 2040, null, null);
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes (Rede).', 2040, null, null);
                 }
 
-                //Tabela propostas
+                // Tabela propostas
                 if (SuporteFacade::verificarRelacionamento('propostas', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Propostas.', 2040, null, null);
                 }
 
-                //Tabela brigadas_incendios
+                // Tabela brigadas_incendios
                 if (SuporteFacade::verificarRelacionamento('brigadas_incendios', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Brigadas Incêndios.', 2040, null, null);
                 }
 
-                //Tabela clientes_executivos
+                // Tabela clientes_executivos
                 if (SuporteFacade::verificarRelacionamento('clientes_executivos', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Executivos.', 2040, null, null);
                 }
 
-                //Tabela clientes_documentos
+                // Tabela clientes_documentos
                 if (SuporteFacade::verificarRelacionamento('clientes_documentos', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Documentos.', 2040, null, null);
                 }
 
-                //Tabela clientes_documentos_exigidos
+                // Tabela clientes_documentos_exigidos
                 if (SuporteFacade::verificarRelacionamento('clientes_documentos_exigidos', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Documentos Exigidos.', 2040, null, null);
                 }
 
-                //Tabela ordens_servicos
+                // Tabela ordens_servicos
                 if (SuporteFacade::verificarRelacionamento('ordens_servicos', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Ordem de Serviço.', 2040, null, null);
                 }
 
-                //Tabela clientes_lojas
+                // Tabela clientes_lojas
                 if (SuporteFacade::verificarRelacionamento('clientes_lojas', 'subordinado_cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Lojas.', 2040, null, null);
                 }
 
-                //Tabela clientes_materiais
+                // Tabela clientes_materiais
                 if (SuporteFacade::verificarRelacionamento('clientes_materiais', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Materiais.', 2040, null, null);
                 }
 
-                //Tabela clientes_sistemas_preventivos
+                // Tabela clientes_sistemas_preventivos
                 if (SuporteFacade::verificarRelacionamento('clientes_sistemas_preventivos', 'cliente_id', $id) > 0) {
                     return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Sistemas Preventivos.', 2040, null, null);
                 }
-                //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+                // Tabela edificacoes
+                if (SuporteFacade::verificarRelacionamento('edificacoes', 'cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Edificações.', 2040, null, null);
+                }
+
+                // Tabela estoques_locais
+                if (SuporteFacade::verificarRelacionamento('estoques_locais', 'cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Estoques Locais.', 2040, null, null);
+                }
+
+                // Tabela funcionarios
+                if (SuporteFacade::verificarRelacionamento('funcionarios', 'tomador_servico_cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Funcionários (Tomador Serviço).', 2040, null, null);
+                }
+
+                // Tabela users
+                if (SuporteFacade::verificarRelacionamento('users', 'cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Usuários (Cliente).', 2040, null, null);
+                }
+
+                // Tabela visitas_tecnicas
+                if (SuporteFacade::verificarRelacionamento('visitas_tecnicas', 'cliente_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Visitas Técnicas.', 2040, null, null);
+                }
+                //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 $registro->delete();
@@ -646,12 +671,14 @@ class ClienteController extends Controller
         try {
             $request->validate([
                 'editar_documentos_exigidos_cliente_id' => 'required|integer',
-                'editar_documentos_exigidos_documentos_exigidos' => 'required|array',
-                'editar_documentos_exigidos_documentos_exigidos.*' => 'integer'
+                'editar_documentos_exigidos_documentos_exigidos' => 'nullable|array',
+                'editar_documentos_exigidos_documentos_exigidos.*' => 'integer',
             ]);
 
             $clienteId = $request->input('editar_documentos_exigidos_cliente_id');
-            $documentosIds = $request->input('editar_documentos_exigidos_documentos_exigidos');
+
+            // Se não vier nada, considera array vazio
+            $documentosIds = $request->input('editar_documentos_exigidos_documentos_exigidos', []);
 
             // IDs atualmente registrados
             $documentosExistentes = ClienteDocumentoExigido::where('cliente_id', $clienteId)->pluck('documento_id')->toArray();
@@ -662,30 +689,90 @@ class ClienteController extends Controller
 
             // Inserir novos
             if (!empty($novos)) {
-                $dados = collect($novos)->map(fn($id) => [
-                    'cliente_id' => $clienteId,
-                    'documento_id' => $id,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ])->toArray();
+                $dados = collect($novos)
+                    ->map(fn($id) => [
+                        'cliente_id' => $clienteId,
+                        'documento_id' => $id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ])
+                    ->toArray();
 
                 ClienteDocumentoExigido::insert($dados);
             }
 
             // Remover desmarcados
             if (!empty($removidos)) {
-                ClienteDocumentoExigido::where('cliente_id', $clienteId)->whereIn('documento_id', $removidos)->delete();
+                ClienteDocumentoExigido::where('cliente_id', $clienteId)
+                    ->whereIn('documento_id', $removidos)
+                    ->delete();
             }
 
-            return $this->sendResponse('Documentos exigidos sincronizados com sucesso.', 2010, null, null);
+            return $this->sendResponse(
+                'Documentos exigidos sincronizados com sucesso.',
+                2010,
+                null,
+                null
+            );
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return $this->sendResponse($e->getMessage(), 5000, null, null);
             }
 
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+            return $this->sendResponse(
+                'Houve um erro ao realizar a operação.',
+                5000,
+                null,
+                null
+            );
         }
     }
+
+    // public function documentos_exigidos_save(Request $request)
+    // {
+    //     try {
+    //         $request->validate([
+    //             'editar_documentos_exigidos_cliente_id' => 'required|integer',
+    //             'editar_documentos_exigidos_documentos_exigidos' => 'required|array',
+    //             'editar_documentos_exigidos_documentos_exigidos.*' => 'integer'
+    //         ]);
+
+    //         $clienteId = $request->input('editar_documentos_exigidos_cliente_id');
+    //         $documentosIds = $request->input('editar_documentos_exigidos_documentos_exigidos');
+
+    //         // IDs atualmente registrados
+    //         $documentosExistentes = ClienteDocumentoExigido::where('cliente_id', $clienteId)->pluck('documento_id')->toArray();
+
+    //         // Calcula diferenças
+    //         $novos = array_diff($documentosIds, $documentosExistentes);
+    //         $removidos = array_diff($documentosExistentes, $documentosIds);
+
+    //         // Inserir novos
+    //         if (!empty($novos)) {
+    //             $dados = collect($novos)->map(fn($id) => [
+    //                 'cliente_id' => $clienteId,
+    //                 'documento_id' => $id,
+    //                 'created_at' => now(),
+    //                 'updated_at' => now()
+    //             ])->toArray();
+
+    //             ClienteDocumentoExigido::insert($dados);
+    //         }
+
+    //         // Remover desmarcados
+    //         if (!empty($removidos)) {
+    //             ClienteDocumentoExigido::where('cliente_id', $clienteId)->whereIn('documento_id', $removidos)->delete();
+    //         }
+
+    //         return $this->sendResponse('Documentos exigidos sincronizados com sucesso.', 2010, null, null);
+    //     } catch (\Exception $e) {
+    //         if (config('app.debug')) {
+    //             return $this->sendResponse($e->getMessage(), 5000, null, null);
+    //         }
+
+    //         return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+    //     }
+    // }
 
     public function editar_documento(Request $request)
     {
