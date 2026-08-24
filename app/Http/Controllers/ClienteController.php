@@ -780,23 +780,26 @@ class ClienteController extends Controller
             $validator = Validator::make($request->all(), [
                 'operacao' => ['required'],
                 'cliente_id' => ['required'],
-                'documento_id' => [
-                    'required',
-                    function ($attribute, $value, $fail) use ($request) {
+                'documento_id' => ['required'],
 
-                        $query = ClienteDocumento::where('edificacao_id', $request->edificacao_id)
-                            ->where('documento_id', $value);
+                // 'documento_id' => [
+                //     'required',
+                //     function ($attribute, $value, $fail) use ($request) {
 
-                        // Se estiver editando, ignora o próprio registro atual
-                        if ($request['operacao'] == 'edit') {
-                            $query->where('id', '!=', $request->cliente_documento_id);
-                        }
+                //         $query = ClienteDocumento::where('edificacao_id', $request->edificacao_id)
+                //             ->where('documento_id', $value);
 
-                        if ($query->exists()) {
-                            $fail('Já existe este documento para a Edificação informada.');
-                        }
-                    }
-                ],
+                //         // Se estiver editando, ignora o próprio registro atual
+                //         if ($request['operacao'] == 'edit') {
+                //             $query->where('id', '!=', $request->cliente_documento_id);
+                //         }
+
+                //         if ($query->exists()) {
+                //             $fail('Já existe este documento para a Edificação informada.');
+                //         }
+                //     }
+                // ],
+
                 'edificacao_id' => [
                     'required',
                     function ($attribute, $value, $fail) use ($request) {
@@ -860,7 +863,7 @@ class ClienteController extends Controller
         }
     }
 
-    public function documentos($cliente_id)
+    public function documentos(int $cliente_id)
     {
         try {
             $registros = array();
@@ -886,7 +889,7 @@ class ClienteController extends Controller
                 ->where('clientes_documentos.cliente_id', $cliente_id)
                 ->orderby('documento_fontes.ordem', 'ASC')
                 ->orderby('documentos.ordem', 'ASC')
-                ->orderBy('clientes_documentos.data_emissao', 'DESC')
+                ->orderBy('clientes_documentos.data_emissao', 'ASC')
                 ->get();
 
             return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);

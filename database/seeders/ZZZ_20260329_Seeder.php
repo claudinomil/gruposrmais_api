@@ -111,5 +111,9 @@ class ZZZ_20260329_Seeder extends Seeder
         Documento::create(['id' => 110, 'name' => 'Projeto de Rede de Dados', 'documento_submodulo_id' => 1, 'documento_fonte_id' => 9, 'ordem' => 100]);
         Documento::create(['id' => 111, 'name' => 'Projeto de As Built', 'documento_submodulo_id' => 1, 'documento_fonte_id' => 9, 'ordem' => 30]);
         //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+        // Documentos (OUTRO)''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        Documento::create(['id' => 112, 'name' => 'ADITIVO CONTRATO LOCAÇÃO', 'documento_submodulo_id' => 1, 'documento_fonte_id' => 1, 'ordem' => 65]);
+        //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     }
 }

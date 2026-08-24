@@ -754,7 +754,11 @@ class DashboardController extends Controller
 
         // Usuários Quantidade
         if ($op == 8) {
-            return User::count();
+            if ($this->cliente_id > 0) {
+                return User::where('cliente_id', $this->cliente_id)->count();
+            } else {
+                return User::count();
+            }
         }
 
         // Funcionários Quantidade
@@ -773,7 +777,11 @@ class DashboardController extends Controller
 
         // Transações Quantidade
         if ($op == 11) {
-            return Transacao::count();
+            if ($this->cliente_id > 0) {
+                return Transacao::join('users', 'users.id', 'transacoes.user_id')->where('users.cliente_id', $this->cliente_id)->count();
+            } else {
+                return Transacao::count();
+            }
         }
 
         // Ordens Serviços Quantidade

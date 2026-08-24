@@ -120,7 +120,7 @@ class EdificacaoController extends Controller
             } else {
                 // Verificar se alterou os níveis e removeu algum com relacionamento''''''''''''''''''''''''''''''
                 if (!SuporteFacade::podeEditarEdificacoesNiveis($id, $request)) {
-                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Edificações Locais e/ou Clientes Lojas.', 2040, null, null);
+                    return $this->sendResponse('Náo é possível remover Níveis. Registro relacionado com Edificações Locais e/ou Clientes Lojas.', 2040, null, null);
                 }
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -167,8 +167,22 @@ class EdificacaoController extends Controller
 
                 return $this->sendResponse('Registro não encontrado.', 4040, null, $registro);
             } else {
-                //Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                // Verificar Relacionamentos'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                // Tabela edificacoes_niveis
+                if (SuporteFacade::verificarRelacionamento('edificacoes_niveis', 'edificacao_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Edificações Níveis.', 2040, null, null);
+                }
+
+                // Tabela vistorias_sistemas
+                if (SuporteFacade::verificarRelacionamento('vistorias_sistemas', 'edificacao_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Vistorias Sistemas.', 2040, null, null);
+                }
+
+                // Tabela clientes_documentos
+                if (SuporteFacade::verificarRelacionamento('clientes_documentos', 'edificacao_id', $id) > 0) {
+                    return $this->sendResponse('Náo é possível excluir. Registro relacionado com Clientes Documentos.', 2040, null, null);
+                }
+                //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
                 // Verificar se tem edificacao_nivel_id em outras tabelas antes de excluir''''''''''''''''''''''''''''''
                 // Buscar os níveis da edificação
@@ -196,7 +210,7 @@ class EdificacaoController extends Controller
                 EdificacaoNivel::where('edificacao_id', $id)->delete();
                 //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-                //Deletar'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                // Deletar''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 $registro->delete();
 
                 // Verificar/Bloquear/Desbloquear Tabela''''''''''
