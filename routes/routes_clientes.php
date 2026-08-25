@@ -37,4 +37,6 @@ Route::prefix('clientes')->group(function () {
     Route::get('/modalInfo/clientes_principal/{cliente_id}', [ClienteController::class, 'clientes_principal'])->middleware(['auth:api']);
 
     Route::get('/sistema_preventivo/informacao/{sistema_preventivo_numero}', [ClienteController::class, 'sistema_preventivo_informacao']);
+
+    Route::get('/modalInfo/documentos_vencidos', [ClienteController::class, 'documentos_vencidos'])->middleware(['auth:api']);
 });

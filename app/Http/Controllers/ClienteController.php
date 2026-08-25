@@ -1334,4 +1334,25 @@ class ClienteController extends Controller
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $dados);
     }
+
+    public function documentos_vencidos()
+    {
+        $registros = ClienteDocumento::join('clientes', 'clientes.id', 'clientes_documentos.cliente_id')
+            ->select([
+                'clientes.id as clienteId',
+                'clientes.name as clienteName',
+                'clientes.nome_fantasia as clienteNomeFantasia',
+                'clientes_documentos.data_vencimento'
+            ])
+            ->where('clientes_documentos.data_vencimento', '<', date('Y-m-d'))
+            ->where(function ($query) {
+                $query->where('clientes.principal_cliente_id', $this->x_cliente_id)
+                    ->orWhere('clientes.id', $this->x_cliente_id);
+            })
+            ->orderBy('clientes.name')
+            ->orderBy('clientes.nome_fantasia')
+            ->get();
+
+        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+    }
 }
