@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BrigadaIncendio;
 use App\Models\Cliente;
+use App\Models\ClienteSistemaPreventivo;
 use App\Models\Edificacao;
 use App\Models\OrdemServico;
 use App\Models\Proposta;
@@ -24,7 +25,7 @@ class AppController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
 
-    public function clientes_edificacao_sistemas_preventivos($edificacao_id)
+    public function clientes_edificacao_sistemas_preventivos(int $edificacao_id)
     {
         $registros = Edificacao::join('edificacoes_niveis', 'edificacoes_niveis.edificacao_id', 'edificacoes.id')
             ->join('edificacoes_locais', 'edificacoes_locais.edificacao_nivel_id', 'edificacoes_niveis.id')
@@ -50,6 +51,18 @@ class AppController extends Controller
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+    }
+
+    public function clientes_sistema_preventivo_informacao(string $sistema_preventivo_numero)
+    {
+        $registros = ClienteSistemaPreventivo::join('clientes', 'clientes.id', 'clientes_sistemas_preventivos.cliente_id')
+            ->join('sistemas_preventivos', 'sistemas_preventivos.id', 'clientes_sistemas_preventivos.sistema_preventivo_id')
+            ->join('medidas_seguranca', 'medidas_seguranca.id', 'sistemas_preventivos.medida_seguranca_id')
+            ->select('clientes_sistemas_preventivos.*', 'clientes.name as clienteName', 'sistemas_preventivos.name as sistemaPreventivoName', 'medidas_seguranca.name as medidaSegurancaName')
+            ->where('clientes_sistemas_preventivos.sistema_preventivo_numero', $sistema_preventivo_numero)
+            ->first();
+
+        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
     }
     // Clientes - Fim'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     // Clientes - Fim'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
