@@ -58,7 +58,7 @@ class AppController extends Controller
         $registros = ClienteSistemaPreventivo::join('clientes', 'clientes.id', 'clientes_sistemas_preventivos.cliente_id')
             ->join('sistemas_preventivos', 'sistemas_preventivos.id', 'clientes_sistemas_preventivos.sistema_preventivo_id')
             ->join('medidas_seguranca', 'medidas_seguranca.id', 'sistemas_preventivos.medida_seguranca_id')
-            ->join('edificacoes_locais', 'edificacoes_locais.id', 'sistemas_preventivos.edificacao_local_id')
+            ->join('edificacoes_locais', 'edificacoes_locais.id', 'clientes_sistemas_preventivos.edificacao_local_id')
             ->join('edificacoes_niveis', 'edificacoes_niveis.id', 'edificacoes_locais.edificacao_nivel_id')
             ->join('edificacoes', 'edificacoes.id', 'edificacoes_niveis.edificacao_id')
             ->select(
