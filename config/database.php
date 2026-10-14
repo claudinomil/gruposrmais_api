@@ -76,6 +76,20 @@ return [
             'engine' => null
         ],
 
+        'gruposrmais01' => [
+            'driver' => 'mysql',
+            'host' => env('PRODUCAO_HOST'),
+            'port' => env('PRODUCAO_PORT'),
+            'database' => env('PRODUCAO_DATABASE'),
+            'username' => env('PRODUCAO_USERNAME'),
+            'password' => env('PRODUCAO_PASSWORD'),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

@@ -30,6 +30,7 @@ use App\Models\ProdutoMovimentacao;
 use App\Models\OrdemServico;
 use App\Models\Proposta;
 use App\Models\MedidaSeguranca;
+use App\Models\AppPessoa;
 use App\Models\SistemaPreventivo;
 use App\Models\Situacao;
 use App\Models\User;
@@ -64,6 +65,7 @@ use App\Observers\ProdutoObserver;
 use App\Observers\OrdemServicoObserver;
 use App\Observers\PropostaObserver;
 use App\Observers\MedidaSegurancaObserver;
+use App\Observers\AppPessoaObserver;
 use App\Observers\SistemaPreventivoObserver;
 use App\Observers\SituacaoObserver;
 use App\Observers\UserObserver;
@@ -85,6 +87,8 @@ class EventServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        AppPessoa::observe(AppPessoaObserver::class);
+
         Banco::observe(BancoObserver::class);
         BrigadaIncendio::observe(BrigadaIncendioObserver::class);
         ClienteExecutivo::observe(ClienteExecutivoObserver::class);

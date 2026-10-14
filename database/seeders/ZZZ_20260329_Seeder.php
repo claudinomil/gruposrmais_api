@@ -40,6 +40,16 @@ class ZZZ_20260329_Seeder extends Seeder
         // GrupoPermissao::create(['grupo_id' => 1, 'permissao_id' => 240]);
         //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
+
+
+
+
+
+        Submodulo::create(['id' => 123, 'modulo_id' => 11, 'name' => 'App Pessoas', 'menu_text' => 'App Pessoas', 'menu_url' => 'app_pessoas', 'menu_route' => 'app_pessoas', 'menu_icon' => 'fas fa-angle-right', 'prefix_permissao' => 'app_pessoas', 'prefix_route' => 'app_pessoas', 'mobile' => 0, 'menu_text_mobile' => 'Meus ', 'viewing_order' => 0]);
+
+
+
+
         // Submódulo Sistemas Preventivos''''''''''''''''''''''''''''''''''''''''''''
 
         // Criar Submódulo
@@ -60,36 +70,36 @@ class ZZZ_20260329_Seeder extends Seeder
         // GrupoPermissao::create(['grupo_id' => 1, 'permissao_id' => 230]);
         //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-        // Equipamentos Preventivos''''''''''''''''''''''''''''''''''''''''''''''''''
-        $equipamentos = [
-            'Extintor de Água (Classe A)',
-            'Extintor de Pó Químico Seco - PQS (Classe BC)',
-            'Extintor de Pó Químico Seco - PQS (Classe ABC)',
-            'Extintor de CO2',
-            'Extintor de Espuma Mecânica',
-            'Extintor Classe K',
-            'Hidrante de Parede',
-            'Hidrante de Recalque',
-            'Abrigo de Hidrante',
-            'Mangueira Tipo 1',
-            'Mangueira Tipo 2',
-            'Esguicho Regulável',
-            'Esguicho Jato Sólido',
-            'Chave Storz',
-            'Adaptador Storz',
-            'Detector de Fumaça',
-            'Detector de Calor',
-            'Acionador Manual',
-            'Luminária de Emergência',
-            'Porta Corta-Fogo',
-            'Barra Antipânico',
-            'Sprinkler'
-        ];
+        // // Equipamentos Preventivos''''''''''''''''''''''''''''''''''''''''''''''''''
+        // $equipamentos = [
+        //     'Extintor de Água (Classe A)',
+        //     'Extintor de Pó Químico Seco - PQS (Classe BC)',
+        //     'Extintor de Pó Químico Seco - PQS (Classe ABC)',
+        //     'Extintor de CO2',
+        //     'Extintor de Espuma Mecânica',
+        //     'Extintor Classe K',
+        //     'Hidrante de Parede',
+        //     'Hidrante de Recalque',
+        //     'Abrigo de Hidrante',
+        //     'Mangueira Tipo 1',
+        //     'Mangueira Tipo 2',
+        //     'Esguicho Regulável',
+        //     'Esguicho Jato Sólido',
+        //     'Chave Storz',
+        //     'Adaptador Storz',
+        //     'Detector de Fumaça',
+        //     'Detector de Calor',
+        //     'Acionador Manual',
+        //     'Luminária de Emergência',
+        //     'Porta Corta-Fogo',
+        //     'Barra Antipânico',
+        //     'Sprinkler'
+        // ];
 
-        foreach ($equipamentos as $nome) {
-            EquipamentoPreventivo::create(['name' => $nome]);
-        }
-        //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        // foreach ($equipamentos as $nome) {
+        //     EquipamentoPreventivo::create(['name' => $nome]);
+        // }
+        // //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
         // Documentos''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 

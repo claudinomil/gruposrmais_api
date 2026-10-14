@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('ocupacao_uso', 150)->nullable();
             $table->string('divisao', 150)->nullable();
             $table->string('descricao', 150)->nullable();
-            $table->string('definicao', 255)->nullable();
+            $table->text('definicao')->nullable();
             $table->timestamps();
         });
     }

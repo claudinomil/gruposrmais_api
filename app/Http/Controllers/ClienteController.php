@@ -27,7 +27,6 @@ use App\Models\EdificacaoNivel;
 use App\Models\GrupoPermissao;
 use App\Models\SistemaPreventivo;
 use App\Models\VisitaTecnica;
-// use App\Services\ClienteSyncService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -1345,7 +1344,7 @@ class ClienteController extends Controller
                 'clientes_documentos.data_vencimento'
             ])
             ->where('clientes_documentos.data_vencimento', '<', date('Y-m-d'))
-            ->where(function ($query) {
+            ->when($this->x_cliente_id != 0, function ($query) {
                 $query->where('clientes.principal_cliente_id', $this->x_cliente_id)
                     ->orWhere('clientes.id', $this->x_cliente_id);
             })

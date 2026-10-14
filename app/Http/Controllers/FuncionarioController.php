@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Facades\SuporteFacade;
 use App\Facades\Transacoes;
+use App\Http\Requests\EntregaUniformeStoreRequest;
+use App\Http\Requests\EntregaUniformeUpdateRequest;
 use App\Http\Requests\FuncionarioStoreRequest;
 use App\Http\Requests\FuncionarioUpdateRequest;
 use App\Models\AtestadoSaudeOcupacionalTipo;
@@ -22,7 +24,6 @@ use App\Models\Nacionalidade;
 use App\Models\Naturalidade;
 use App\Models\Funcao;
 use App\Models\Banco;
-use App\Models\DocumentoMensal;
 use App\Models\DocumentoMensalFuncionario;
 use App\Models\Escolaridade;
 use App\Models\Estado;
@@ -31,8 +32,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Funcionario;
 use App\Models\FuncionarioDocumento;
+use App\Models\FuncionarioDocumentoExigido;
 use App\Models\FuncionarioDocumentoMensal;
+use App\Models\EntregaUniforme;
+use App\Models\EntregaUniformeDado;
 use App\Models\GrupoPermissao;
+use App\Models\Uniforme;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 
 class FuncionarioController extends Controller
@@ -58,6 +64,14 @@ class FuncionarioController extends Controller
             ->leftJoin('bancos', 'funcionarios.banco_id', '=', 'bancos.id')
             ->leftJoin('clientes as tomador_servico_clientes', 'funcionarios.tomador_servico_cliente_id', '=', 'tomador_servico_clientes.id')
             ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName', 'tomador_servico_clientes.name as tomadorServicoClienteName'])
+            ->where(function ($query) {
+                $query->where('funcionarios.data_demissao', '')
+                    ->orWhereNull('funcionarios.data_demissao');
+            })
+            ->where(function ($query) {
+                $query->where('funcionarios.data_afastamento', '')
+                    ->orWhereNull('funcionarios.data_afastamento');
+            })
             ->orderby('funcionarios.name')
             ->get();
 
@@ -123,10 +137,23 @@ class FuncionarioController extends Controller
             $registros['departamentos'] = Departamento::all();
 
             //Funções
-            $registros['funcoes'] = Funcao::all();
+            $registros['funcoes'] = Funcao::orderby('name')->get();
+
+            // Tomadores de Serviços
+            $registros['tomadores_servicos'] = Cliente::join('funcionarios', 'funcionarios.tomador_servico_cliente_id', 'clientes.id')
+                ->select('clientes.*')
+                ->distinct('clientes.*')
+                ->orderby('clientes.name')
+                ->get();
 
             //Clientes
-            $registros['clientes'] = Cliente::all();
+            $registros['clientes'] = Cliente::orderby('name')->get();
+
+            // Funcionários
+            $registros['funcionarios'] = Funcionario::orderby('name')->get();
+
+            // Uniformes
+            $registros['uniformes'] = Uniforme::orderby('name')->get();
 
             //PIX Tipos
             $registros['pix_tipos'] = PixTipo::all();
@@ -138,8 +165,7 @@ class FuncionarioController extends Controller
             $registros['empresas'] = Empresa::all();
 
             //Documentos
-            $registros['documentos'] = Documento
-                ::join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
+            $registros['documentos'] = Documento::join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
                 ->join('documento_fontes', 'documentos.documento_fonte_id', 'documento_fontes.id')
                 ->select('documentos.*', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
                 ->where('documentos.documento_submodulo_id', 2)
@@ -313,70 +339,6 @@ class FuncionarioController extends Controller
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
 
-    public function funcionario_acao_1_gerar_pdf_dados($funcionarios_ids)
-    {
-        try {
-            //Limpar Querys executadas
-            //DB::enableQueryLog();
-
-            // Converter a string em um array de inteiros
-            $ids_array = array_map('intval', explode(',', $funcionarios_ids));
-
-            $registros = Funcionario
-                ::leftJoin('identidade_orgaos', 'funcionarios.personal_identidade_orgao_id', '=', 'identidade_orgaos.id')
-                ->leftJoin('estados', 'funcionarios.personal_identidade_estado_id', '=', 'estados.id')
-                ->leftJoin('generos', 'funcionarios.genero_id', '=', 'generos.id')
-                ->leftJoin('contratacao_tipos', 'funcionarios.contratacao_tipo_id', '=', 'contratacao_tipos.id')
-                ->leftJoin('departamentos', 'funcionarios.departamento_id', '=', 'departamentos.id')
-                ->leftJoin('funcoes', 'funcionarios.funcao_id', '=', 'funcoes.id')
-                ->leftJoin('escolaridades', 'funcionarios.escolaridade_id', '=', 'escolaridades.id')
-                ->leftJoin('estados_civis', 'funcionarios.estado_civil_id', '=', 'estados_civis.id')
-                ->leftJoin('bancos', 'funcionarios.banco_id', '=', 'bancos.id')
-                ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName'])
-                ->whereIn('funcionarios.id', $ids_array)
-                ->get();
-
-
-        //Código SQL Bruto
-        //$sql = DB::getQueryLog();
-
-            return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return $this->sendResponse($e->getMessage(), 5000, null, null);
-            }
-
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-        }
-    }
-
-    public function funcionario_acao_1_grade_funcionarios()
-    {
-        try {
-            $registros = Funcionario
-                ::leftJoin('identidade_orgaos', 'funcionarios.personal_identidade_orgao_id', '=', 'identidade_orgaos.id')
-                ->leftJoin('estados', 'funcionarios.personal_identidade_estado_id', '=', 'estados.id')
-                ->leftJoin('generos', 'funcionarios.genero_id', '=', 'generos.id')
-                ->leftJoin('contratacao_tipos', 'funcionarios.contratacao_tipo_id', '=', 'contratacao_tipos.id')
-                ->leftJoin('departamentos', 'funcionarios.departamento_id', '=', 'departamentos.id')
-                ->leftJoin('funcoes', 'funcionarios.funcao_id', '=', 'funcoes.id')
-                ->leftJoin('escolaridades', 'funcionarios.escolaridade_id', '=', 'escolaridades.id')
-                ->leftJoin('estados_civis', 'funcionarios.estado_civil_id', '=', 'estados_civis.id')
-                ->leftJoin('bancos', 'funcionarios.banco_id', '=', 'bancos.id')
-                ->select(['funcionarios.*', 'identidade_orgaos.name as identidade_orgaosName', 'estados.name as identidadeEstadoName', 'generos.name as generoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName', 'bancos.name as bancoName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName'])
-                ->orderBy('funcionarios.name')
-                ->get();
-
-            return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return $this->sendResponse($e->getMessage(), 5000, null, null);
-            }
-
-            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
-        }
-    }
-
     public function cartoes_emergenciais_registros()
     {
         $registros = $this->funcionario->orderby('id')->get(['id']);
@@ -409,7 +371,7 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function modal_info($id)
+    public function modal_info(int $id)
     {
         try {
             $registro = array();
@@ -423,7 +385,16 @@ class FuncionarioController extends Controller
                 ->leftJoin('estados_civis', 'funcionarios.estado_civil_id', '=', 'estados_civis.id')
                 ->leftJoin('clientes as tomador_servico_clientes', 'funcionarios.tomador_servico_cliente_id', '=', 'tomador_servico_clientes.id')
                 ->leftJoin('contratacao_tipos', 'funcionarios.contratacao_tipo_id', '=', 'contratacao_tipos.id')
-                ->select(['funcionarios.*', 'generos.name as generoName', 'empresas.name as empresaName', 'departamentos.name as departamentoName', 'funcoes.name as funcaoName', 'tomador_servico_clientes.name as tomadorServicoName', 'contratacao_tipos.name as contratacaoTipoName', 'estados_civis.name as estado_civilName'])
+                ->select([
+                    'funcionarios.*',
+                    'generos.name as generoName',
+                    'empresas.name as empresaName',
+                    'departamentos.name as departamentoName',
+                    'funcoes.name as funcaoName',
+                    'tomador_servico_clientes.name as tomadorServicoName',
+                    'contratacao_tipos.name as contratacaoTipoName',
+                    'estados_civis.name as estado_civilName'
+                ])
                 ->where('funcionarios.id', '=', $id)
                 ->get();
 
@@ -439,24 +410,22 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function estatisticas($id)
+    public function estatisticas(int $id)
     {
         try {
             $registro = array();
 
             //Documentos
-            $documentos = FuncionarioDocumento
-                ::where('funcionario_id', '=', $id)
-                ->count();
-
-            $registro['documentos'] = $documentos;
+            $registro['documentos'] = FuncionarioDocumento::where('funcionario_id', '=', $id)->count();
 
             // Documentos Mensais
-            $documentos_mensais = FuncionarioDocumentoMensal
-                ::where('funcionario_id', '=', $id)
-                ->count();
+            $registro['documentos_mensais'] = FuncionarioDocumentoMensal::where('funcionario_id', '=', $id)->count();
 
-            $registro['documentos_mensais'] = $documentos_mensais;
+            // Documentos Exigidos
+            $registro['documentos_exigidos'] = FuncionarioDocumentoExigido::where('funcionario_id', $id)->count();
+
+            // Entregas Uniformes
+            $registro['entregas_uniformes'] = EntregaUniformeDado::where('funcionario_id', $id)->distinct('entrega_uniforme_id')->count();
 
             return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registro);
         } catch (\Exception $e) {
@@ -514,17 +483,52 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function upload_documento(Request $request)
+    public function editar_documento(Request $request)
     {
         try {
-            //Incluir Registro
-            FuncionarioDocumento::create($request->all());
+            $validator = Validator::make($request->all(), [
+                'operacao' => ['required'],
+                'funcionario_id' => ['required'],
+                'documento_id' => ['required'],
+                'data_emissao' => ['nullable', 'date_format:d/m/Y'],
+                'data_vencimento' => ['nullable', 'date_format:d/m/Y'],
+            ], [
+                'operacao.required' => 'A operação é obrigatória.',
+                'funcionario_id.required' => 'O funcionario é obrigatório.',
+                'documento_id.required' => 'O documento é obrigatório.',
+                'data_emissao.date_format' => 'A data de emissão é inválida.',
+                'data_vencimento.date_format' => 'A data de vencimento é inválida.',
+            ]);
 
-            //Transação
-            Transacoes::transacaoRecord(2, 1, 'funcionarios', $request, $request);
+            // Se falhar retorna
+            if ($validator->fails()) {
+                $mensagens = implode("<br>", $validator->errors()->all());
 
-            //Return
-            return $this->sendResponse('Documento enviado com sucesso.', 2000, null, $request);
+                return $this->sendResponse($mensagens, 2020, null, $request);
+            }
+
+            if ($request['operacao'] == 'create') {
+                // Incluir Registro
+                FuncionarioDocumento::create($request->all());
+
+                // Transação
+                Transacoes::transacaoRecord(3, 1, 'funcionarios', $request, $request);
+            } else if ($request['operacao'] == 'edit') {
+                // Buscando Registro
+                $registro = FuncionarioDocumento::find($request['funcionario_documento_id']);
+
+                // Dados Anterior
+                $dadosAnterior = $registro;
+
+                // Alterando registro
+                $registro->update($request->all());
+
+                // Transação
+                Transacoes::transacaoRecord(3, 2, 'funcionarios', $dadosAnterior, $request);
+            }
+
+            // Return
+            return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $request);
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return $this->sendResponse($e->getMessage(), 5000, null, null);
@@ -534,28 +538,32 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function documentos($funcionario_id)
+    public function documentos(int $funcionario_id)
     {
         try {
             $registros = array();
 
-            $registros['permissoes'] = GrupoPermissao
-                ::join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
+            $registros['permissoes'] = GrupoPermissao::join('permissoes', 'grupos_permissoes.permissao_id', '=', 'permissoes.id')
                 ->select('permissoes.name as permissao')
                 ->where('grupos_permissoes.grupo_id', Auth::user()->grupo_id)
-                ->where('permissoes.name', 'like', 'funcionarios_%')
+                ->where(function ($query) {
+                    $query->where('permissoes.name', 'like', 'funcionarios_list%')
+                        ->orWhere('permissoes.name', 'like', 'funcionarios_show%')
+                        ->orWhere('permissoes.name', 'like', 'funcionarios_edit%')
+                        ->orWhere('permissoes.name', 'like', 'funcionarios_destroy%');
+                })
                 ->get();
 
             $registros['documento_fontes'] = DocumentoFonte::orderby('ordem', 'ASC')->get();
 
-            $registros['funcionarios_documentos'] = FuncionarioDocumento
-                ::join('documentos', 'funcionarios_documentos.documento_id', 'documentos.id')
+            $registros['funcionarios_documentos'] = FuncionarioDocumento::join('documentos', 'funcionarios_documentos.documento_id', 'documentos.id')
                 ->join('documento_submodulos', 'documentos.documento_submodulo_id', 'documento_submodulos.id')
                 ->join('documento_fontes', 'documentos.documento_fonte_id', 'documento_fontes.id')
                 ->select('funcionarios_documentos.*', 'documentos.documento_fonte_id', 'documentos.name as documentoName', 'documento_submodulos.name as documentoSubmoduloName', 'documento_fontes.name as documentoFonteName')
                 ->where('funcionarios_documentos.funcionario_id', $funcionario_id)
                 ->orderby('documento_fontes.ordem', 'ASC')
                 ->orderby('documentos.ordem', 'ASC')
+                ->orderBy('funcionarios_documentos.data_emissao', 'ASC')
                 ->get();
 
             return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
@@ -568,7 +576,34 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function deletar_documento($funcionario_documento_id)
+    public function entregas_uniformes(int $funcionario_id)
+    {
+        try {
+            $data = array();
+
+            $data['entregas'] = EntregaUniforme::join('entregas_uniformes_dados', 'entregas_uniformes_dados.entrega_uniforme_id', 'entregas_uniformes.id')
+                ->select('entregas_uniformes.*')
+                ->where('entregas_uniformes_dados.funcionario_id', $funcionario_id)
+                ->distinct('entregas_uniformes.id')
+                ->orderby('entregas_uniformes.numero_entrega', 'ASC')
+                ->get();
+
+            $data['entregas_dados'] = EntregaUniformeDado::join('uniformes', 'uniformes.id', 'entregas_uniformes_dados.uniforme_id')
+                ->select('entregas_uniformes_dados.*', 'uniformes.name as uniformeName')
+                ->where('entregas_uniformes_dados.funcionario_id', $funcionario_id)
+                ->get();
+
+            return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $data);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function deletar_documento(int $funcionario_documento_id)
     {
         $registro = FuncionarioDocumento::find($funcionario_documento_id);
 
@@ -608,10 +643,10 @@ class FuncionarioController extends Controller
                 FuncionarioDocumentoMensal::create($request->all());
             }
 
-            //Transação
+            // Transação
             Transacoes::transacaoRecord(4, 1, 'funcionarios', $request, $request);
 
-            //Return
+            // Return
             return $this->sendResponse('Documento Mensal enviado com sucesso.', 2000, null, $request);
         } catch (\Exception $e) {
             if (config('app.debug')) {
@@ -622,7 +657,7 @@ class FuncionarioController extends Controller
         }
     }
 
-    public function verificar_documentos_mensais($funcionario_id, $mes, $ano)
+    public function verificar_documentos_mensais(int $funcionario_id, string $mes, string $ano)
     {
         try {
             $registros = array();
@@ -662,7 +697,10 @@ class FuncionarioController extends Controller
 
             $registros['funcionarios_documentos_mensais'] = FuncionarioDocumentoMensal
                 ::join('documentos_mensais_funcionarios', 'funcionarios_documentos_mensais.documento_mensal_funcionario_id', 'documentos_mensais_funcionarios.id')
-                ->select('funcionarios_documentos_mensais.*', 'documentos_mensais_funcionarios.name as documentoMensalName')
+                ->select(
+                    'funcionarios_documentos_mensais.*',
+                    'documentos_mensais_funcionarios.name as documentoMensalName'
+                )
                 ->where('funcionarios_documentos_mensais.funcionario_id', $funcionario_id)
                 ->orderby('funcionarios_documentos_mensais.ano', 'DESC')
                 ->orderby('funcionarios_documentos_mensais.mes', 'DESC')
@@ -696,4 +734,316 @@ class FuncionarioController extends Controller
             return $this->sendResponse('Documento Mensal excluído com sucesso.', 2000, null, $registro['caminho']);
         }
     }
+
+    public function documentos_exigidos(int $funcionario_id)
+    {
+        try {
+            $registros = array();
+
+            $registros['documento_fontes'] = DocumentoFonte::orderby('ordem', 'ASC')->get();
+
+            $registros['funcionarios_documentos_exigidos'] = FuncionarioDocumentoExigido::join('documentos', 'documentos.id', '=', 'funcionarios_documentos_exigidos.documento_id')
+                ->join('documento_submodulos', 'documento_submodulos.id', '=', 'documentos.documento_submodulo_id')
+                ->join('documento_fontes', 'documento_fontes.id', '=', 'documentos.documento_fonte_id')
+                ->leftJoin('funcionarios_documentos', function ($join) {
+                    $join->on('funcionarios_documentos.documento_id', '=', 'funcionarios_documentos_exigidos.documento_id')
+                        ->on('funcionarios_documentos.funcionario_id', '=', 'funcionarios_documentos_exigidos.funcionario_id');
+                })
+                ->select(
+                    'funcionarios_documentos_exigidos.*',
+                    'documentos.documento_fonte_id',
+                    'documentos.name as documentoName',
+                    'documento_submodulos.name as documentoSubmoduloName',
+                    'documento_fontes.name as documentoFonteName',
+                    'funcionarios_documentos.caminho as funcionarioDocumentoCaminho'
+                )
+                ->where('funcionarios_documentos_exigidos.funcionario_id', $funcionario_id)
+                ->orderBy('documento_fontes.ordem')
+                ->orderBy('documentos.ordem')
+                ->get();
+
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            return $this->sendResponse('Registro enviado com sucesso.', 2000, null, []);
+        }
+    }
+
+    public function documentos_exigidos_save(Request $request)
+    {
+        try {
+            $request->validate([
+                'editar_documentos_exigidos_funcionario_id' => 'required|integer',
+                'editar_documentos_exigidos_documentos_exigidos' => 'nullable|array',
+                'editar_documentos_exigidos_documentos_exigidos.*' => 'integer',
+            ]);
+
+            $funcionarioId = $request->input('editar_documentos_exigidos_funcionario_id');
+
+            // Se não vier nada, considera array vazio
+            $documentosIds = $request->input('editar_documentos_exigidos_documentos_exigidos', []);
+
+            // IDs atualmente registrados
+            $documentosExistentes = FuncionarioDocumentoExigido::where('funcionario_id', $funcionarioId)->pluck('documento_id')->toArray();
+
+            // Calcula diferenças
+            $novos = array_diff($documentosIds, $documentosExistentes);
+            $removidos = array_diff($documentosExistentes, $documentosIds);
+
+            // Inserir novos
+            if (!empty($novos)) {
+                $dados = collect($novos)
+                    ->map(fn($id) => [
+                        'funcionario_id' => $funcionarioId,
+                        'documento_id' => $id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ])
+                    ->toArray();
+
+                FuncionarioDocumentoExigido::insert($dados);
+            }
+
+            // Remover desmarcados
+            if (!empty($removidos)) {
+                FuncionarioDocumentoExigido::where('funcionario_id', $funcionarioId)
+                    ->whereIn('documento_id', $removidos)
+                    ->delete();
+            }
+
+            return $this->sendResponse(
+                'Documentos exigidos sincronizados com sucesso.',
+                2010,
+                null,
+                null
+            );
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse(
+                'Houve um erro ao realizar a operação.',
+                5000,
+                null,
+                null
+            );
+        }
+    }
+
+    public function documentos_vencidos()
+    {
+        $registros = FuncionarioDocumento::join('funcionarios', 'funcionarios.id', 'funcionarios_documentos.funcionario_id')
+            ->select([
+                'funcionarios.id as funcionarioId',
+                'funcionarios.name as funcionarioName',
+                'funcionarios.cpf as funcionarioCpf',
+                'funcionarios_documentos.data_vencimento'
+            ])
+            ->where('funcionarios_documentos.data_vencimento', '<', date('Y-m-d'))
+            ->orderBy('funcionarios.name')
+            ->get();
+
+        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+    }
+
+    // Ação 1: Entregas de Uniformes - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    // Ação 1: Entregas de Uniformes - Início'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    public function entregas_uniformes_index()
+    {
+        try {
+            $registros = EntregaUniforme::orderby('numero_entrega')->get();
+
+            return $this->sendResponse('Dados Estatísticas.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function entregas_uniformes_show($id)
+    {
+        try {
+            $data = array();
+
+            $registro = EntregaUniforme::find($id);
+
+            if (!$registro) {
+                return $this->sendResponse('Registro não encontrado. xxx:'.$id, 4040, null, null);
+            }
+
+            $data['entrega'] = $registro;
+
+            $data['entrega_dados'] = EntregaUniformeDado::where('entrega_uniforme_id', $id)
+                ->orderby('funcionario_nome')
+                ->orderby('uniforme_nome')
+                ->get();
+
+            return $this->sendResponse('Registro encontrado.', 2000, null, $data);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function entregas_uniformes_store(EntregaUniformeStoreRequest $request)
+    {
+        try {
+            $dados = $request->validated();
+            $uniformes = $dados['uniformes'];
+            unset($dados['uniformes']);
+
+            DB::transaction(function () use ($dados, $uniformes, &$registro) {
+                // Inclusão Prncipal
+                $registro = EntregaUniforme::create($dados);
+
+                // Inclusão Grade
+                foreach ($uniformes as $uniforme) {
+                    EntregaUniformeDado::create([
+                        'entrega_uniforme_id' => $registro->id,
+                        'funcionario_id' => $uniforme['funcionario_id'],
+                        'funcionario_nome' => $uniforme['funcionario_nome'],
+                        'uniforme_id' => $uniforme['uniforme_id'],
+                        'uniforme_nome' => $uniforme['uniforme_nome'],
+                        'quantidade' => $uniforme['quantidade'],
+                        'tamanho' => $uniforme['tamanho'],
+                        'data_entrega' => $uniforme['data_entrega'] ?? null,
+                    ]);
+                }
+            });
+
+            return $this->sendResponse('Registro criado com sucesso.', 2010, null, $registro);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function entregas_uniformes_update(EntregaUniformeUpdateRequest $request, int $id)
+    {
+        try {
+            $dados = $request->validated();
+            $uniformes = $dados['uniformes'];
+            unset($dados['uniformes']);
+
+            DB::transaction(function () use ($dados, $uniformes, $id, &$registro) {
+                // Localiza o registro principal
+                $registro = EntregaUniforme::findOrFail($id);
+
+                // Atualiza o registro principal
+                $registro->update($dados);
+
+                // Remove a grade atual
+                EntregaUniformeDado::where('entrega_uniforme_id', $registro->id)->delete();
+
+                // Recria a grade
+                foreach ($uniformes as $uniforme) {
+                    EntregaUniformeDado::create([
+                        'entrega_uniforme_id' => $registro->id,
+                        'funcionario_id' => $uniforme['funcionario_id'],
+                        'funcionario_nome' => $uniforme['funcionario_nome'],
+                        'uniforme_id' => $uniforme['uniforme_id'],
+                        'uniforme_nome' => $uniforme['uniforme_nome'],
+                        'quantidade' => $uniforme['quantidade'],
+                        'tamanho' => $uniforme['tamanho'],
+                        'data_entrega' => $uniforme['data_entrega'] ?? null,
+                    ]);
+                }
+            });
+
+            return $this->sendResponse('Registro atualizado com sucesso.', 2000, null, $registro);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function entregas_uniformes_destroy(int $id)
+    {
+        try {
+            $registro = EntregaUniforme::find($id);
+            $dados = EntregaUniformeDado::where('entrega_uniforme_id', $id);
+
+            if (!$registro) {
+                return $this->sendResponse('Registro não encontrado.', 4040, null, null);
+            }
+
+            DB::transaction(function () use ($registro, $dados) {
+                $dados->delete();
+                $registro->delete();
+            });
+
+            return $this->sendResponse('Registro excluído com sucesso.', 2000, null, null);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function entregas_uniformes_dados_estatisticas()
+    {
+        try {
+            $data = array();
+            $data['total_entregas_realizadas'] = EntregaUniforme::count();
+
+            return $this->sendResponse('Dados Estatísticas.', 2000, null, $data);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    public function recibo_funcionario(int $entrega_uniforme_id, int $funcionario_id)
+    {
+        try {
+            $registros = EntregaUniforme::join('entregas_uniformes_dados', 'entregas_uniformes_dados.entrega_uniforme_id', 'entregas_uniformes.id')
+                ->join('funcionarios', 'funcionarios.id', 'entregas_uniformes_dados.funcionario_id')
+                ->join('uniformes', 'uniformes.id', 'entregas_uniformes_dados.uniforme_id')
+                ->leftjoin('clientes as tomadores_servicos', 'tomadores_servicos.id', 'funcionarios.tomador_servico_cliente_id')
+                ->leftjoin('funcoes', 'funcoes.id', 'funcionarios.funcao_id')
+                ->select(
+                    'entregas_uniformes_dados.funcionario_nome as entregaUniformeDadoFuncionarioNome',
+                    'entregas_uniformes_dados.uniforme_nome as entregaUniformeDadoUniformeNome',
+                    'entregas_uniformes_dados.quantidade as entregaUniformeDadoQuantidade',
+                    'entregas_uniformes_dados.tamanho as entregaUniformeDadoTamanho',
+                    'entregas_uniformes_dados.data_entrega as entregaUniformeDadoDataEntrega',
+                    'funcionarios.name as funcionarioName',
+                    'funcionarios.cpf as funcionarioCpf',
+                    'tomadores_servicos.name as tomadorServicoClienteName',
+                    'funcoes.name as funcaoName',
+                    'uniformes.name as uniformeName'
+                )
+                ->where('entregas_uniformes_dados.entrega_uniforme_id', $entrega_uniforme_id)
+                ->where('entregas_uniformes_dados.funcionario_id', $funcionario_id)
+                ->get();
+
+            return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return $this->sendResponse($e->getMessage(), 5000, null, null);
+            }
+
+            return $this->sendResponse('Houve um erro ao realizar a operação.', 5000, null, null);
+        }
+    }
+
+    // Ação 1: Entregas de Uniformes - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    // Ação 1: Entregas de Uniformes - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 }

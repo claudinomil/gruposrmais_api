@@ -1042,6 +1042,22 @@ class Transacoes
                 }
             }
 
+
+
+
+            // App Pessoas
+            if ($submodulo_id == 123) {
+                if ($op == 1) {
+                    $dados .= '<b>:: App Pessoas</b>'.'<br><br>';
+                    $dados .= $this->retornaDado(1, $dadosAnterior['nome'], $dadosAtual['nome'], 'Nome', '', '');
+                    $dados .= $this->retornaDado(1, $dadosAnterior['apelido'], $dadosAtual['apelido'], 'Apelido', '', '');
+                }
+            }
+
+
+
+
+
             // Verificando se é uma alteração e pode gravar (caso nenhum campo tenha sido alterado não deixar gravar)''''
             if ($operacao == 2 and $this->gravarAlteracao === false) {
                 $dados = '';

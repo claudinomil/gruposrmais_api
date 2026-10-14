@@ -29,7 +29,7 @@ class CreateMateriaisEntradasTable extends Migration
             $table->string('fornecedor_logradouro_numero', 15)->nullable();
             $table->string('fornecedor_logradouro_complemento')->nullable();
             $table->string('fornecedor_cidade')->nullable();
-            $table->string('fornecedor_uf', 2)->nullable();
+            $table->string('fornecedor_uf', 50)->nullable();
 
             $table->timestamps();
         });

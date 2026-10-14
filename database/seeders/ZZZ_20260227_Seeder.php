@@ -8,6 +8,7 @@ use App\Models\Submodulo;
 use App\Models\Permissao;
 use App\Models\GrupoPermissao;
 use App\Models\VistoriaSistemaStatus;
+use App\Models\AppVistoriaSistemaStatus;
 use Illuminate\Database\Seeder;
 
 class ZZZ_20260227_Seeder extends Seeder
@@ -46,6 +47,13 @@ class ZZZ_20260227_Seeder extends Seeder
         VistoriaSistemaStatus::create(['id' => 3, 'name' => 'CONCLUÍDA']);
         VistoriaSistemaStatus::create(['id' => 4, 'name' => 'FINALIZADA']);
         VistoriaSistemaStatus::create(['id' => 5, 'name' => 'CANCELADA']);
+
+        // App Vistoria Sistema Status
+        AppVistoriaSistemaStatus::create(['id' => 1, 'name' => 'ABERTA']);
+        AppVistoriaSistemaStatus::create(['id' => 2, 'name' => 'EM ANDAMENTO']);
+        AppVistoriaSistemaStatus::create(['id' => 3, 'name' => 'CONCLUÍDA']);
+        AppVistoriaSistemaStatus::create(['id' => 4, 'name' => 'FINALIZADA']);
+        AppVistoriaSistemaStatus::create(['id' => 5, 'name' => 'CANCELADA']);
         //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
         // Documento Fontes e Documentos'''''''''''''''''''''''''''''''''''''''''''''

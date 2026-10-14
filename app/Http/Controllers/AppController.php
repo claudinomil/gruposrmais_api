@@ -63,17 +63,34 @@ class AppController extends Controller
             ->join('edificacoes', 'edificacoes.id', 'edificacoes_niveis.edificacao_id')
             ->select(
                 'clientes_sistemas_preventivos.*',
+                'clientes_sistemas_preventivos.id as cliente_sistema_preventivo_id',
                 'clientes.name as clienteName',
-                'sistemas_preventivos.name as sistemaPreventivoName',
-                'medidas_seguranca.name as medidaSegurancaName',
-                'edificacoes_locais.name as edificacaoLocalName',
+                'edificacoes.id as edificacao_id',
+                'edificacoes.name as edificacaoName',
                 'edificacoes_niveis.name as edificacaoNivelName',
-                'edificacoes.name as edificacaoName'
+                'edificacoes_locais.name as edificacaoLocalName',
+                'medidas_seguranca.name as medidaSegurancaName',
+                'sistemas_preventivos.name as sistemaPreventivoName'
             )
             ->where('clientes_sistemas_preventivos.sistema_preventivo_numero', $sistema_preventivo_numero)
             ->first();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
+    }
+
+    public function clientes_edificacoes_vistorias()
+    {
+        $registros = Cliente::join('edificacoes', 'edificacoes.cliente_id', 'clientes.id')
+            ->join('edificacoes_niveis', 'edificacoes_niveis.edificacao_id', 'edificacoes.id')
+            ->join('edificacoes_locais', 'edificacoes_locais.edificacao_nivel_id', 'edificacoes_niveis.id')
+            ->join('clientes_sistemas_preventivos', 'clientes_sistemas_preventivos.edificacao_local_id', 'edificacoes_locais.id')
+            ->select('edificacoes.id as edificacaoId', 'edificacoes.name as edificacaoName', 'clientes.name as clienteName')
+            ->distinct('edificacaoName')
+            ->orderby('clientes.name')
+            ->orderby('edificacoes.name')
+            ->get();
+
+        return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, null, $registros);
     }
     // Clientes - Fim'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     // Clientes - Fim'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

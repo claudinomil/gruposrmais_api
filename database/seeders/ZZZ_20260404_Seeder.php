@@ -17,34 +17,39 @@ class ZZZ_20260404_Seeder extends Seeder
 
     public function run()
     {
-        // Criar Sistema Preventivo para cada Equipamento Preventivo''''''''''''''''''''''''''''''
-        $equipamentos = EquipamentoPreventivo::all();
 
-        foreach($equipamentos as $equipamento) {
-            // Medida de Segurança
-            $medida_seguranca_id = 0;
+    
+        // // Criar Sistema Preventivo para cada Equipamento Preventivo''''''''''''''''''''''''''''''
+        // $equipamentos = EquipamentoPreventivo::all();
 
-            // ALARME DE INCÊNDIO
-            if ($equipamento['id'] == 18 or $equipamento['id'] == 35) {$medida_seguranca_id = 2;}
+        // foreach($equipamentos as $equipamento) {
+        //     // Medida de Segurança
+        //     $medida_seguranca_id = 0;
 
-            // APARELHO EXTINTOR
-            if ($equipamento['id'] == 3) {$medida_seguranca_id = 3;}
+        //     // ALARME DE INCÊNDIO
+        //     if ($equipamento['id'] == 18 or $equipamento['id'] == 35) {$medida_seguranca_id = 2;}
 
-            // HIDRANTE E MANGOTINHO
-            if ($equipamento['id'] == 32) {$medida_seguranca_id = 15;}
+        //     // APARELHO EXTINTOR
+        //     if ($equipamento['id'] == 3) {$medida_seguranca_id = 3;}
 
-            if ($medida_seguranca_id != 0) {
-                $sistema_preventivo = SistemaPreventivo::create(['medida_seguranca_id' => $medida_seguranca_id, 'name' => $equipamento['name']]);
+        //     // HIDRANTE E MANGOTINHO
+        //     if ($equipamento['id'] == 32) {$medida_seguranca_id = 15;}
 
-                SistemaPreventivoEquipamento::create([
-                    'sistema_preventivo_id' => $sistema_preventivo['id'],
-                    'equipamento_preventivo_id' => $equipamento['id'],
-                    'equipamento_preventivo_item' => 1,
-                    'equipamento_preventivo_nome' => $equipamento['name'],
-                    'equipamento_preventivo_quantidade' => 1
-                ]);
-            }
-        }
-        //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        //     if ($medida_seguranca_id != 0) {
+        //         $sistema_preventivo = SistemaPreventivo::create(['medida_seguranca_id' => $medida_seguranca_id, 'name' => $equipamento['name']]);
+
+        //         SistemaPreventivoEquipamento::create([
+        //             'sistema_preventivo_id' => $sistema_preventivo['id'],
+        //             'equipamento_preventivo_id' => $equipamento['id'],
+        //             'equipamento_preventivo_item' => 1,
+        //             'equipamento_preventivo_nome' => $equipamento['name'],
+        //             'equipamento_preventivo_quantidade' => 1
+        //         ]);
+        //     }
+        // }
+        // //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+
+
     }
 }
