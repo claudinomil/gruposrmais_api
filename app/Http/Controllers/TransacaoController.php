@@ -24,6 +24,7 @@ class TransacaoController extends Controller
             ->join('submodulos', 'transacoes.submodulo_id', '=', 'submodulos.id')
             ->select(['transacoes.*', 'users.name as userName', 'operacoes.name as operacaoName', 'submodulos.name as submoduloName'])
             ->orderby('transacoes.date', 'DESC')
+            ->limit(1000)
             ->get();
 
         return $this->sendResponse('Lista de dados enviada com sucesso.', 2000, '', $registros);
@@ -86,7 +87,7 @@ class TransacaoController extends Controller
                     $indexCampo = $indexCampo + 4;
                 }
             }
-            )->orderby('transacoes.date', 'DESC')->get();
+            )->orderby('transacoes.date', 'DESC')->limit(1000)->get();
 
         //Código SQL Bruto
         //$sql = DB::getQueryLog();

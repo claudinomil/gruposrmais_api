@@ -32,8 +32,11 @@ class Z_Faker999Seeder extends Seeder
             // Totais
             $total_producao = $registros_producao->count();
 
+            // Total de registros faker para criar
+            $total_criar = $total_producao + 100;
+
             // Criar Registros faker para depois alterar com a produção (PARA NÂO DAR ERROS)
-            for($i=1; $i<=$total_producao; $i++) {
+            for($i=1; $i<=$total_criar; $i++) {
                 Cliente::create([
                     'status' => 1,
                     'tipo' => 1,
@@ -55,6 +58,9 @@ class Z_Faker999Seeder extends Seeder
                     $dados
                 );
             }
+
+            // Deletar Registros faker que sobraram
+            Cliente::where('name', 'LIKE', 'TESTE%')->delete();
             // Clientes - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
             // Clientes - Fim''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
